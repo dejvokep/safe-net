@@ -52,7 +52,7 @@ public class PluginCommand extends net.md_5.bungee.api.plugin.Command {
         //Check the arguments
         if ((args.length != 1 && args.length != 2) ||
                 //If the command is not available
-                (!(command = args[0].toLowerCase()).equals("reload") && !command.equals("algorithms") && !command.equals("generate")) ||
+                (!(command = args[0].toLowerCase()).equals("reload") && !command.equals("generate")) ||
                 //If the command is generate and the argument length is not 2, or the 2nd argument is invalid
                 (command.equals("generate") && (args.length != 2 || (passphraseLength = toPassphraseLength(args[1])) == -1)) ||
                 //If the command is not generate and the argument length is not 1
