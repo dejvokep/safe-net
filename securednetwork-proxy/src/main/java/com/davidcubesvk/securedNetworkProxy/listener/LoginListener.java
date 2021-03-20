@@ -3,6 +3,7 @@ package com.davidcubesvk.securedNetworkProxy.listener;
 import com.davidcubesvk.securedNetworkCore.log.Log;
 import com.davidcubesvk.securedNetworkProxy.SecuredNetworkProxy;
 import com.davidcubesvk.securedNetworkProxy.ipWhitelist.IPCheckResult;
+import com.davidcubesvk.securedNetworkProxy.ipWhitelist.IPHolder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -87,7 +88,7 @@ public class LoginListener implements Listener {
         //The connection
         PendingConnection connection = event.getConnection();
         //Virtual host address
-        String virtualHost = connection.getVirtualHost().getHostString() + ":" + connection.getVirtualHost().getPort();
+        String virtualHost = connection.getVirtualHost().getHostString() + IPHolder.PORT_COLON + connection.getVirtualHost().getPort();
         //Connection name
         String name = connection.getName();
         //Check the IP
