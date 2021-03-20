@@ -76,7 +76,7 @@ public class LoginListener implements Listener {
         ProxiedPlayer player = event.getPlayer();
 
         //Check the permission
-        if (!player.hasPermission("securedNetwork.updater") && !player.hasPermission("securedNetwork.*"))
+        if (!player.hasPermission("secured-network.updater") && !player.hasPermission("secured-network.*"))
             return;
         //Send the message
         plugin.getMessenger().sendMessage(player, plugin.getUpdater().getJoinMessage());
