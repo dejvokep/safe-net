@@ -46,7 +46,8 @@ ip-whitelist:
   # Whitelisted IPs - these should be the proxy IPs / DNS names (these are just examples, please, delete them if you want to use this feature):
   # - Info: Port should be specified after each IP separated by colon (IP:port). If the connecting player used any of
   #         these IPs, their connection will be allowed.
-  #         If your server has dynamic IP, use the "{ip}" placeholder as the server's IP.
+  #         If your server has dynamic IP, use the "{ip}" placeholder as the server's IP. Please configure the
+  #         ip-website field, too.
   #         Please note that your DNS server also accepts YoUrSERVER.com (or similarly formatted) requests. By default,
   #         exactly the specified IPs / DNS names are compared. If you want to allow also these, case-randomly formatted
   #         DNS addresses, including hostnames..., please surround that whitelisted IP by brackets []. Example:
