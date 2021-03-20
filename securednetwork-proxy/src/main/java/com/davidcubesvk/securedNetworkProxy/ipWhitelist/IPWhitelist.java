@@ -13,7 +13,6 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -36,10 +35,8 @@ public class IPWhitelist {
     //Enabled
     private boolean enabled;
 
-    //Default message
-    private TextComponent defaultMessage;
-    //Messages by the filtering IPs
-    private final Set<Map.Entry<IPHolder, TextComponent>> filterMessages = new HashSet<>();
+    //Disconnect message
+    private TextComponent disconnectMessage;
 
     //The plugin instance
     private final SecuredNetworkProxy plugin;
@@ -70,27 +67,18 @@ public class IPWhitelist {
         if (!enabled)
             return new IPCheckResult(true);
 
-        //The IP parts
-        String[] ip = virtualHost.getHostString().split(IPHolder.PART_SEPARATOR);
-        //The port
-        String port = "" + virtualHost.getPort();
+        //The IP
+        String ip = virtualHost.getHostString() + IPHolder.PORT_COLON + virtualHost.getPort();
 
         //Loop through whitelisted IPs
         for (IPHolder ipHolder : whitelisted) {
             //If do equal
-            if (ipHolder.compare(ip, port))
+            if (ipHolder.compare(ip))
                 return new IPCheckResult(true);
         }
 
-        //Loop through filtering IPs
-        for (Map.Entry<IPHolder, TextComponent> filter : filterMessages) {
-            //If do equal
-            if (filter.getKey().compare(ip, port))
-                return new IPCheckResult(false, filter.getValue());
-        }
-
         //Not found, return the default message
-        return new IPCheckResult(false, defaultMessage);
+        return new IPCheckResult(false, disconnectMessage);
     }
 
     /**
@@ -98,7 +86,7 @@ public class IPWhitelist {
      */
     public void reload() {
         //Log
-        plugin.getLog().log(Level.INFO, Log.Source.WHITELIST, "Getting internal variables...");
+        plugin.getLog().log(Level.INFO, Log.Source.WHITELIST, "Loading internal variables...");
 
         //If enabled
         enabled = plugin.getConfiguration().getBoolean("ip-whitelist.enabled");
@@ -106,50 +94,11 @@ public class IPWhitelist {
         if (!enabled)
             return;
 
-        //Clear the list
-        filterMessages.clear();
-        //If uses the IP placeholder
-        boolean usesPlaceholder = false;
         //The default message
-        defaultMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect.whitelist.default")));
-        //Loop through all filters
-        for (Object filter : (List<?>) plugin.getConfiguration().get("disconnect.whitelist.filters")) {
-            //Cast
-            Map<String, Object> filterCasted = (Map<String, Object>) filter;
-            //Create a new holder
-            IPHolder ipHolder = new IPHolder();
-            //The IP and message
-            String ip = (String) filterCasted.get("ip"), message = (String) filterCasted.get("message");
-            //Set the IP
-            if (ipHolder.setIp(ip)) {
-                //Add
-                filterMessages.add(new Map.Entry<IPHolder, TextComponent>() {
-                    @Override
-                    public IPHolder getKey() {
-                        return ipHolder;
-                    }
-
-                    @Override
-                    public TextComponent getValue() {
-                        return new TextComponent(ChatColor.translateAlternateColorCodes('&', message));
-                    }
-
-                    @Override
-                    public TextComponent setValue(TextComponent value) {
-                        return null;
-                    }
-                });
-                //If the IP placeholder is present
-                if (ip.contains(IP_PLACEHOLDER))
-                    usesPlaceholder = true;
-            } else {
-                //Log
-                plugin.getLog().log(Level.SEVERE, Log.Source.WHITELIST, "IP \"" + ip + "\" is not specified correctly! Removing from the disconnect message filtering system.");
-            }
-        }
+        disconnectMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect.whitelist")));
 
         //Reload whitelisted IPs
-        if (reloadIPs() || usesPlaceholder)
+        if (reloadIPs())
             //Get the proxy IP
             getProxyIP();
     }
@@ -201,7 +150,7 @@ public class IPWhitelist {
                     ipHolder.setIp(ipHolder.getIp().replace(IP_PLACEHOLDER, proxyIP));
             } catch (Exception ex) {
                 //Log the error
-                plugin.getLog().logConsoleWithoutThrowable(Level.SEVERE, Log.Source.WHITELIST, "An error occurred while getting the IP of the server for the {ip} placeholder!", ex);
+                plugin.getLog().logConsoleWithoutThrowable(Level.SEVERE, Log.Source.WHITELIST, "An error occurred while getting the IP of the server for the {ip} placeholder! Is the server address correct?", ex);
             }
         });
     }
