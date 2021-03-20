@@ -5,7 +5,8 @@
 #   |  | | ┌---┘ |  |    | | | | |  |    | ┌---┘ | | | | |  |\    | | ┌---┘   |  |   | || || | | | | | |  |    |  ┌┐  \
 #┌--┘  | | └---┐ |  └--┐ | └-┘ | |  |    | └---┐ | └-┘ | |  | \   | | └---┐   |  |   | └┘ └┘ | | └-┘ | |  |    |  |\   \
 #└-----┘ └-----┘ └-----┘ └-----┘ └--┘    └-----┘ └-----┘ └--┘  └--┘ └-----┘   └--┘   └-------┘ └-----┘ └--┘    └--┘ └--┘
-#Plugin made by davidcubesvk.
+# Plugin made by davidcubesvk. Credit for some parts of this plugin including but not limited to the core (passphrase)
+# functioning goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and it's contributors.
 #
 # ► Don't understand / know how to set up?
 # All terms and setup process are available on my website. Link is in all of my plugins' descriptions.
@@ -26,58 +27,44 @@ property:
 # - Info: "\n" can be used for a new line.
 disconnect:
   # A not whitelisted IP was used to join the server:
-  whitelist:
-    # The default message used when no filtering IP applies:
-    default: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!"
-    # Message filtering by IP:
-    # - Info: If you do not wish to use this feature, just leave it as "filters: []"
-    filters: []
-    #    # The IP player used to connect (specified the same way as in IP whitelist):
-    #  - ip: ""
-    #    # The message to use when the filter applies:
-    #    message: ""
+  whitelist: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!"
   # An error occurred while setting the passphrase into the connection:
-  passphrase-error: "&7[&6SecuredNetwork&7] &cAn error occurred while processing your request.\n\n&7&oPlease try again later."
+  passphrase-error: "&7[&6SecuredNetwork&7] &cAn error occurred while processing your request.\n\n&7&oPlease try again later. If the problem persists, contact server administrators."
 # Enable the plugin's own logging system:
-# - Info: Plugin's log files are saved into "logs" folder in it's plugin folder. It is recommended to have it disabled if
-#         you are not encountering any problems and/or errors.
+# - Info: Plugin's log files are saved into "logs" folder in it's plugin folder. It is recommended to have it disabled
+#         if you are not encountering any problems and/or errors.
 log: false
 # Enable metrics - anonymous data sending including but not limited to country in which is the server hosted, number of
 # cores, amount of players online. These statistics are used to determine the usage of the plugin.
 # - Note: When changed, to take effect server restart is needed.
 metrics: true
 # IP whitelisting:
+# - Note: This is NOT any kind of security feature, just a "decoration".
 ip-whitelist:
   # Enable:
   enabled: false
   # Whitelisted IPs - these should be the proxy IPs / DNS names (these are just examples, please, delete them if you want to use this feature):
-  # - Info: Wildcard character can be used as a replacement for string of any length (except the dot ".") and specified
-  #         by "*". For example, "*.yourserver.com" will allow players connecting with any hostname - it is not
-  #         specified exactly. Please make sure you've placed the wildcard on the desired positions. You can also use
-  #         wildcard as an IP part (an IP part is part of the IP surrounded by dots from both side or port colon ":"
-  #         from one side...), "123.*.*.321" will allow players connecting through "123.010.255.321"... For more
-  #         information about these mechanics, please visit the plugin wiki available at davidcubesvk.com.
-  #         To block all hostname for a IP, simply insert only the IP without any hostname - e.g. "yourserver.com" will
-  #         allow only players connecting with "yourserver.com".
+  # - Info: Port should be specified after each IP separated by colon (IP:port). If the connecting player used any of
+  #         these IPs, their connection will be allowed.
   #         If your server has dynamic IP, use the "{ip}" placeholder as the server's IP.
-  #         To allow case-insensitive hostname comparing for the current IP, insert "[CASE_INSENSITIVE]" prefix right
-  #         before the IP as shown in an example IP below. The "[CASE_SENSITIVE]" prefix indicates case-sensitive
-  #         comparing. If there's no prefix, the IP is compared case-sensitively.
-  #         Writing a port is required.
-  # - Note: The only accepted IPs are IPv4 addresses.
-  ips:
-    - "{ip}:25577"
-    - "yourserver.com:25577"
-    - "localhost:25577"
-    - "[CASE_INSENSITIVE] abc.yourserver.com:25577"
+  #         Please note that your DNS server also accepts YoUrSERVER.com (or similarly formatted) requests. By default,
+  #         exactly the specified IPs / DNS names are compared. If you want to allow also these, case-randomly formatted
+  #         DNS addresses, including hostnames..., please surround that whitelisted IP by brackets []. Example:
+  #         [test.yourserver.com] will allow also TeSt.YOuRserVER.cOm. In case of any questions, visit the wiki, please.
+  #         For better readability, you can put spaces (" ") anywhere you want. These will be removed after the plugin
+  #         processes the whitelisted IPs. Example: "a . b . c . your server . com".
+  # - Note: The only accepted IPs are IPv4 formatted addresses.
+  ips: [ ]
   # Website used to obtain the value of the "{ip}" placeholder (the IP of your server):
   # - Info: This should be a website that returns only your IP on the GET request (if you open it on your browser).
-  ip-website: "https://checkip.amazonaws.com/"
+  # - Note: The Author of the plugin is not responsible for any privacy information and/or data leaks. Pick a server
+  #         carefully.
+  ip-website: ""
 # Update checker:
 updater:
   # Enable:
-  # - Info: Recommended to have this enabled so you are always informed about new updates with for example important
-  #         security patches.
+  # - Info: Recommended to have this enabled, so you are always informed about new updates carrying for example
+  #         important security patches.
   enabled: true
   # Delay between re-checking for update in minutes (set to -1 to check only once):
   delay: 60
