@@ -13,30 +13,52 @@ import java.util.logging.Level;
 
 /**
  * Authenticator covering all needed functions related to passphrase.<br>
- * To parse the properties JSON, the GSON library is used. The benefit of using it is that it is already provided by the
- * server - it does not have to be compiled within this plugin.
+ * <p></p>
+ * Credit for some parts of this class goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and
+ * it's contributors.
  */
 public class Authenticator {
 
-    //Default property name
-    public static final String DEFAULT_PROPERTY_NAME = "secured_network";
-    //String used as a splitter for the host value
-    public static final String SPLIT_STRING = "\00";
+    /**
+     * Default property name.
+     */
+    private static final String DEFAULT_PROPERTY_NAME = "secured_network";
+    /**
+     * String used as a splitter for the hostname value.
+     */
+    private static final String HOST_SPLIT_REGEX = "\00";
+    /**
+     * Start of the JSON containing all the properties.
+     */
+    private static final String PROPERTIES_START = "[{\"";
+    /**
+     * String found in the hostname split if the player connected through Geyser. Surrounded by a string from both sides
+     * (in the hostname split).
+     */
+    private static final String GEYSER_FLOODGATE_ID = "Geyser-Floodgate";
 
-    //Gson instance
-    public static final Gson GSON = new Gson();
-    //Property list type
-    public static final Type PROPERTY_LIST_TYPE = new TypeToken<ArrayList<Property>>() {
+    /**
+     * GSON instance.
+     */
+    private static final Gson GSON = new Gson();
+    /**
+     * Property list type used to parse the properties JSON.
+     */
+    private static final Type PROPERTY_LIST_TYPE = new TypeToken<ArrayList<Property>>() {
     }.getType();
 
-    //Passphrase characters
-    public static final String PASSPHRASE_CHARS = "abcdefghijklmnopqrstuvxyzABCDEFGHIJKLMNOPQRSTUVXYZ0123456789!@#$%^&*()_+-=_+[];,.<>?";
+    /**
+     * Passphrase characters (85 chars) used to generate the passphrase.
+     */
+    private static final String PASSPHRASE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@$%^&*()_+-=_+[];,.<>?";
 
     //Property name and passphrase
     private String propertyName, passphrase;
 
-    private Config config;
-    private Log log;
+    //The config
+    private final Config config;
+    //The log
+    private final Log log;
 
     /**
      * Calls {@link #reload()} to load the internal data.
@@ -60,34 +82,46 @@ public class Authenticator {
      */
     public AuthenticationResult authenticate(String host) {
         //Split the host value
-        String[] data = host.split(SPLIT_STRING);
+        String[] data = host.split(HOST_SPLIT_REGEX);
 
-        //If the length is not 3 or 4
-        if (data.length != 3 && data.length != 4) {
+        //If the length is less than 3 or greater than 7 (GeyserMC compatibility)
+        if (data.length < 3 || data.length > 7) {
             //Log the result
             logResult("?", false, "insufficient_length");
             //Return
-            return new AuthenticationResult(data.length > 1 ? data[0] : "", false, "?");
+            return new AuthenticationResult(host.replace(this.passphrase, ""), false, "?");
         }
 
         //The player's UUID
-        String uuid = data[2];
+        String uuid = data.length <= 4 ? data[2] : null;
+        //The properties index
+        int propertiesIndex = -1;
+
+        //Go through all indexes (excluding 0, as there can not be anything useful)
+        for (int i = 1; i < data.length; i++) {
+            //If it is the Geyser Floodgate ID string
+            if (data[i].equals(GEYSER_FLOODGATE_ID))
+                //Skip the next index
+                i++;
+            else if (data[i].startsWith(PROPERTIES_START))
+                //Set the properties index
+                propertiesIndex = i;
+            else if (uuid == null && data[i].length() == 32)
+                //If is the UUID (length is 32)
+                uuid = data[i];
+        }
 
         //Properties
-        ArrayList<Property> properties = null;
+        ArrayList<Property> properties;
         //Parse properties from the last index
         try {
             //Parse
-            properties = GSON.fromJson(data[3], PROPERTY_LIST_TYPE);
+            properties = GSON.fromJson(data[propertiesIndex], PROPERTY_LIST_TYPE);
         } catch (JsonSyntaxException | ArrayIndexOutOfBoundsException ignored) {
-        }
-
-        //If the property array is invalid
-        if (properties == null) {
             //Log the result
             logResult(uuid, false, "no_property");
             //Return
-            return new AuthenticationResult(data[0], false, uuid);
+            return new AuthenticationResult(host.replace(this.passphrase, ""), false, uuid);
         }
 
         try {
@@ -109,8 +143,7 @@ public class Authenticator {
                         //Log the result
                         logResult(uuid, true, null);
                         //Return and replace the passphrase just in case
-                        return new AuthenticationResult(data[0] + SPLIT_STRING + data[1] + SPLIT_STRING + data[2] + SPLIT_STRING +
-                                GSON.toJson(properties).replace("\"" + this.passphrase + "\"", "\"\""), true, uuid);
+                        return new AuthenticationResult(host.replace(data[propertiesIndex], GSON.toJson(properties)), true, uuid);
                     } else {
                         //Break
                         break;
@@ -123,7 +156,7 @@ public class Authenticator {
         //Log the result
         logResult(uuid, false, "incorrect_property");
         //Return
-        return new AuthenticationResult(data[0], false, uuid);
+        return new AuthenticationResult(host.replace(this.passphrase, ""), false, uuid);
     }
 
     /**
