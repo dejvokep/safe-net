@@ -22,7 +22,10 @@ import java.util.logging.Level;
  * <code>host</code> string and extract the property passed by the proxy server from it. If there is the correct
  * property and value, connection is allowed. The property is then removed from the packet to hide it from unwanted
  * exposures. This is also why this packet was chosen - it is the first packet sent between the server and client,
- * so we can remove the property as soon as possible.
+ * so we can remove the property as soon as possible.<br>
+ * <p></p>
+ * Credit for some parts of this class goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and
+ * it's contributors.
  */
 public class PacketHandler {
 

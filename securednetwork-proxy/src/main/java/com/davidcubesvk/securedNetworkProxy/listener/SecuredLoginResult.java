@@ -13,7 +13,10 @@ import java.util.Arrays;
  * does not supply the login result. As this custom login result is there every time (not depending on the mode), the
  * returned values are <code>null</code> (replacing the <code>null</code> login profile), except the properties.
  * The returned properties are (if not called by methods mentioned above) always an empty array, as during the testing
- * phase, a lot of problems were found when using some plugins if the value was <code>null</code>.
+ * phase, a lot of problems were found when using some plugins if the value was <code>null</code>.<br>
+ * <p></p>
+ * Credit for some parts of this class goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and
+ * it's contributors.
  */
 public class SecuredLoginResult extends LoginResult {
 

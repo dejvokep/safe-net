@@ -29,6 +29,9 @@ import java.util.logging.Level;
  *     Therefore, this event is the first event that is suitable.</li>
  *     <li>{@link PostLoginEvent} sends players with the updater permission an updater message.</li>
  * </ul>
+ * <p></p>
+ * Credit for some parts of this class goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and
+ * it's contributors.
  */
 public class LoginListener implements Listener {
 
