@@ -5,7 +5,8 @@
 #   |  | | ┌---┘ |  |    | | | | |  |    | ┌---┘ | | | | |  |\    | | ┌---┘   |  |   | || || | | | | | |  |    |  ┌┐  \
 #┌--┘  | | └---┐ |  └--┐ | └-┘ | |  |    | └---┐ | └-┘ | |  | \   | | └---┐   |  |   | └┘ └┘ | | └-┘ | |  |    |  |\   \
 #└-----┘ └-----┘ └-----┘ └-----┘ └--┘    └-----┘ └-----┘ └--┘  └--┘ └-----┘   └--┘   └-------┘ └-----┘ └--┘    └--┘ └--┘
-#Plugin made by davidcubesvk.
+# Plugin made by davidcubesvk. Credit for some parts of this plugin including but not limited to the core (passphrase)
+# functioning goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and it's contributors.
 #
 # ► Don't understand / know how to set up?
 # All terms and setup process are available on my website. Link is in all of my plugins' descriptions.
