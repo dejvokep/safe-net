@@ -10,10 +10,10 @@
     <packaging>pom</packaging>
     <version>3.1</version>
     <modules>
-        <module>Core</module>
-        <module>Proxy</module>
-        <module>Backend</module>
-        <module>Distribution</module>
+        <module>securednetwork-core</module>
+        <module>securednetwork-proxy</module>
+        <module>securednetwork-backend</module>
+        <module>securednetwork-distribution</module>
     </modules>
     <name>SecuredNetwork</name>
     <description>A lightweight protection for your network with powerful configuration.</description>
