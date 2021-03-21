@@ -8,16 +8,23 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>securednetwork-distribution</artifactId>
   <build>
-    <directory>../target</directory>
-    <finalName>${project.parent.name}-${project.parent.version}</finalName>
-    <plugins>
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
+      <resources>
+          <resource>
+              <targetPath>.</targetPath>
+              <filtering>true</filtering>
+              <directory>${basedir}/src/main/resources</directory>
+          </resource>
+      </resources>
+      <directory>../target</directory>
+      <finalName>${project.parent.name}-${project.parent.version}</finalName>
+      <plugins>
+          <plugin>
+              <artifactId>maven-shade-plugin</artifactId>
+              <version>3.2.4</version>
+              <executions>
+                  <execution>
+                      <phase>package</phase>
+                      <goals>
               <goal>shade</goal>
             </goals>
             <configuration>

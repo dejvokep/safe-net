@@ -11,6 +11,8 @@ import com.davidcubesvk.securedNetworkBackend.SecuredNetworkBackend;
 import com.davidcubesvk.securedNetworkCore.authenticator.AuthenticationResult;
 import com.davidcubesvk.securedNetworkCore.authenticator.Authenticator;
 import com.davidcubesvk.securedNetworkCore.log.Log;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -67,7 +69,9 @@ public class PacketHandler {
                 //If failed
                 if (!result.isPassed())
                     //Disconnect
-                    disconnect(event.getPlayer());
+                    if (!disconnect(event.getPlayer()))
+                        //Mess up the hostname so the server will disconnect the player
+                        event.getPacket().getStrings().write(0, "");
             }
         });
     }
@@ -77,11 +81,12 @@ public class PacketHandler {
      * {@link com.comphenix.protocol.injector.server.TemporaryPlayer} now, which provides the socket instance, which is
      * used to close the connection. This is achieved by calling
      * {@link TemporaryPlayerFactory#getInjectorFromPlayer(Player)} and then
-     * {@link com.comphenix.protocol.injector.server.SocketInjector#disconnect(String)}.
+     * {@link com.comphenix.protocol.injector.server.SocketInjector#disconnect(String)}. Returns if disconnection was
+     * successful.
      *
      * @param player the player to disconnect
      */
-    private void disconnect(Player player) {
+    private boolean disconnect(Player player) {
         try {
             //Message
             String message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-failed-authentication"));
@@ -89,14 +94,16 @@ public class PacketHandler {
             //Create the disconnect packet
             PacketContainer disconnectPacket = new PacketContainer(PacketType.Login.Server.DISCONNECT);
             //Set the message
-            disconnectPacket.getChatComponents().write(0, WrappedChatComponent.fromText(message));
+            disconnectPacket.getChatComponents().write(0, WrappedChatComponent.fromJson(ComponentSerializer.toString(TextComponent.fromLegacyText(message))));
             //Send
             protocolManager.sendServerPacket(player, disconnectPacket);
 
             //Disconnect the player
             TemporaryPlayerFactory.getInjectorFromPlayer(player).disconnect(message);
+            return true;
         } catch (InvocationTargetException ignored) {
             //If something happens, the server itself will disconnect the player due to insufficient host string length
+            return false;
         }
     }
 
