@@ -10,7 +10,7 @@ public class IPHolder {
     /**
      * IP (IPv4) address pattern.
      */
-    private static final Pattern IP_PATTERN = Pattern.compile("(?:[^.]+\\.)+.+:[0-9]{1,5}");
+    private static final Pattern IP_PATTERN = Pattern.compile("((?:[^.]+\\.)+.+:[0-9]{1,5})|(\\[(?:[^.]+\\.)+.+:[0-9]{1,5}])");
 
     /**
      * The case-insensitive pattern.
