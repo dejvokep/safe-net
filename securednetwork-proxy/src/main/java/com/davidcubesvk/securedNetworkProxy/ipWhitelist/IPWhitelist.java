@@ -122,7 +122,7 @@ public class IPWhitelist {
                 whitelisted.add(ipHolder);
             else
                 //Log
-                plugin.getLog().log(Level.SEVERE, Log.Source.WHITELIST, "IP \"" + ip + "\" is not specified correctly! Removing from the whitelist.");
+                plugin.getLog().logConsole(Level.SEVERE, Log.Source.WHITELIST, "IP \"" + ip + "\" is not specified correctly! Removing from the whitelist.");
         }
 
         //If IP placeholder is present
