@@ -6,17 +6,19 @@ import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.server.TemporaryPlayerFactory;
+import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.davidcubesvk.securedNetworkBackend.SecuredNetworkBackend;
 import com.davidcubesvk.securedNetworkCore.authenticator.AuthenticationResult;
 import com.davidcubesvk.securedNetworkCore.authenticator.Authenticator;
 import com.davidcubesvk.securedNetworkCore.log.Log;
+import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import java.lang.reflect.InvocationTargetException;
+import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -59,50 +61,52 @@ public class PacketHandler {
                 //If pinging and it is allowed
                 if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS && !blockPings)
                     return;
-
+                //The strings
+                StructureModifier<String> strings = event.getPacket().getStrings();
                 //Authenticate
-                AuthenticationResult result = authenticator.authenticate(event.getPacket().getStrings().read(0));
-                //Set the host
-                event.getPacket().getStrings().write(0, result.getHost());
+                AuthenticationResult result = authenticator.authenticate(strings.read(0));
                 //Log the result
-                logResult(result.getPlayerId(), result.isPassed());
+                logResult(result.getPlayerId(), result.isPassed(), strings.read(0));
                 //If failed
-                if (!result.isPassed())
+                if (!result.isPassed()) {
                     //Disconnect
-                    if (!disconnect(event.getPlayer()))
+                    if (!disconnect(event.getPlayer())) {
                         //Mess up the hostname so the server will disconnect the player
-                        event.getPacket().getStrings().write(0, "");
+                        strings.write(0, "");
+                        return;
+                    }
+                }
+                //Set the host
+                strings.write(0, result.getHost());
             }
         });
     }
 
     /**
-     * Disconnects the given player. The player is an instance of
-     * {@link com.comphenix.protocol.injector.server.TemporaryPlayer} now, which provides the socket instance, which is
-     * used to close the connection. This is achieved by calling
-     * {@link TemporaryPlayerFactory#getInjectorFromPlayer(Player)} and then
-     * {@link com.comphenix.protocol.injector.server.SocketInjector#disconnect(String)}. Returns if disconnection was
-     * successful.
+     * Disconnects the given player. Returns if disconnection was successful.
      *
      * @param player the player to disconnect
+     * @return if the player was disconnected
      */
     private boolean disconnect(Player player) {
         try {
-            //Message
-            String message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-failed-authentication"));
-
             //Create the disconnect packet
             PacketContainer disconnectPacket = new PacketContainer(PacketType.Login.Server.DISCONNECT);
+            //Write defaults
+            disconnectPacket.getModifier().writeDefaults();
+            BaseComponent[] textComponent = TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-failed-authentication")));
+            String serialized = ComponentSerializer.toString(textComponent);
+            WrappedChatComponent wrappedChatComponent = WrappedChatComponent.fromJson(serialized);
             //Set the message
-            disconnectPacket.getChatComponents().write(0, WrappedChatComponent.fromJson(ComponentSerializer.toString(TextComponent.fromLegacyText(message))));
+            disconnectPacket.getChatComponents().write(0, wrappedChatComponent);
+            //disconnectPacket.getChatComponents().write(0, WrappedChatComponent.fromJson(ComponentSerializer.toString(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', )))));
             //Send
             protocolManager.sendServerPacket(player, disconnectPacket);
 
             //Disconnect the player
-            TemporaryPlayerFactory.getInjectorFromPlayer(player).disconnect(message);
+            TemporaryPlayerFactory.getInjectorFromPlayer(player).getSocket().close();
             return true;
-        } catch (InvocationTargetException ignored) {
-            //If something happens, the server itself will disconnect the player due to insufficient host string length
+        } catch (ReflectiveOperationException | IOException ignored) {
             return false;
         }
     }
@@ -122,9 +126,9 @@ public class PacketHandler {
      * @param playerId UUID of the player connecting, or <code>?</code> if unknown
      * @param accepted if the connection was accepted
      */
-    private void logResult(String playerId, boolean accepted) {
+    private void logResult(String playerId, boolean accepted, String propertyDump) {
         plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "uuid=" + playerId + " result=" + (accepted ? "accepted" : "rejected") +
-                (accepted ? "" : " cause=failed_authentication"));
+                (accepted ? "" : " cause=failed_authentication") + " dump=" + propertyDump);
     }
 
 }

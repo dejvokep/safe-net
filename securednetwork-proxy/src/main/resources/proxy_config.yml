@@ -20,7 +20,7 @@ property:
   #         If used that way, it is recommended to change this once in a while.
   name: "secured_network"
   # Value of the property - the actual passphrase (the longer it is, the better, but do not choose too long passphrase,
-  # otherwise, it will take long for slower connections to join):
+  # otherwise, it will take long for slower connections to join, recommended length: 100):
   # - Info: It is recommended to change this once in a while.
   value: ""
 # Disconnect message sent to the player if:
@@ -43,7 +43,8 @@ metrics: true
 ip-whitelist:
   # Enable:
   enabled: false
-  # Whitelisted IPs - these should be the proxy IPs / DNS names (these are just examples, please, delete them if you want to use this feature):
+  # Whitelisted IPs - these should be the proxy IPs / DNS names (these are just examples, please, delete them if you
+  # want to use this feature):
   # - Info: Port should be specified after each IP separated by colon (IP:port). If the connecting player used any of
   #         these IPs, their connection will be allowed.
   #         If your server has dynamic IP, use the "{ip}" placeholder as the server's IP. Please configure the

@@ -28,6 +28,8 @@ public class SecuredNetworkBackend extends JavaPlugin {
     private Log log;
     //Authenticator
     private Authenticator authenticator;
+    //Packet handler
+    private PacketHandler packetHandler;
 
     @Override
     public void onEnable() {
@@ -59,7 +61,7 @@ public class SecuredNetworkBackend extends JavaPlugin {
         //Registering the packet listener
         log.log(Level.INFO, Log.Source.GENERAL, "Registering the packet listener.");
         //Register
-        new PacketHandler(ProtocolLibrary.getProtocolManager(), this);
+        packetHandler = new PacketHandler(ProtocolLibrary.getProtocolManager(), this);
 
         //Finished enabling
         log.log(Level.INFO, Log.Source.GENERAL, "Finished enabling SecuredNetwork.");
@@ -82,6 +84,7 @@ public class SecuredNetworkBackend extends JavaPlugin {
 
     /**
      * Returns the configuration file representation.
+     *
      * @return the configuration file.
      */
     public Config getConfiguration() {
@@ -90,6 +93,7 @@ public class SecuredNetworkBackend extends JavaPlugin {
 
     /**
      * Returns the logging utility which is used to log plugin messages.
+     *
      * @return the logging utility
      */
     public Log getLog() {
@@ -98,9 +102,20 @@ public class SecuredNetworkBackend extends JavaPlugin {
 
     /**
      * Returns the authenticator.
+     *
      * @return the authenticator
      */
     public Authenticator getAuthenticator() {
         return authenticator;
     }
+
+    /**
+     * Returns the packet handler.
+     *
+     * @return the packet handler
+     */
+    public PacketHandler getPacketHandler() {
+        return packetHandler;
+    }
+
 }

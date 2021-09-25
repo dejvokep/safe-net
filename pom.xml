@@ -17,6 +17,14 @@
     </modules>
     <name>SecuredNetwork</name>
     <description>A lightweight protection for your network with powerful configuration.</description>
+    <developers>
+        <developer>
+            <name>davidcubesvk</name>
+            <email>davidcubesvkdev@gmail.com</email>
+            <timezone>CET</timezone>
+            <url>https://davidcubesvk.com</url>
+        </developer>
+    </developers>
 
     <!-- Source encoding -->
     <properties>

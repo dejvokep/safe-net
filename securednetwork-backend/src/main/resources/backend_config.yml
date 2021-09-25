@@ -19,7 +19,8 @@ property:
   # - Info: This can be used also as the second passphrase - another layer of security.
   #         If used that way, it is recommended to change this once in a while.
   name: "secured_network"
-  # Value of the property - the actual passphrase (the longer it is, the better, but do not choose too long passphrase, otherwise, it will take long for slower connections to join):
+  # Value of the property - the actual passphrase (the longer it is, the better, but do not choose too long passphrase,
+  # otherwise, it will take long for slower connections to join):
   # - Info: It is recommended to change this once in a while.
   value: ""
 # Block server pings:

@@ -25,16 +25,16 @@
                   <execution>
                       <phase>package</phase>
                       <goals>
-              <goal>shade</goal>
-            </goals>
-            <configuration>
-              <artifactSet>
-                <includes>
-                  <include>com.davidcubesvk:securednetwork-*</include>
-                </includes>
-              </artifactSet>
-            </configuration>
-          </execution>
+                          <goal>shade</goal>
+                      </goals>
+                      <configuration>
+                          <artifactSet>
+                              <includes>
+                                  <include>com.davidcubesvk:securednetwork-*</include>
+                              </includes>
+                          </artifactSet>
+                      </configuration>
+                  </execution>
         </executions>
         <configuration>
           <filters>

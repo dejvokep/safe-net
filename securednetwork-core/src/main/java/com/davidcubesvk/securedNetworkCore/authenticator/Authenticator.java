@@ -81,6 +81,7 @@ public class Authenticator {
      * @return an authentication result
      */
     public AuthenticationResult authenticate(String host) {
+        log.log(Level.INFO, Log.Source.AUTHENTICATOR, host);
         //Split the host value
         String[] data = host.split(HOST_SPLIT_REGEX);
 
