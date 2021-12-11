@@ -3,11 +3,20 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <parent>
         <artifactId>securednetwork-parent</artifactId>
-        <groupId>com.davidcubesvk</groupId>
+        <groupId>dev.dejvokep</groupId>
         <version>3.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>securednetwork-core</artifactId>
+    <description>SecuredNetwork - Lightweight but yet unbeaten protection for your server.</description>
+    <developers>
+        <developer>
+            <name>dejvokep</name>
+            <email>admin@dejvokep.dev</email>
+            <url>https://dejvokep.dev</url>
+            <timezone>CET</timezone>
+        </developer>
+    </developers>
     <build>
         <plugins>
             <plugin>
@@ -33,11 +42,47 @@
                     <relocations>
                         <relocation>
                             <pattern>com.google.gson</pattern>
-                            <shadedPattern>com.davidcubesvk.securedNetworkCore.util.libs.com.google.gson</shadedPattern>
+                            <shadedPattern>dev.dejvokep.securednetwork.core.util.libs.com.google.gson</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>4.1</version>
+                <executions>
+                    <execution>
+                        <id>check-headers</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <properties>
+                        <owner>dejvokep</owner>
+                        <email>admin@dejvokep.dev</email>
+                    </properties>
+                    <header>${project.parent.basedir}/LICENSE-header.txt</header>
+                    <excludes>
+                        <exclude>**/README</exclude>
+                    </excludes>
+                    <includes>
+                        <include>**/*.java</include>
+                        <include>**/*.xml</include>
+                    </includes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>22.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

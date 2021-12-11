@@ -1,6 +1,0 @@
-# Plugin info:
-name: ${parent.name}
-version: ${parent.version}
-author: davidcubesvk
-main: com.davidcubesvk.securedNetworkProxy.SecuredNetworkProxy
-description: ${parent.description}

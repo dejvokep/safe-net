@@ -1,45 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
     <artifactId>securednetwork-parent</artifactId>
-    <groupId>com.davidcubesvk</groupId>
+    <groupId>dev.dejvokep</groupId>
     <version>3.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>securednetwork-distribution</artifactId>
+  <developers>
+    <developer>
+      <name>dejvokep</name>
+      <email>admin@dejvokep.dev</email>
+      <url>https://dejvokep.dev</url>
+      <timezone>CET</timezone>
+    </developer>
+  </developers>
   <build>
-      <resources>
-          <resource>
-              <targetPath>.</targetPath>
-              <filtering>true</filtering>
-              <directory>${basedir}/src/main/resources</directory>
-          </resource>
-      </resources>
-      <directory>../target</directory>
-      <finalName>${project.parent.name}-${project.parent.version}</finalName>
-      <plugins>
-          <plugin>
-              <artifactId>maven-shade-plugin</artifactId>
-              <version>3.2.4</version>
-              <executions>
-                  <execution>
-                      <phase>package</phase>
-                      <goals>
-                          <goal>shade</goal>
-                      </goals>
-                      <configuration>
-                          <artifactSet>
-                              <includes>
-                                  <include>com.davidcubesvk:securednetwork-*</include>
-                              </includes>
-                          </artifactSet>
-                      </configuration>
-                  </execution>
+    <resources>
+      <resource>
+        <targetPath>.</targetPath>
+        <filtering>true</filtering>
+        <directory>${project.basedir}/src/main/resources</directory>
+      </resource>
+    </resources>
+    <directory>../target</directory>
+    <finalName>${project.parent.name}-${project.parent.version}</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>3.2.4</version>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>shade</goal>
+            </goals>
+            <configuration>
+              <artifactSet>
+                <includes>
+                  <include>dev.dejvokep:securednetwork-*</include>
+                </includes>
+              </artifactSet>
+            </configuration>
+          </execution>
         </executions>
         <configuration>
           <filters>
             <filter>
-              <artifact>com.davidcubesvk:*</artifact>
+              <artifact>dev.dejvokep:*</artifact>
               <excludes>
                 <exclude>META-INF/MANIFEST.MF</exclude>
               </excludes>
@@ -47,6 +56,42 @@
           </filters>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>com.mycila</groupId>
+        <artifactId>license-maven-plugin</artifactId>
+        <version>4.1</version>
+        <executions>
+          <execution>
+            <id>check-headers</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>format</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <properties>
+            <owner>dejvokep</owner>
+            <email>admin@dejvokep.dev</email>
+          </properties>
+          <header>${project.parent.basedir}/LICENSE-header.txt</header>
+          <excludes>
+            <exclude>**/README</exclude>
+          </excludes>
+          <includes>
+            <include>**/*.java</include>
+            <include>**/*.xml</include>
+          </includes>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.jetbrains</groupId>
+      <artifactId>annotations</artifactId>
+      <version>22.0.0</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
 </project>
