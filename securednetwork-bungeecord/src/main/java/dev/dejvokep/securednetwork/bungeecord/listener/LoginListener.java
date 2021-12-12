@@ -48,8 +48,6 @@ import java.util.logging.Level;
  *     Therefore, this event is the first event that is suitable.</li>
  *     <li>{@link PostLoginEvent} sends players with the updater permission an updater message.</li>
  * </ul>
- * <p>
- * Inspired by project BungeeGuard (https://github.com/lucko/BungeeGuard).
  */
 public class LoginListener implements Listener {
 
@@ -124,7 +122,7 @@ public class LoginListener implements Listener {
         }
 
         // Insert the custom result
-        if (insertCustomResult(event.getConnection())) {
+        if (plugin.getAuthenticator().getPassphrase().length() > 0 && insertCustomResult(event.getConnection())) {
             // Accepted
             logResult(name, true, null, virtualHost);
         } else {

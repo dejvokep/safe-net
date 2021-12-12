@@ -52,7 +52,6 @@ public class ConnectionLogger {
      * Detaches the logger.
      */
     public void detach() {
-        this.callback = null;
         this.identifier = null;
     }
 

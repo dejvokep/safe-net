@@ -5,30 +5,23 @@
 #   |  | | ┌---┘ |  |    | | | | |  |    | ┌---┘ | | | | |  |\    | | ┌---┘   |  |   | || || | | | | | |  |    |  ┌┐  \
 #┌--┘  | | └---┐ |  └--┐ | └-┘ | |  |    | └---┐ | └-┘ | |  | \   | | └---┐   |  |   | └┘ └┘ | | └-┘ | |  |    |  |\   \
 #└-----┘ └-----┘ └-----┘ └-----┘ └--┘    └-----┘ └-----┘ └--┘  └--┘ └-----┘   └--┘   └-------┘ └-----┘ └--┘    └--┘ └--┘
-# Plugin made by davidcubesvk. Credit for some parts of this plugin including but not limited to the core (passphrase)
-# functioning goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and it's contributors.
+# Plugin made by dejvokep.
 #
-# ► Don't understand / know how to set up?
-# All terms and setup process are available on my website. Link is in all of my plugins' descriptions.
 # ► Need any help?
-# Contact me through any of listed methods on my website, I'd like to help!
+# Join the Discord server (https://discord.com/invite/BbhADEy) and we will more than happily help you :) (nonstop 24/7 bot support)
 #
-# Property used to forward the passphrase to a backend server:
-property:
-  # Name of the property (can not be "textures" - reserved for the game protocol):
-  # - Info: This can be used also as the second passphrase - another layer of security.
-  name: "secured_network"
-  # Value of the property - the actual passphrase:
-  # - Info: It is recommended to change this once in a while.
-  #         The longer it is, the better, but do not choose too long passphrase, otherwise, it will take long for slower
-  #         connections to join, recommended length: 1000)
-  value: ""
+# Passphrase:
+# - Info: It is recommended to change this once in a while.
+#         The longer it is, the better, but do not choose too long passphrase, otherwise, it will take long for slower
+#         connections to join.
+#         Recommended length: 1000. Generate a new one using "/sn generate".
+passphrase: ""
 # Disconnect message sent to the player if:
 # - Info: "\n" can be used for a new line.
 disconnect:
   # A not whitelisted IP was used to join the server:
   whitelist: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!"
-  # An error occurred while setting the passphrase into the connection:
+  # An error occurred while setting the passphrase into the connection, or it is not set (length of 0):
   passphrase-error: "&7[&6SecuredNetwork&7] &cAn error occurred while processing your request.\n\n&7&oPlease try again later. If the problem persists, contact server administrators."
 # Enable the plugin's own logging system:
 # - Info: Plugin's log files are saved into "logs" folder in it's plugin folder. It is recommended to have it disabled

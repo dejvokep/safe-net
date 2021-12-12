@@ -27,33 +27,33 @@
         </resources>
         <plugins>
             <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <source>8</source>
-          <target>8</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.2.4</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-          <configuration>
-              <relocations>
-                  <relocation>
-                      <pattern>org.bstats</pattern>
-                      <shadedPattern>dev.dejvokep.securednetwork.bungeecord.util.metrics</shadedPattern>
-                  </relocation>
-              </relocations>
-          </configuration>
-      </plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.bstats</pattern>
+                            <shadedPattern>dev.dejvokep.securednetwork.bungeecord.util.metrics</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -61,7 +61,7 @@
                 <executions>
                     <execution>
                         <id>check-headers</id>
-                        <phase>package</phase>
+                        <phase>validate</phase>
                         <goals>
                             <goal>format</goal>
                         </goals>
@@ -94,32 +94,32 @@
       <url>https://repo.codemc.org/repository/maven-public</url>
     </repository>
   </repositories>
-  <dependencies>
-    <dependency>
-        <groupId>dev.dejvokep</groupId>
-      <artifactId>securednetwork-core</artifactId>
-      <version>3.1</version>
-      <scope>provided</scope>
-    </dependency>
-      <dependency>
-          <groupId>net.md-5</groupId>
-          <artifactId>bungeecord-api</artifactId>
-          <version>1.18-R0.1-SNAPSHOT</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>net.md-5</groupId>
-          <artifactId>bungeecord-proxy</artifactId>
-          <version>1.18-R0.1-SNAPSHOT</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.jetbrains</groupId>
-          <artifactId>annotations</artifactId>
-          <version>22.0.0</version>
-          <scope>provided</scope>
-      </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>dev.dejvokep</groupId>
+            <artifactId>securednetwork-core</artifactId>
+            <version>3.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>1.18-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-proxy</artifactId>
+            <version>1.18-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>22.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
