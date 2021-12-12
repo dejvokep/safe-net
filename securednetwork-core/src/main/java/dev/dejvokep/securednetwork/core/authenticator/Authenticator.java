@@ -30,15 +30,13 @@ import java.util.logging.Level;
 
 /**
  * Authenticator covering all needed functions related to passphrase.
- * <p>
- * Inspired by project BungeeGuard (https://github.com/lucko/BungeeGuard).
  */
 public class Authenticator {
 
     /**
-     * Default property name.
+     * Property name.
      */
-    private static final String DEFAULT_PROPERTY_NAME = "secured_network";
+    public static final String PROPERTY_NAME = "secured_network";
     /**
      * String used as a splitter for the hostname value.
      */
@@ -56,7 +54,7 @@ public class Authenticator {
     /**
      * Recommended passphrase length.
      */
-    public static final int RECOMMENDED_PASSPHRASE_LENGTH = 500;
+    public static final int RECOMMENDED_PASSPHRASE_LENGTH = 1000;
 
     /**
      * Passphrases with lengths below this threshold are considered weak and should be reset immediately.
@@ -74,12 +72,12 @@ public class Authenticator {
     }.getType();
 
     /**
-     * Passphrase characters (86 chars) used to generate the passphrase.
+     * Passphrase characters (90 chars) used to generate the passphrase.
      */
-    private static final String PASSPHRASE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@$%^&*()_+-=_+[];,.<>?/";
+    private static final String PASSPHRASE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=[];,./~!@#$%^&*()_+{}|:<>?";
 
-    // Property name and passphrase
-    private String propertyName, passphrase;
+    // Passphrase
+    private String passphrase;
 
     // The config
     private final Config config;
@@ -160,7 +158,7 @@ public class Authenticator {
                 property = properties.get(index);
 
                 // If the names equal
-                if (property.getName().equals(this.propertyName)) {
+                if (property.getName().equals(PROPERTY_NAME)) {
                     // Remove the property
                     properties.remove(index);
 
@@ -207,7 +205,7 @@ public class Authenticator {
             // Append a new character
             stringBuilder.append(PASSPHRASE_CHARS.charAt(random.nextInt(PASSPHRASE_CHARS.length())));
         // Set into the config
-        config.set("property.value", stringBuilder.toString());
+        config.set("passphrase", stringBuilder.toString());
         // Save
         config.save();
 
@@ -228,35 +226,17 @@ public class Authenticator {
     }
 
     /**
-     * Reloads the internal data.
+     * Reloads the passphrase.
      */
     public void reload() {
-        // Property name
-        propertyName = config.getString("property.name");
-
-        // If the name is invalid
-        if (propertyName.equals("textures")) {
-            // Set to default
-            propertyName = DEFAULT_PROPERTY_NAME;
-            // Log
-            log.logConsole(Level.SEVERE, Log.Source.AUTHENTICATOR, "Invalid property name! Using default \"" + DEFAULT_PROPERTY_NAME + "\" name.");
-        }
-
         // Passphrase
-        passphrase = config.getString("property.value");
+        passphrase = config.getString("passphrase");
         // Log the warning
-        if (passphrase.length() < WEAK_PASSPHRASE_LENGTH_THRESHOLD)
+        if (passphrase.length() == 0)
+            log.logConsole(Level.SEVERE, Log.Source.AUTHENTICATOR, "No passphrase configured (length is 0)! The plugin will disconnect all incoming connections. Please generate one as soon as possible from the proxy console with \"/sn generate\".");
+        else if (passphrase.length() < WEAK_PASSPHRASE_LENGTH_THRESHOLD)
             log.logConsole(Level.SEVERE, Log.Source.AUTHENTICATOR, "The configured passphrase is weak! It should be at least " + WEAK_PASSPHRASE_LENGTH_THRESHOLD +
-                    " characters long; though the recommended length is " + RECOMMENDED_PASSPHRASE_LENGTH + ". Please generate one as soon as possible from the proxy console with \"/sn generate " + RECOMMENDED_PASSPHRASE_LENGTH + "\".");
-    }
-
-    /**
-     * Returns the name of the property used by the plugin.
-     *
-     * @return the name of the property used by the plugin
-     */
-    public String getPropertyName() {
-        return propertyName;
+                    " characters long; though the recommended length is " + RECOMMENDED_PASSPHRASE_LENGTH + ". Please generate one as soon as possible from the proxy console with \"/sn generate\".");
     }
 
     /**

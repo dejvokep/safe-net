@@ -5,24 +5,13 @@
 #   |  | | ┌---┘ |  |    | | | | |  |    | ┌---┘ | | | | |  |\    | | ┌---┘   |  |   | || || | | | | | |  |    |  ┌┐  \
 #┌--┘  | | └---┐ |  └--┐ | └-┘ | |  |    | └---┐ | └-┘ | |  | \   | | └---┐   |  |   | └┘ └┘ | | └-┘ | |  |    |  |\   \
 #└-----┘ └-----┘ └-----┘ └-----┘ └--┘    └-----┘ └-----┘ └--┘  └--┘ └-----┘   └--┘   └-------┘ └-----┘ └--┘    └--┘ └--┘
-# Plugin made by davidcubesvk. Credit for some parts of this plugin including but not limited to the core (passphrase)
-# functioning goes to project BungeeGuard (https://github.com/lucko/BungeeGuard) and it's contributors.
+# Plugin made by dejvokep.
 #
-# ► Don't understand / know how to set up?
-# All terms and setup process are available on my website. Link is in all of my plugins' descriptions.
 # ► Need any help?
-# Contact me through any of listed methods on my website, I'd like to help!
+# Join the Discord server (https://discord.com/invite/BbhADEy) and we will more than happily help you :) (nonstop 24/7 bot support)
 #
-# Property used to forward the passphrase from the proxy server (fill with the same data as on the proxy servers):
-property:
-  # Name of the property (can not be "textures" - reserved for the game protocol):
-  # - Info: This can be used also as the second passphrase - another layer of security.
-  name: "secured_network"
-  # Value of the property - the actual passphrase:
-  # - Info: It is recommended to change this once in a while.
-  #         The longer it is, the better, but do not choose too long passphrase, otherwise, it will take long for slower
-  #         connections to join, recommended length: 1000)
-  value: ""
+# Passphrase (equal to what you set at the proxy):
+passphrase: ""
 # Block server pings for unauthenticated requests:
 block-pings: false
 # Disconnect message sent to the player if bypassing the proxy (failed the authentication - invalid passphrase, property):

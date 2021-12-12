@@ -44,8 +44,6 @@ import java.util.logging.Level;
  * property and value, connection is allowed. The property is then removed from the packet to hide it from unwanted
  * exposures. This is also why this packet was chosen - it is the first packet sent between the server and client,
  * so we can remove the property as soon as possible.
- * <p>
- * Inspired by project BungeeGuard (https://github.com/lucko/BungeeGuard).
  */
 public class PacketHandler {
 
@@ -144,13 +142,14 @@ public class PacketHandler {
      * Logs the result of a connection request determined by the authentication result. The cause is always
      * <code>failed_authentication</code> if the connection was rejected.
      *
-     * @param playerId UUID of the player connecting, or <code>?</code> if unknown
-     * @param accepted if the connection was accepted
+     * @param playerId     UUID of the player connecting, or <code>?</code> if unknown
+     * @param accepted     if the connection was accepted
+     * @param propertyDump property array dump
      */
     private void logResult(@Nullable String playerId, boolean accepted, @NotNull String propertyDump) {
         // Message
         String message = "uuid=" + playerId + " result=" + (accepted ? "accepted" : "rejected") +
-                (accepted ? "" : " cause=failed_authentication") + (accepted ? "" : "dump=" + propertyDump);
+                (accepted ? "" : " cause=failed_authentication") + (accepted ? "" : " properties=" + propertyDump);
         // Log
         connectionLogger.handle(playerId, message);
         plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, message);

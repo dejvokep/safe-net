@@ -117,7 +117,7 @@ public class Updater {
             // Get current version of plugin
             int currentVersionNumbers = Integer.parseInt(this.currentVersion.replace(".", ""));
 
-            // Get latest version of plugin
+            // Get the latest version of plugin
             try {
                 this.latestVersion = new BufferedReader(new InputStreamReader(new URL(URL).openStream())).readLine();
             } catch (IOException ex) {
@@ -129,7 +129,7 @@ public class Updater {
                 return;
             }
 
-            // Get latest version in numbers
+            // Get the latest version in numbers
             int latestVersionNumbers = Integer.parseInt(this.latestVersion.replace(".", ""));
             this.isNewVersion = latestVersionNumbers > currentVersionNumbers;
 
