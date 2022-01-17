@@ -66,16 +66,14 @@ public class IPHolder {
      */
     public boolean setIp(@NotNull String ip) {
         // Replace all the spaces
-        ip = ip.replace(" ", "");
-        // Match the IP pattern
-        if (!IP_PATTERN.matcher(ip).matches())
-            return false;
-
-        // Set the case-insensitive depending on the pattern match
+        this.ip = ip.replace(" ", "");
+        // Case-insensitive depending on the match
         caseSensitive = !CASE_INSENSITIVE_PATTERN.matcher(ip).matches();
-        // Set
+        // Remove the brackets
         this.ip = caseSensitive ? ip : ip.substring(1, ip.length() - 1);
-        return true;
+
+        // Match the IP pattern
+        return IP_PATTERN.matcher(ip).matches();
     }
 
     /**

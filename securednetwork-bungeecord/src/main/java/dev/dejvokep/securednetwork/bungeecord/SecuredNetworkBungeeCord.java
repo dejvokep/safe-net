@@ -23,13 +23,16 @@ import dev.dejvokep.securednetwork.bungeecord.util.config.ConfigProxy;
 import dev.dejvokep.securednetwork.bungeecord.util.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
 import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.bstats.bungeecord.Metrics;
 
-import java.io.File;
+import java.net.URISyntaxException;
+import java.util.Objects;
 import java.util.logging.Level;
 
 /**
@@ -47,7 +50,8 @@ public class SecuredNetworkBungeeCord extends Plugin {
     // Config
     private Config config;
     // Logger
-    private Log log;
+    private Logger logger;
+    private LoggerContext loggerContext;
     // Authenticator
     private Authenticator authenticator;
     // IP whitelist
@@ -57,6 +61,22 @@ public class SecuredNetworkBungeeCord extends Plugin {
 
     @Override
     public void onEnable() {
+        try {
+            // Context
+            loggerContext = LoggerContext.getContext(getClass().getClassLoader(), false, Objects.requireNonNull(getClass().getClassLoader().getResource("log4j2-securednetwork.xml")).toURI());
+            // Initialize the logger
+            logger = loggerContext.getLogger(getClass().getName());
+            // Display notice
+            logger.info(LogSource.GENERAL.getPrefix() + "-------------------------------- IMPORTANT! --------------------------------");
+            logger.info(LogSource.GENERAL.getPrefix() + "Log files may contain sensitive information such as server IP, player names,");
+            logger.info(LogSource.GENERAL.getPrefix() + "player UUIDs, etc. If sharing, please make sure you delete ALL of these information.");
+            logger.info(LogSource.GENERAL.getPrefix() + "Logs should be shared only with people you trust.");
+            logger.info(LogSource.GENERAL.getPrefix() + "----------------------------------------------------------------------------");
+        } catch (URISyntaxException | NullPointerException ex) {
+            getLogger().log(Level.SEVERE, "Failed to initialize Log4j! Shutting down...", ex);
+            ProxyServer.getInstance().stop();
+        }
+
         // Set the plugin instance
         plugin = this;
         // Thank you message
@@ -64,24 +84,22 @@ public class SecuredNetworkBungeeCord extends Plugin {
 
         // Load the config file
         config = new ConfigProxy(this, "proxy_config.yml", "config.yml");
-        // Initialize log class
-        log = new Log(getLogger(), new File(getDataFolder(), "logs"), config);
 
         // Enabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Enabling SecuredNetwork... (PROXY)");
+        logger.info(LogSource.GENERAL.getPrefix() + "Enabling SecuredNetwork... (BungeeCord)");
 
         // Initializing the authenticator
-        log.log(Level.INFO, Log.Source.GENERAL, "Initializing the authenticator.");
+        logger.info(LogSource.GENERAL.getPrefix() + "Initializing the authenticator.");
         // Initialize
-        authenticator = new Authenticator(config, log);
+        authenticator = new Authenticator(config, getLogger(), logger);
 
         // Initializing the IP whitelist
-        log.log(Level.INFO, Log.Source.GENERAL, "Initializing the IP whitelist...");
+        logger.info(LogSource.GENERAL.getPrefix() + "Initializing the IP whitelist...");
         // Initialize
         ipWhitelist = new IPWhitelist(this);
 
         // Registering listeners and commands
-        log.log(Level.INFO, Log.Source.GENERAL, "Registering listeners and commands.");
+        logger.info(LogSource.GENERAL.getPrefix() + "Registering listeners and commands.");
         // Plugin manager
         PluginManager pluginManager = ProxyServer.getInstance().getPluginManager();
         // Register listener
@@ -91,26 +109,27 @@ public class SecuredNetworkBungeeCord extends Plugin {
         pluginManager.registerCommand(this, new PluginCommand(this, "sn"));
 
         // Starting updater
-        log.log(Level.INFO, Log.Source.GENERAL, "Starting updater.");
+        logger.info(LogSource.GENERAL.getPrefix() + "Starting updater.");
         // Initialize
         updater = new Updater(this);
 
         // If enabled
         if (config.getBoolean("metrics")) {
             // Initializing metrics
-            log.log(Level.INFO, Log.Source.GENERAL, "Initializing metrics.");
+            logger.info(LogSource.GENERAL.getPrefix() + "Initializing metrics.");
             // Initialize Metrics
             new Metrics(this, 6479);
         }
 
         // Finished enabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Finished enabling SecuredNetwork.");
+        logger.info(LogSource.GENERAL.getPrefix() + "Finished enabling SecuredNetwork.");
     }
 
     @Override
     public void onDisable() {
         // Finished disabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Finished disabling SecuredNetwork.");
+        logger.info(LogSource.GENERAL.getPrefix() + "Finished disabling SecuredNetwork.");
+        loggerContext.terminate();
     }
 
     /**
@@ -132,12 +151,12 @@ public class SecuredNetworkBungeeCord extends Plugin {
     }
 
     /**
-     * Returns the logging utility which is used to log plugin messages.
+     * Returns the plugin's dedicated logging system.
      *
-     * @return the logging utility
+     * @return the dedicated logging system
      */
-    public Log getLog() {
-        return log;
+    public Logger getDedicatedLogger() {
+        return logger;
     }
 
     /**

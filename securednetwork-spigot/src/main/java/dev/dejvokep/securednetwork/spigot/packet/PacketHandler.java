@@ -23,10 +23,10 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.server.TemporaryPlayerFactory;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import dev.dejvokep.securednetwork.core.authenticator.AuthenticationResult;
+import dev.dejvokep.securednetwork.core.authenticator.AuthenticationRequest;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
 import dev.dejvokep.securednetwork.core.connection.ConnectionLogger;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -34,9 +34,6 @@ import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.logging.Level;
 
 /**
  * Listens for the {@link PacketType.Handshake.Client#SET_PROTOCOL} packet. This packet is then used to read the
@@ -81,12 +78,18 @@ public class PacketHandler {
                     return;
                 // The strings
                 StructureModifier<String> strings = event.getPacket().getStrings();
+                // Host
+                String host = strings.read(0);
                 // Authenticate
-                AuthenticationResult result = authenticator.authenticate(strings.read(0));
-                // Log the result
-                logResult(result.getPlayerId(), result.isPassed(), strings.read(0));
+                AuthenticationRequest request = authenticator.authenticate(host);
+                // Message
+                String message = "uuid=" + request.getPlayerId() + " result=" + (request.getResult().isPassed() ? "accepted" : "rejected cause=failed_authentication") + " data=" + host;
+                // Log
+                connectionLogger.handle(request.getPlayerId(), String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s%s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
+                PacketHandler.this.plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + message);
+
                 // If failed
-                if (!result.isPassed()) {
+                if (!request.getResult().isPassed()) {
                     // Disconnect
                     if (!disconnect(event.getPlayer())) {
                         // Mess up the hostname so the server will disconnect the player
@@ -95,7 +98,7 @@ public class PacketHandler {
                     }
                 }
                 // Set the host
-                strings.write(0, result.getHost());
+                strings.write(0, request.getHost());
             }
         });
     }
@@ -136,23 +139,6 @@ public class PacketHandler {
     public void reload() {
         // If to block ping packets
         blockPings = plugin.getConfiguration().getBoolean("block-pings");
-    }
-
-    /**
-     * Logs the result of a connection request determined by the authentication result. The cause is always
-     * <code>failed_authentication</code> if the connection was rejected.
-     *
-     * @param playerId     UUID of the player connecting, or <code>?</code> if unknown
-     * @param accepted     if the connection was accepted
-     * @param propertyDump property array dump
-     */
-    private void logResult(@Nullable String playerId, boolean accepted, @NotNull String propertyDump) {
-        // Message
-        String message = "uuid=" + playerId + " result=" + (accepted ? "accepted" : "rejected") +
-                (accepted ? "" : " cause=failed_authentication") + (accepted ? "" : " properties=" + propertyDump);
-        // Log
-        connectionLogger.handle(playerId, message);
-        plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, message);
     }
 
     /**

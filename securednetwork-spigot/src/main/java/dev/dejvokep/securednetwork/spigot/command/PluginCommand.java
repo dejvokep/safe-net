@@ -16,7 +16,7 @@
 package dev.dejvokep.securednetwork.spigot.command;
 
 import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -24,8 +24,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.logging.Level;
 
 /**
  * Command executor for the main plugin command, which reloads the plugin.
@@ -68,7 +66,7 @@ public class PluginCommand implements CommandExecutor {
         // If to reload
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
             // Reloading
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloading...");
+            plugin.getDedicatedLogger().info(LogSource.GENERAL.getPrefix() + "Reloading...");
 
             // Config
             config.load();
@@ -78,7 +76,7 @@ public class PluginCommand implements CommandExecutor {
             plugin.getPacketHandler().reload();
 
             // Reloaded
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloaded.");
+            plugin.getDedicatedLogger().info(LogSource.GENERAL.getPrefix() + "Reloaded.");
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     config.getString("command.reload")));
             return true;
@@ -91,7 +89,7 @@ public class PluginCommand implements CommandExecutor {
                 // Detach
                 plugin.getPacketHandler().getConnectionLogger().detach();
                 // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger detached.");
+                plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + "Connection logger detached.");
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         config.getString("command.connection-logger.detached")));
                 return true;
@@ -101,7 +99,7 @@ public class PluginCommand implements CommandExecutor {
                 // Attach
                 plugin.getPacketHandler().getConnectionLogger().attach(args[2]);
                 // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger attached to UUID \"" + args[2] + "\".");
+                plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + "Connection logger attached to UUID \"" + args[2] + "\".");
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         config.getString("command.connection-logger.attached").replace("{uuid}", args[2])));
                 return true;

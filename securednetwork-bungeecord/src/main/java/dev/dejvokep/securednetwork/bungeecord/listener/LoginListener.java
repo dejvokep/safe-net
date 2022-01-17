@@ -19,7 +19,7 @@ import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
 import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPCheckResult;
 import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPHolder;
 import dev.dejvokep.securednetwork.core.connection.ConnectionLogger;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -68,7 +68,8 @@ public class LoginListener implements Listener {
     private final ConnectionLogger connectionLogger;
 
     /**
-     * Utilizes the login result field of the {@link InitialHandler} class. Loads the passphrase error disconnect message.
+     * Utilizes the login result field of the {@link InitialHandler} class. Loads the passphrase error disconnect
+     * message.
      *
      * @param plugin the plugin instance
      */
@@ -86,7 +87,8 @@ public class LoginListener implements Listener {
             loginResultField.setAccessible(true);
         } catch (NoSuchFieldException | SecurityException ex) {
             // Log
-            plugin.getLog().log(Level.SEVERE, Log.Source.AUTHENTICATOR, "Failed to utilize the LoginResult field!", ex);
+            plugin.getDedicatedLogger().error(LogSource.AUTHENTICATOR.getPrefix() + "Failed to utilize the loginProfile field!", ex);
+            plugin.getLogger().log(Level.SEVERE, LogSource.AUTHENTICATOR.getPrefix() + "Failed to utilize the loginProfile field!", ex);
         }
     }
 
@@ -116,7 +118,7 @@ public class LoginListener implements Listener {
         // If not passed
         if (!result.isPassed()) {
             // Rejected
-            logResult(name, false, "whitelist", virtualHost);
+            logResult(name, false, "whitelist", virtualHost, String.format("ERROR (code P1): Rejected connection of name \"%s\" by IP whitelist; used address was %s. Didn't you mean to whitelist it?", name, virtualHost));
             informedCancellation(event, result.getMessage());
             return;
         }
@@ -124,10 +126,10 @@ public class LoginListener implements Listener {
         // Insert the custom result
         if (plugin.getAuthenticator().getPassphrase().length() > 0 && insertCustomResult(event.getConnection())) {
             // Accepted
-            logResult(name, true, null, virtualHost);
+            logResult(name, true, null, virtualHost, String.format("OK (code P0): Accepted connection of \"%s\".", name));
         } else {
             // Rejected
-            logResult(name, false, "passphrase-error", virtualHost);
+            logResult(name, false, "passphrase-error", virtualHost, String.format("ERROR (code P2): Failed to process the connection of \"%s\". Isn't there an error on server startup?", name));
             informedCancellation(event, passphraseErrorMessage);
         }
     }
@@ -157,7 +159,8 @@ public class LoginListener implements Listener {
             loginResultField.set(pendingConnection, new SecuredLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getAuthenticator()));
         } catch (Exception ex) {
             // Log
-            plugin.getLog().log(Level.SEVERE, Log.Source.CONNECTOR, "An error occurred while setting the custom login result into the connection!", ex);
+            plugin.getDedicatedLogger().error(LogSource.AUTHENTICATOR.getPrefix() + "An error occurred while setting the custom login result into the connection!", ex);
+            plugin.getLogger().log(Level.SEVERE, LogSource.AUTHENTICATOR.getPrefix() + "An error occurred while setting the custom login result into the connection!", ex);
             return false;
         }
 
@@ -185,18 +188,19 @@ public class LoginListener implements Listener {
     /**
      * Logs the result of a connection request determined in {@link #onPreLogin(LoginEvent)}.
      *
-     * @param playerName  name of the player connecting
-     * @param accepted    if the connection was accepted
-     * @param cause       the cause (if the connection was rejected, otherwise <code>null</code>)
-     * @param virtualHost the player's virtual host (in format <code>ip:port</code>)
+     * @param playerName    name of the player connecting
+     * @param accepted      if the connection was accepted
+     * @param cause         the cause (if the connection was rejected, otherwise <code>null</code>)
+     * @param virtualHost   the player's virtual host (in format <code>ip:port</code>)
+     * @param simpleMessage simplified result message
      */
-    private void logResult(@Nullable String playerName, boolean accepted, @Nullable String cause, @NotNull String virtualHost) {
+    private void logResult(@Nullable String playerName, boolean accepted, @Nullable String cause, @NotNull String virtualHost, @NotNull String simpleMessage) {
         // Message
         String message = "name=" + playerName + " result=" + (accepted ? "accepted" : "rejected") +
                 (cause != null ? ", cause=" + cause : "") + " host_address=" + virtualHost;
         // Log
-        connectionLogger.handle(playerName, message);
-        plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, message);
+        connectionLogger.handle(playerName, simpleMessage);
+        plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + message);
     }
 
     /**

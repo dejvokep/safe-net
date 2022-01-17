@@ -19,14 +19,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 /**
  * Authenticator covering all needed functions related to passphrase.
@@ -81,19 +81,22 @@ public class Authenticator {
 
     // The config
     private final Config config;
-    // The log
-    private final Log log;
+    // The logger
+    private final Logger dedicatedLogger;
+    private final java.util.logging.Logger pluginLogger;
 
     /**
      * Calls {@link #reload()} to load the internal data.
      *
-     * @param config the configuration file
-     * @param log    the logger
+     * @param config          the configuration file
+     * @param pluginLogger    the plugin logger
+     * @param dedicatedLogger the dedicated logger
      */
-    public Authenticator(@NotNull Config config, @NotNull Log log) {
+    public Authenticator(@NotNull Config config, @NotNull java.util.logging.Logger pluginLogger, @NotNull Logger dedicatedLogger) {
         // Set
         this.config = config;
-        this.log = log;
+        this.pluginLogger = pluginLogger;
+        this.dedicatedLogger = dedicatedLogger;
         // Reload
         reload();
     }
@@ -104,16 +107,16 @@ public class Authenticator {
      * @param host the host string obtained from the handshake packet
      * @return an authentication result
      */
-    public AuthenticationResult authenticate(@NotNull String host) {
+    public AuthenticationRequest authenticate(@NotNull String host) {
         // Split the host value
         String[] data = host.split(HOST_SPLIT_REGEX);
 
         // If the length is less than 3 or greater than 7 (GeyserMC compatibility)
         if (data.length < 3 || data.length > 7) {
             // Log the result
-            logResult("?", false, "insufficient_length");
+            logResult("?", AuthenticationRequest.Result.FAIL_INSUFFICIENT_LENGTH);
             // Return
-            return new AuthenticationResult(host.replace(this.passphrase, ""), false, "?");
+            return new AuthenticationRequest(host.replace(this.passphrase, ""), "?", AuthenticationRequest.Result.FAIL_INSUFFICIENT_LENGTH);
         }
 
         // The player's UUID
@@ -143,9 +146,9 @@ public class Authenticator {
             properties = GSON.fromJson(data[propertiesIndex], PROPERTY_LIST_TYPE);
         } catch (JsonSyntaxException | ArrayIndexOutOfBoundsException ignored) {
             // Log the result
-            logResult(uuid, false, "no_property");
+            logResult(uuid, AuthenticationRequest.Result.FAIL_NO_PROPERTIES);
             // Return
-            return new AuthenticationResult(host.replace(this.passphrase, ""), false, uuid);
+            return new AuthenticationRequest(host.replace(this.passphrase, ""), uuid, AuthenticationRequest.Result.FAIL_NO_PROPERTIES);
         }
 
         try {
@@ -165,9 +168,9 @@ public class Authenticator {
                     // If the values equal
                     if (property.getValue().equals(this.passphrase)) {
                         // Log the result
-                        logResult(uuid, true, null);
+                        logResult(uuid, AuthenticationRequest.Result.PASSED);
                         // Return and replace the passphrase just in case
-                        return new AuthenticationResult(host.replace(data[propertiesIndex], GSON.toJson(properties)), true, uuid);
+                        return new AuthenticationRequest(host.replace(data[propertiesIndex], GSON.toJson(properties)), uuid, AuthenticationRequest.Result.PASSED);
                     } else {
                         // Break
                         break;
@@ -178,9 +181,9 @@ public class Authenticator {
         }
 
         // Log the result
-        logResult(uuid, false, "incorrect_property");
+        logResult(uuid, AuthenticationRequest.Result.FAIL_PROPERTY_NOT_FOUND);
         // Return
-        return new AuthenticationResult(host.replace(this.passphrase, ""), false, uuid);
+        return new AuthenticationRequest(host.replace(this.passphrase, ""), uuid, AuthenticationRequest.Result.FAIL_PROPERTY_NOT_FOUND);
     }
 
     /**
@@ -194,7 +197,7 @@ public class Authenticator {
             return;
 
         // Generating
-        log.log(Level.INFO, Log.Source.AUTHENTICATOR, "Generating a new passphrase of length " + length + ".");
+        dedicatedLogger.info(LogSource.AUTHENTICATOR.getPrefix() + "Generating a new passphrase of length " + length + ".");
 
         // Secure random
         SecureRandom random = new SecureRandom();
@@ -210,19 +213,17 @@ public class Authenticator {
         config.save();
 
         // Generated
-        log.log(Level.INFO, Log.Source.AUTHENTICATOR, "The new passphrase has been generated successfully.");
+        dedicatedLogger.info(LogSource.AUTHENTICATOR.getPrefix() + "The new passphrase has been generated successfully.");
     }
 
     /**
      * Logs the result of an authentication request.
      *
      * @param playerId UUID representing the player who invoked the request (or <code>?</code> if unknown)
-     * @param passed   if the player authenticated successfully
-     * @param cause    the cause (if the authentication failed, otherwise <code>null</code>)
+     * @param result   authentication result
      */
-    private void logResult(@Nullable String playerId, boolean passed, @Nullable String cause) {
-        log.log(Level.INFO, Log.Source.AUTHENTICATOR, "uuid=" + playerId + " result=" + (passed ? "passed" : "failed") +
-                (cause != null ? ", cause=" + cause : ""));
+    private void logResult(@Nullable String playerId, @NotNull AuthenticationRequest.Result result) {
+        dedicatedLogger.info(LogSource.AUTHENTICATOR.getPrefix() + "uuid=" + playerId + " result=" + (result.isPassed() ? "passed" : "failed cause=" + result.getAsString()));
     }
 
     /**
@@ -231,12 +232,20 @@ public class Authenticator {
     public void reload() {
         // Passphrase
         passphrase = config.getString("passphrase");
+        // Message
+        String message;
+
         // Log the warning
         if (passphrase.length() == 0)
-            log.logConsole(Level.SEVERE, Log.Source.AUTHENTICATOR, "No passphrase configured (length is 0)! The plugin will disconnect all incoming connections. Please generate one as soon as possible from the proxy console with \"/sn generate\".");
+            message = "No passphrase configured (length is 0)! The plugin will disconnect all incoming connections. Please generate one as soon as possible from the proxy console with \"/sn generate\".";
         else if (passphrase.length() < WEAK_PASSPHRASE_LENGTH_THRESHOLD)
-            log.logConsole(Level.SEVERE, Log.Source.AUTHENTICATOR, "The configured passphrase is weak! It should be at least " + WEAK_PASSPHRASE_LENGTH_THRESHOLD +
-                    " characters long; though the recommended length is " + RECOMMENDED_PASSPHRASE_LENGTH + ". Please generate one as soon as possible from the proxy console with \"/sn generate\".");
+            message = "The configured passphrase is weak! It should be at least " + WEAK_PASSPHRASE_LENGTH_THRESHOLD + " characters long; though the recommended length is " + RECOMMENDED_PASSPHRASE_LENGTH + ". Please generate one as soon as possible from the proxy console with \"/sn generate\".";
+        else
+            return;
+
+        // Log
+        pluginLogger.severe(message);
+        dedicatedLogger.error(message);
     }
 
     /**

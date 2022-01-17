@@ -16,7 +16,7 @@
 package dev.dejvokep.securednetwork.bungeecord.updater;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.jetbrains.annotations.NotNull;
@@ -91,7 +91,7 @@ public class Updater {
             // Check if not invalid
             if (recheck < 1) {
                 // Log that refresh rate is invalid
-                plugin.getLog().log(Level.WARNING, Log.Source.UPDATER, "Recheck rate is smaller than 1min! Using value 1min.");
+                plugin.getDedicatedLogger().warn(LogSource.UPDATER.getPrefix() + "Recheck rate is smaller than 1min! Using value 1min.");
                 recheck = 1;
             }
 
@@ -103,7 +103,8 @@ public class Updater {
     /**
      * Checks for a new update of the plugin and logs the result.
      * <p>
-     * More specifically, reads the newest version from a website API, then announces if a new update is available or not.
+     * More specifically, reads the newest version from a website API, then announces if a new update is available or
+     * not.
      */
     private void check() {
         // If not enabled
@@ -112,7 +113,8 @@ public class Updater {
 
         ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
             // Checking for updates
-            plugin.getLog().logConsole(Level.INFO, Log.Source.UPDATER, "Checking for updates...");
+            plugin.getDedicatedLogger().warn(LogSource.UPDATER.getPrefix() + "Checking for updates...");
+            plugin.getLogger().warning(LogSource.UPDATER.getPrefix() + "Checking for updates...");
 
             // Get current version of plugin
             int currentVersionNumbers = Integer.parseInt(this.currentVersion.replace(".", ""));
@@ -122,8 +124,8 @@ public class Updater {
                 this.latestVersion = new BufferedReader(new InputStreamReader(new URL(URL).openStream())).readLine();
             } catch (IOException ex) {
                 // Log the error
-                plugin.getLog().logConsoleWithoutThrowable(Level.WARNING, Log.Source.UPDATER,
-                        "Failed to check for updates.", ex);
+                plugin.getDedicatedLogger().warn(LogSource.UPDATER.getPrefix() + "Failed to check for updates.", ex);
+                plugin.getLogger().log(Level.WARNING, LogSource.UPDATER.getPrefix() + "Failed to check for updates.", ex);
 
                 // Return
                 return;
@@ -134,9 +136,12 @@ public class Updater {
             this.isNewVersion = latestVersionNumbers > currentVersionNumbers;
 
             // Log and print to console
-            if (isNewVersion)
+            if (isNewVersion) {
                 // New version available
-                plugin.getLog().logConsole(Level.INFO, Log.Source.UPDATER, "New version " + latestVersion + " is available! You are using version " + currentVersion + ".");
+                String message = LogSource.UPDATER.getPrefix() + "New version " + latestVersion + " is available! You are using version " + currentVersion + ".";
+                plugin.getDedicatedLogger().info(message);
+                plugin.getLogger().info(message);
+            }
         });
     }
 

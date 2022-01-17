@@ -19,13 +19,11 @@ import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
 import dev.dejvokep.securednetwork.bungeecord.util.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
 import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.command.ConsoleCommandSender;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.logging.Level;
 
 /**
  * Command executor for the main plugin command, which can reload the plugin or generate a new passphrase.
@@ -72,7 +70,7 @@ public class PluginCommand extends Command {
         // If to reload
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
             // Reloading
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloading...");
+            plugin.getDedicatedLogger().info(LogSource.GENERAL.getPrefix() + "Reloading...");
 
             // Config
             config.load();
@@ -86,7 +84,7 @@ public class PluginCommand extends Command {
             plugin.getListener().reload();
 
             // Reloaded
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloaded.");
+            plugin.getDedicatedLogger().info(LogSource.GENERAL.getPrefix() + "Reloaded.");
             messenger.sendMessage(sender, config.getString("command.reload"));
             return;
         }
@@ -107,14 +105,14 @@ public class PluginCommand extends Command {
                 // Detach
                 plugin.getListener().getConnectionLogger().detach();
                 // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger detached.");
+                plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + "Connection logger detached.");
                 messenger.sendMessage(sender, config.getString("command.connection-logger.detached"));
                 return;
             } else if (args.length == 3 && args[1].equalsIgnoreCase("attach")) {
                 // Attach
                 plugin.getListener().getConnectionLogger().attach(args[2]);
                 // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger attached to name \"" + args[2] + "\".");
+                plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + "Connection logger attached to name \"" + args[2] + "\".");
                 messenger.sendMessage(sender, config.getString("command.connection-logger.attached").replace("{name}", args[2]));
                 return;
             }

@@ -16,7 +16,7 @@
 package dev.dejvokep.securednetwork.bungeecord.ipwhitelist;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -103,7 +103,7 @@ public class IPWhitelist {
      */
     public void reload() {
         // Log
-        plugin.getLog().log(Level.INFO, Log.Source.WHITELIST, "Loading internal variables...");
+        plugin.getDedicatedLogger().info(LogSource.WHITELIST.getPrefix() + "Loading internal variables...");
 
         // If enabled
         enabled = plugin.getConfiguration().getBoolean("ip-whitelist.enabled");
@@ -122,6 +122,7 @@ public class IPWhitelist {
 
     /**
      * Reloads whitelisted IPs.
+     *
      * @return if any of the IPs uses {@link #IP_PLACEHOLDER} and calling {@link #getProxyIP()} is needed
      */
     private boolean reloadIPs() {
@@ -134,12 +135,15 @@ public class IPWhitelist {
             // Create a new holder
             IPHolder ipHolder = new IPHolder();
             // Set the IP
-            if (ipHolder.setIp(ip))
+            if (ipHolder.setIp(ip)) {
                 // Add
                 whitelisted.add(ipHolder);
-            else
+            } else {
                 // Log
-                plugin.getLog().logConsole(Level.SEVERE, Log.Source.WHITELIST, "IP \"" + ip + "\" is not specified correctly! Removing from the whitelist.");
+                String message = LogSource.WHITELIST.getPrefix() + "IP \"" + ip + "\" is not specified correctly! Removing from the whitelist.";
+                plugin.getLogger().severe(message);
+                plugin.getDedicatedLogger().info(message);
+            }
         }
 
         // If IP placeholder is present
@@ -153,7 +157,7 @@ public class IPWhitelist {
         ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
             try {
                 // Log the operation
-                plugin.getLog().log(Level.INFO, Log.Source.WHITELIST, "Getting the IP of the server...");
+                plugin.getDedicatedLogger().info(LogSource.WHITELIST.getPrefix() + "Getting the IP of the server...");
 
                 // Open stream and initialize reader
                 BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new URL(plugin.getConfiguration().getString("ip-whitelist.ip-website")).openStream()));
@@ -161,13 +165,15 @@ public class IPWhitelist {
                 proxyIP = bufferedReader.readLine();
 
                 // Log the IP
-                plugin.getLog().log(Level.INFO, Log.Source.WHITELIST, "Public IP got successfully, hosting on " + proxyIP + "!");
+                plugin.getDedicatedLogger().info(LogSource.WHITELIST.getPrefix() + "Public IP got successfully, hosting on " + proxyIP + "!");
                 // Replace {ip} with the server's IP
                 for (IPHolder ipHolder : whitelisted)
                     ipHolder.setIp(ipHolder.getIp().replace(IP_PLACEHOLDER, proxyIP));
             } catch (Exception ex) {
                 // Log the error
-                plugin.getLog().logConsoleWithoutThrowable(Level.SEVERE, Log.Source.WHITELIST, "An error occurred while getting the IP of the server for the {ip} placeholder! Is the server address correct?", ex);
+                String message = LogSource.WHITELIST.getPrefix() + "An error occurred while getting the IP of the server for the {ip} placeholder! Is the server address correct?";
+                plugin.getDedicatedLogger().error(message, ex);
+                plugin.getLogger().log(Level.SEVERE, message, ex);
             }
         });
     }

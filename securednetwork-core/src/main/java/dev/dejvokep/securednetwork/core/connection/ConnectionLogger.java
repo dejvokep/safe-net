@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 public class ConnectionLogger {
 
     // Callback
-    private Consumer<String> callback;
+    private final Consumer<String> callback;
     // Identifier
     private String identifier;
 
@@ -59,15 +59,15 @@ public class ConnectionLogger {
      * Handles the given connection identifier and dump.
      *
      * @param identifier the connection identifier
-     * @param dump       the connection dump
+     * @param message    the message
      */
-    public void handle(@Nullable String identifier, @NotNull String dump) {
+    public void handle(@Nullable String identifier, @NotNull String message) {
         // If detached or identifiers do not equal
-        if (this.identifier == null || this.callback == null || identifier == null || (!this.identifier.equals("all") && !this.identifier.equals(identifier)))
+        if (this.identifier == null || identifier == null || (!this.identifier.equals("all") && !this.identifier.equals(identifier)))
             return;
 
         // Call
-        callback.accept("Connection of " + identifier + ": " + dump);
+        callback.accept("Connection of " + identifier + ": " + message);
         // Detach
         detach();
     }
