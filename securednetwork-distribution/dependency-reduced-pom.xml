@@ -39,6 +39,8 @@
               <artifactSet>
                 <includes>
                   <include>dev.dejvokep:securednetwork-*</include>
+                  <include>org.apache.logging.log4j:*</include>
+                  <include>dev.dejvokep:boosted-yaml</include>
                 </includes>
               </artifactSet>
             </configuration>

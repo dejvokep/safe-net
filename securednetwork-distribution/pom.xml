@@ -66,6 +66,8 @@
                             <artifactSet>
                                 <includes>
                                     <include>dev.dejvokep:securednetwork-*</include>
+                                    <include>org.apache.logging.log4j:*</include>
+                                    <include>dev.dejvokep:boosted-yaml</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
@@ -139,6 +141,23 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>22.0.0</version>
+        </dependency>
+        <!-- Log4j -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>2.17.1</version>
+        </dependency>
+        <!-- BoostedYAML -->
+        <dependency>
+            <groupId>dev.dejvokep</groupId>
+            <artifactId>boosted-yaml</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 

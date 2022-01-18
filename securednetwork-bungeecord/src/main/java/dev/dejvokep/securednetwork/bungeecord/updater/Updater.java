@@ -113,8 +113,8 @@ public class Updater {
 
         ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
             // Checking for updates
-            plugin.getDedicatedLogger().warn(LogSource.UPDATER.getPrefix() + "Checking for updates...");
-            plugin.getLogger().warning(LogSource.UPDATER.getPrefix() + "Checking for updates...");
+            plugin.getDedicatedLogger().info(LogSource.UPDATER.getPrefix() + "Checking for updates...");
+            plugin.getLogger().info("Checking for updates...");
 
             // Get current version of plugin
             int currentVersionNumbers = Integer.parseInt(this.currentVersion.replace(".", ""));
@@ -125,7 +125,7 @@ public class Updater {
             } catch (IOException ex) {
                 // Log the error
                 plugin.getDedicatedLogger().warn(LogSource.UPDATER.getPrefix() + "Failed to check for updates.", ex);
-                plugin.getLogger().log(Level.WARNING, LogSource.UPDATER.getPrefix() + "Failed to check for updates.", ex);
+                plugin.getLogger().log(Level.WARNING, "Failed to check for updates.", ex);
 
                 // Return
                 return;
@@ -138,8 +138,8 @@ public class Updater {
             // Log and print to console
             if (isNewVersion) {
                 // New version available
-                String message = LogSource.UPDATER.getPrefix() + "New version " + latestVersion + " is available! You are using version " + currentVersion + ".";
-                plugin.getDedicatedLogger().info(message);
+                String message = "New version " + latestVersion + " is available! You are using version " + currentVersion + ".";
+                plugin.getDedicatedLogger().info(LogSource.UPDATER.getPrefix() + message);
                 plugin.getLogger().info(message);
             }
         });

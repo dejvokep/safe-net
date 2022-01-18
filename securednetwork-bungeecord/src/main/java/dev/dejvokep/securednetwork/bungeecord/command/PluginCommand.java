@@ -15,23 +15,26 @@
  */
 package dev.dejvokep.securednetwork.bungeecord.command;
 
+import dev.dejvokep.boostedyaml.YamlFile;
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.bungeecord.util.message.Messenger;
+import dev.dejvokep.securednetwork.bungeecord.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.config.Config;
 import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.command.ConsoleCommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.util.logging.Level;
+
 /**
  * Command executor for the main plugin command, which can reload the plugin or generate a new passphrase.
  */
 public class PluginCommand extends Command {
 
-    // The configuration file
-    private final Config config;
+    // The config
+    private final YamlFile config;
     // The messenger
     private final Messenger messenger;
     // The plugin instance
@@ -73,7 +76,14 @@ public class PluginCommand extends Command {
             plugin.getDedicatedLogger().info(LogSource.GENERAL.getPrefix() + "Reloading...");
 
             // Config
-            config.load();
+            try {
+                config.reload();
+            } catch (IOException ex) {
+                String message = "An error occurred while loading the config! If you believe this is not caused by improper configuration, please report it.";
+                plugin.getDedicatedLogger().error(message, ex);
+                plugin.getLogger().log(Level.SEVERE, message, ex);
+                return;
+            }
             // Authenticator
             plugin.getAuthenticator().reload();
             // IP whitelist
@@ -91,8 +101,14 @@ public class PluginCommand extends Command {
 
         // If to generate
         if (args.length <= 2 && args[0].equalsIgnoreCase("generate")) {
-            // Generate
-            plugin.getAuthenticator().generatePassphrase(args.length == 1 ? Authenticator.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+            try {
+                // Generate
+                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? Authenticator.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+            } catch (IOException ex) {
+                plugin.getDedicatedLogger().error("An error occurred while saving the config!", ex);
+                plugin.getLogger().log(Level.SEVERE, "An error occurred while saving the config!", ex);
+                return;
+            }
             // Generated
             messenger.sendMessage(sender, config.getString("command.generate"));
             return;

@@ -53,7 +53,7 @@ public class AuthenticationRequest {
          * <p>
          * Usually happens when there are any plugin interfering.
          */
-        FAIL_PROPERTY_NOT_FOUND(false, "property_not_found", "property not found. Is there any incompatible plugin installed?", 3);
+        FAIL_PROPERTY_NOT_FOUND(false, "property_not_found", "property not found. If that was you and you believe this is an error, please try checking for incompatible plugins installed.", 3);
 
         // If passed
         private final boolean passed;

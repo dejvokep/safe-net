@@ -10,17 +10,16 @@
 # ► Need any help?
 # Join the Discord server (https://discord.com/invite/BbhADEy) and we will more than happily help you :) (nonstop 24/7 bot support)
 #
-# Passphrase (equal to what you set at the proxy):
+# Config version:
+# - Note: Do not change unless you know what you are doing. Changing this might break the plugin.
+config-version: 1
+# Passphrase (equal to what you set on the proxy):
 passphrase: ""
 # Block server pings for unauthenticated requests:
 block-pings: false
 # Disconnect message sent to the player if bypassing the proxy (failed the authentication - invalid passphrase, property):
 # - Info: "\n" can be used for a new line.
 disconnect-failed-authentication: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!"
-# Enable the plugin's own logging system:
-# - Info: Plugin's log files are saved into "logs" folder in it's plugin folder. It is recommended to have it disabled if
-#         you are not encountering any problems and/or errors.
-log: false
 # Command messages:
 command:
   # If a player runs the command:

@@ -15,85 +15,34 @@
  */
 package dev.dejvokep.securednetwork.core.config;
 
+import dev.dejvokep.boostedyaml.YamlFile;
+import dev.dejvokep.boostedyaml.fvs.versioning.BasicVersioning;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
+
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
- * Interface representation of a configuration file. Includes basic configuration methods and adds an option to
- * retrieve the original configuration object, or the file representation.
+ * Class responsible for creating the config file.
  */
-public interface Config {
+public class Config {
 
     /**
-     * Returns a string located at the specified path.
-     *
-     * @param path the path to locate
-     * @return the string at the path
+     * Creates a config file.
+     * @param file user file
+     * @param defaults defaults
+     * @return the file
+     * @throws IOException an IO error
      */
-    String getString(String path);
-
-    /**
-     * Returns an integer located at the specified path.
-     *
-     * @param path the path to locate
-     * @return the integer at the path
-     */
-    int getInt(String path);
-
-    /**
-     * Returns a boolean located at the specified path.
-     *
-     * @param path the path to locate
-     * @return the boolean at the path
-     */
-    boolean getBoolean(String path);
-
-    /**
-     * Returns a list of strings located at the specified path.
-     *
-     * @param path the path to locate
-     * @return the list of strings at the path
-     */
-    List<String> getStringList(String path);
-
-    /**
-     * Returns an object located at the specified path.
-     *
-     * @param path the path to locate
-     * @return the object at the path
-     */
-    Object get(String path);
-
-    /**
-     * Sets a value to the specified path.
-     *
-     * @param path  the path to set the value to
-     * @param value the value to set
-     */
-    void set(String path, Object value);
-
-    /**
-     * Returns the file instance of the config.
-     *
-     * @return the file instance of the config
-     */
-    File getFile();
-
-    /**
-     * Returns the native config representation.
-     *
-     * @return the native config representation
-     */
-    Object getConfig();
-
-    /**
-     * (Re)loads the config.
-     */
-    void load();
-
-    /**
-     * Saves the config.
-     */
-    void save();
+    public static YamlFile create(File file, InputStream defaults) throws IOException {
+        return YamlFile.create(file, defaults, GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(
+                new BasicVersioning("config-version")
+        ).build());
+    }
 
 }

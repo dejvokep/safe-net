@@ -56,7 +56,7 @@ public class ConnectionLogger {
     }
 
     /**
-     * Handles the given connection identifier and dump.
+     * Handles the given connection identifier and message.
      *
      * @param identifier the connection identifier
      * @param message    the message
@@ -67,7 +67,7 @@ public class ConnectionLogger {
             return;
 
         // Call
-        callback.accept("Connection of " + identifier + ": " + message);
+        callback.accept(message);
         // Detach
         detach();
     }

@@ -15,12 +15,12 @@
  */
 package dev.dejvokep.securednetwork.bungeecord;
 
+import dev.dejvokep.boostedyaml.YamlFile;
 import dev.dejvokep.securednetwork.bungeecord.command.PluginCommand;
 import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPWhitelist;
 import dev.dejvokep.securednetwork.bungeecord.listener.LoginListener;
 import dev.dejvokep.securednetwork.bungeecord.updater.Updater;
-import dev.dejvokep.securednetwork.bungeecord.util.config.ConfigProxy;
-import dev.dejvokep.securednetwork.bungeecord.util.message.Messenger;
+import dev.dejvokep.securednetwork.bungeecord.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
 import dev.dejvokep.securednetwork.core.config.Config;
 import dev.dejvokep.securednetwork.core.log.LogSource;
@@ -31,6 +31,8 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.bstats.bungeecord.Metrics;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -48,7 +50,7 @@ public class SecuredNetworkBungeeCord extends Plugin {
     // Updater
     private Updater updater;
     // Config
-    private Config config;
+    private YamlFile config;
     // Logger
     private Logger logger;
     private LoggerContext loggerContext;
@@ -63,7 +65,7 @@ public class SecuredNetworkBungeeCord extends Plugin {
     public void onEnable() {
         try {
             // Context
-            loggerContext = LoggerContext.getContext(getClass().getClassLoader(), false, Objects.requireNonNull(getClass().getClassLoader().getResource("log4j2-securednetwork.xml")).toURI());
+            loggerContext = LoggerContext.getContext(getClass().getClassLoader(), false, Objects.requireNonNull(getClass().getClassLoader().getResource("log4j2_securednetwork.xml")).toURI());
             // Initialize the logger
             logger = loggerContext.getLogger(getClass().getName());
             // Display notice
@@ -75,6 +77,7 @@ public class SecuredNetworkBungeeCord extends Plugin {
         } catch (URISyntaxException | NullPointerException ex) {
             getLogger().log(Level.SEVERE, "Failed to initialize Log4j! Shutting down...", ex);
             ProxyServer.getInstance().stop();
+            return;
         }
 
         // Set the plugin instance
@@ -82,8 +85,15 @@ public class SecuredNetworkBungeeCord extends Plugin {
         // Thank you message
         getLogger().info("Thank you for downloading SecuredNetwork!");
 
-        // Load the config file
-        config = new ConfigProxy(this, "proxy_config.yml", "config.yml");
+        try {
+            // Load the config file
+            config = Config.create(new File(getDataFolder(), "config.yml"), getResourceAsStream("bungee_config.yml"));
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Failed to initialize config file! Shutting down...", ex);
+            getDedicatedLogger().error("Failed to initialize config file! Shutting down...", ex);
+            ProxyServer.getInstance().stop();
+            return;
+        }
 
         // Enabling
         logger.info(LogSource.GENERAL.getPrefix() + "Enabling SecuredNetwork... (BungeeCord)");
@@ -146,7 +156,7 @@ public class SecuredNetworkBungeeCord extends Plugin {
      *
      * @return the configuration file.
      */
-    public Config getConfiguration() {
+    public YamlFile getConfiguration() {
         return config;
     }
 

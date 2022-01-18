@@ -18,12 +18,13 @@ package dev.dejvokep.securednetwork.core.authenticator;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import dev.dejvokep.securednetwork.core.config.Config;
+import dev.dejvokep.boostedyaml.YamlFile;
 import dev.dejvokep.securednetwork.core.log.LogSource;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -80,7 +81,7 @@ public class Authenticator {
     private String passphrase;
 
     // The config
-    private final Config config;
+    private final YamlFile config;
     // The logger
     private final Logger dedicatedLogger;
     private final java.util.logging.Logger pluginLogger;
@@ -92,7 +93,7 @@ public class Authenticator {
      * @param pluginLogger    the plugin logger
      * @param dedicatedLogger the dedicated logger
      */
-    public Authenticator(@NotNull Config config, @NotNull java.util.logging.Logger pluginLogger, @NotNull Logger dedicatedLogger) {
+    public Authenticator(@NotNull YamlFile config, @NotNull java.util.logging.Logger pluginLogger, @NotNull Logger dedicatedLogger) {
         // Set
         this.config = config;
         this.pluginLogger = pluginLogger;
@@ -191,7 +192,7 @@ public class Authenticator {
      *
      * @param length the desired length of the new passphrase (<code>length > 0</code>)
      */
-    public void generatePassphrase(int length) {
+    public void generatePassphrase(int length) throws IOException {
         // If the length is less than 1
         if (length < 1)
             return;

@@ -26,7 +26,6 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import dev.dejvokep.securednetwork.core.authenticator.AuthenticationRequest;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
 import dev.dejvokep.securednetwork.core.connection.ConnectionLogger;
-import dev.dejvokep.securednetwork.core.log.LogSource;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -82,11 +81,8 @@ public class PacketHandler {
                 String host = strings.read(0);
                 // Authenticate
                 AuthenticationRequest request = authenticator.authenticate(host);
-                // Message
-                String message = "uuid=" + request.getPlayerId() + " result=" + (request.getResult().isPassed() ? "accepted" : "rejected cause=failed_authentication") + " data=" + host;
                 // Log
-                connectionLogger.handle(request.getPlayerId(), String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s%s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
-                PacketHandler.this.plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + message);
+                plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
 
                 // If failed
                 if (!request.getResult().isPassed()) {
