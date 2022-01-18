@@ -19,7 +19,6 @@ import dev.dejvokep.boostedyaml.YamlFile;
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
 import dev.dejvokep.securednetwork.bungeecord.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.command.ConsoleCommandSender;
@@ -72,16 +71,11 @@ public class PluginCommand extends Command {
 
         // If to reload
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-            // Reloading
-            plugin.getDedicatedLogger().info(LogSource.GENERAL.getPrefix() + "Reloading...");
-
             // Config
             try {
                 config.reload();
             } catch (IOException ex) {
-                String message = "An error occurred while loading the config! If you believe this is not caused by improper configuration, please report it.";
-                plugin.getDedicatedLogger().error(message, ex);
-                plugin.getLogger().log(Level.SEVERE, message, ex);
+                plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config! If you believe this is not caused by improper configuration, please report it.", ex);
                 return;
             }
             // Authenticator
@@ -94,7 +88,6 @@ public class PluginCommand extends Command {
             plugin.getListener().reload();
 
             // Reloaded
-            plugin.getDedicatedLogger().info(LogSource.GENERAL.getPrefix() + "Reloaded.");
             messenger.sendMessage(sender, config.getString("command.reload"));
             return;
         }
@@ -105,33 +98,12 @@ public class PluginCommand extends Command {
                 // Generate
                 plugin.getAuthenticator().generatePassphrase(args.length == 1 ? Authenticator.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
             } catch (IOException ex) {
-                plugin.getDedicatedLogger().error("An error occurred while saving the config!", ex);
                 plugin.getLogger().log(Level.SEVERE, "An error occurred while saving the config!", ex);
                 return;
             }
             // Generated
             messenger.sendMessage(sender, config.getString("command.generate"));
             return;
-        }
-
-        // If to manage the connection logger
-        if (args.length >= 2 && args[0].equalsIgnoreCase("connection-logger")) {
-            // If to detach
-            if (args.length == 2 && args[1].equalsIgnoreCase("detach")) {
-                // Detach
-                plugin.getListener().getConnectionLogger().detach();
-                // Log
-                plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + "Connection logger detached.");
-                messenger.sendMessage(sender, config.getString("command.connection-logger.detached"));
-                return;
-            } else if (args.length == 3 && args[1].equalsIgnoreCase("attach")) {
-                // Attach
-                plugin.getListener().getConnectionLogger().attach(args[2]);
-                // Log
-                plugin.getDedicatedLogger().info(LogSource.CONNECTOR.getPrefix() + "Connection logger attached to name \"" + args[2] + "\".");
-                messenger.sendMessage(sender, config.getString("command.connection-logger.attached").replace("{name}", args[2]));
-                return;
-            }
         }
 
         // Invalid format

@@ -19,15 +19,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import dev.dejvokep.boostedyaml.YamlFile;
-import dev.dejvokep.securednetwork.core.log.LogSource;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
  * Authenticator covering all needed functions related to passphrase.
@@ -83,21 +81,18 @@ public class Authenticator {
     // The config
     private final YamlFile config;
     // The logger
-    private final Logger dedicatedLogger;
-    private final java.util.logging.Logger pluginLogger;
+    private final Logger logger;
 
     /**
      * Calls {@link #reload()} to load the internal data.
      *
      * @param config          the configuration file
-     * @param pluginLogger    the plugin logger
-     * @param dedicatedLogger the dedicated logger
+     * @param logger    the logger
      */
-    public Authenticator(@NotNull YamlFile config, @NotNull java.util.logging.Logger pluginLogger, @NotNull Logger dedicatedLogger) {
+    public Authenticator(@NotNull YamlFile config, @NotNull Logger logger) {
         // Set
         this.config = config;
-        this.pluginLogger = pluginLogger;
-        this.dedicatedLogger = dedicatedLogger;
+        this.logger = logger;
         // Reload
         reload();
     }
@@ -114,8 +109,6 @@ public class Authenticator {
 
         // If the length is less than 3 or greater than 7 (GeyserMC compatibility)
         if (data.length < 3 || data.length > 7) {
-            // Log the result
-            logResult("?", AuthenticationRequest.Result.FAIL_INSUFFICIENT_LENGTH);
             // Return
             return new AuthenticationRequest(host.replace(this.passphrase, ""), "?", AuthenticationRequest.Result.FAIL_INSUFFICIENT_LENGTH);
         }
@@ -146,8 +139,6 @@ public class Authenticator {
             // Parse
             properties = GSON.fromJson(data[propertiesIndex], PROPERTY_LIST_TYPE);
         } catch (JsonSyntaxException | ArrayIndexOutOfBoundsException ignored) {
-            // Log the result
-            logResult(uuid, AuthenticationRequest.Result.FAIL_NO_PROPERTIES);
             // Return
             return new AuthenticationRequest(host.replace(this.passphrase, ""), uuid, AuthenticationRequest.Result.FAIL_NO_PROPERTIES);
         }
@@ -168,8 +159,6 @@ public class Authenticator {
 
                     // If the values equal
                     if (property.getValue().equals(this.passphrase)) {
-                        // Log the result
-                        logResult(uuid, AuthenticationRequest.Result.PASSED);
                         // Return and replace the passphrase just in case
                         return new AuthenticationRequest(host.replace(data[propertiesIndex], GSON.toJson(properties)), uuid, AuthenticationRequest.Result.PASSED);
                     } else {
@@ -181,8 +170,6 @@ public class Authenticator {
         } catch (NullPointerException | IndexOutOfBoundsException ignored) {
         }
 
-        // Log the result
-        logResult(uuid, AuthenticationRequest.Result.FAIL_PROPERTY_NOT_FOUND);
         // Return
         return new AuthenticationRequest(host.replace(this.passphrase, ""), uuid, AuthenticationRequest.Result.FAIL_PROPERTY_NOT_FOUND);
     }
@@ -197,9 +184,6 @@ public class Authenticator {
         if (length < 1)
             return;
 
-        // Generating
-        dedicatedLogger.info(LogSource.AUTHENTICATOR.getPrefix() + "Generating a new passphrase of length " + length + ".");
-
         // Secure random
         SecureRandom random = new SecureRandom();
         // String builder
@@ -212,19 +196,6 @@ public class Authenticator {
         config.set("passphrase", stringBuilder.toString());
         // Save
         config.save();
-
-        // Generated
-        dedicatedLogger.info(LogSource.AUTHENTICATOR.getPrefix() + "The new passphrase has been generated successfully.");
-    }
-
-    /**
-     * Logs the result of an authentication request.
-     *
-     * @param playerId UUID representing the player who invoked the request (or <code>?</code> if unknown)
-     * @param result   authentication result
-     */
-    private void logResult(@Nullable String playerId, @NotNull AuthenticationRequest.Result result) {
-        dedicatedLogger.info(LogSource.AUTHENTICATOR.getPrefix() + "uuid=" + playerId + " result=" + (result.isPassed() ? "passed" : "failed cause=" + result.getAsString()));
     }
 
     /**
@@ -233,20 +204,12 @@ public class Authenticator {
     public void reload() {
         // Passphrase
         passphrase = config.getString("passphrase");
-        // Message
-        String message;
 
         // Log the warning
         if (passphrase.length() == 0)
-            message = "No passphrase configured (length is 0)! The plugin will disconnect all incoming connections. Please generate one as soon as possible from the proxy console with \"/sn generate\".";
+            logger.severe("No passphrase configured (length is 0)! The plugin will disconnect all incoming connections. Please generate one as soon as possible from the proxy console with \"/sn generate\".");
         else if (passphrase.length() < WEAK_PASSPHRASE_LENGTH_THRESHOLD)
-            message = "The configured passphrase is weak! It should be at least " + WEAK_PASSPHRASE_LENGTH_THRESHOLD + " characters long; though the recommended length is " + RECOMMENDED_PASSPHRASE_LENGTH + ". Please generate one as soon as possible from the proxy console with \"/sn generate\".";
-        else
-            return;
-
-        // Log
-        pluginLogger.severe(message);
-        dedicatedLogger.error(message);
+            logger.severe("The configured passphrase is weak! It should be at least " + WEAK_PASSPHRASE_LENGTH_THRESHOLD + " characters long; though the recommended length is " + RECOMMENDED_PASSPHRASE_LENGTH + ". Please generate one as soon as possible from the proxy console with \"/sn generate\".");
     }
 
     /**

@@ -25,7 +25,6 @@ import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import dev.dejvokep.securednetwork.core.authenticator.AuthenticationRequest;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.connection.ConnectionLogger;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -51,9 +50,6 @@ public class PacketHandler {
     // If to block pings
     private boolean blockPings;
 
-    // Connection logger
-    private final ConnectionLogger connectionLogger;
-
     /**
      * Registers the packet listener and handles the incoming connections.
      *
@@ -64,7 +60,6 @@ public class PacketHandler {
         // Set
         this.protocolManager = protocolManager;
         this.plugin = plugin;
-        this.connectionLogger = new ConnectionLogger(plugin.getLogger()::info);
         // Authenticator
         final Authenticator authenticator = plugin.getAuthenticator();
 
@@ -137,12 +132,4 @@ public class PacketHandler {
         blockPings = plugin.getConfiguration().getBoolean("block-pings");
     }
 
-    /**
-     * Returns the connection logger.
-     *
-     * @return the connection logger
-     */
-    public ConnectionLogger getConnectionLogger() {
-        return connectionLogger;
-    }
 }

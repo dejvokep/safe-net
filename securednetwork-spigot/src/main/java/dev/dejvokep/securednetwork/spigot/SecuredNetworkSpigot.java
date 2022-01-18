@@ -57,7 +57,7 @@ public class SecuredNetworkSpigot extends JavaPlugin {
             // Load the config file
             config = Config.create(new File(getDataFolder(), "config.yml"), getResource("spigot_config.yml"));
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Failed to initialize config file! Shutting down...", ex);
+            getLogger().log(Level.SEVERE, "Failed to initialize the config file! Shutting down...", ex);
             Bukkit.shutdown();
             return;
         }

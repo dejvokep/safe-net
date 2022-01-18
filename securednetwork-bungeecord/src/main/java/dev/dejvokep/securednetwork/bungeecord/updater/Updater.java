@@ -16,7 +16,6 @@
 package dev.dejvokep.securednetwork.bungeecord.updater;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.core.log.LogSource;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.jetbrains.annotations.NotNull;
@@ -38,8 +37,6 @@ public class Updater {
     public static final String URL = "https://api.spigotmc.org/legacy/update.php?resource=65075";
     // If is new version available and if to check that
     private boolean isNewVersion, enabled;
-    // Recheck delay in minutes
-    private int recheck;
 
     // Current version and the latest version of the plugin
     private final String currentVersion;
@@ -73,8 +70,8 @@ public class Updater {
         if (!enabled)
             return;
 
-        // Get the refresh delay
-        this.recheck = plugin.getConfiguration().getInt("updater.delay");
+        // Recheck delay in minutes
+        int recheck = plugin.getConfiguration().getInt("updater.delay");
         // Refresh
         check();
 
@@ -91,7 +88,7 @@ public class Updater {
             // Check if not invalid
             if (recheck < 1) {
                 // Log that refresh rate is invalid
-                plugin.getDedicatedLogger().warn(LogSource.UPDATER.getPrefix() + "Recheck rate is smaller than 1min! Using value 1min.");
+                plugin.getLogger().warning("Updater recheck rate is smaller than 1min! Using value 1min.");
                 recheck = 1;
             }
 
@@ -113,7 +110,6 @@ public class Updater {
 
         ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
             // Checking for updates
-            plugin.getDedicatedLogger().info(LogSource.UPDATER.getPrefix() + "Checking for updates...");
             plugin.getLogger().info("Checking for updates...");
 
             // Get current version of plugin
@@ -124,10 +120,7 @@ public class Updater {
                 this.latestVersion = new BufferedReader(new InputStreamReader(new URL(URL).openStream())).readLine();
             } catch (IOException ex) {
                 // Log the error
-                plugin.getDedicatedLogger().warn(LogSource.UPDATER.getPrefix() + "Failed to check for updates.", ex);
                 plugin.getLogger().log(Level.WARNING, "Failed to check for updates.", ex);
-
-                // Return
                 return;
             }
 
@@ -135,13 +128,9 @@ public class Updater {
             int latestVersionNumbers = Integer.parseInt(this.latestVersion.replace(".", ""));
             this.isNewVersion = latestVersionNumbers > currentVersionNumbers;
 
-            // Log and print to console
-            if (isNewVersion) {
-                // New version available
-                String message = "New version " + latestVersion + " is available! You are using version " + currentVersion + ".";
-                plugin.getDedicatedLogger().info(LogSource.UPDATER.getPrefix() + message);
-                plugin.getLogger().info(message);
-            }
+            // New version available
+            if (isNewVersion)
+                plugin.getLogger().info("New version " + latestVersion + " is available! You are using version " + currentVersion + ".");
         });
     }
 
@@ -158,42 +147,6 @@ public class Updater {
         return plugin.getConfiguration().getString("updater.message")
                 .replace("{version_current}", currentVersion)
                 .replace("{version_latest}", latestVersion);
-    }
-
-    /**
-     * Returns if checking for updates is enabled.
-     *
-     * @return if checking for updates is enabled
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Returns the latest version of the plugin in a string (x.x).
-     *
-     * @return the latest version
-     */
-    public String getLatestVersion() {
-        return latestVersion;
-    }
-
-    /**
-     * Returns the current version of the plugin in a string (x.x).
-     *
-     * @return the current version
-     */
-    public String getCurrentVersion() {
-        return currentVersion;
-    }
-
-    /**
-     * Returns if a new version of the plugin is available.
-     *
-     * @return if a new version is available
-     */
-    public boolean isNewVersionAvailable() {
-        return isNewVersion;
     }
 
 }
