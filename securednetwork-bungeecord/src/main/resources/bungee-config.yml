@@ -14,19 +14,14 @@
 # - Note: Do not change unless you know what you are doing. Changing this might break the plugin.
 config-version: 1
 # Passphrase:
-# - Info: It is recommended to change this once in a while.
-#         The longer it is, the better, but do not choose too long passphrase, otherwise, it will take long for slower
-#         connections to join. Recommended length: 1000. Generate a new one using "/sn generate".
+# - Info: It is recommended to change this once in a while. Generate a new one using "/sn generate".
 passphrase: ""
-# Disconnect message sent to the player if:
+# Disconnect message sent to the player if their connection is unauthorized:
 # - Info: "\n" can be used for a new line.
-disconnect:
-  # A not whitelisted IP was used to join the server:
-  whitelist: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!"
-  # An error occurred while setting the passphrase into the connection, or it is not set (length of 0):
-  passphrase-error: "&7[&6SecuredNetwork&7] &cAn error occurred while processing your request.\n\n&7&oPlease try again later. If the problem persists, contact server administrators."
+disconnect-message: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!\n\n&7&oIf you believe this is an error, contact server administrators."
 # Enable metrics - anonymous data sending including but not limited to country in which is the server hosted, number of
-# cores, amount of players online. These statistics are used to determine the usage of the plugin.
+# cores, amount of players online. These statistics are used to determine the usage of the plugin and are freely
+# viewable online.
 # - Note: When changed, to take effect server restart is needed.
 metrics: true
 # IP whitelisting:
@@ -70,15 +65,8 @@ command:
   # If player runs the command:
   console-only: "&7[&6SecuredNetwork&7] Command is available only in the console."
   # If sender uses an invalid format of a command:
-  invalid-format: "&7[&6SecuredNetwork&7] Invalid format! Please use &6/sn generate [length, greater than 0] &7to generate a new passphrase of the specified length, &6/sn reload &7to reload the plugin, or &6/sn connection-logger <attach|detach> [uuid] to manage the connection logger."
+  invalid-format: "&7[&6SecuredNetwork&7] Invalid format! Please use &6/sn generate [length, greater than 0] &7to generate a new passphrase of the specified length, or &6/sn reload &7to reload the plugin."
   # If a new passphrase is being generated (/sn generate <length>):
   generate: "&7[&6SecuredNetwork&7] New passphrase has been generated and set into the configuration file. Please, use &6/sn reload &7to apply the new passphrase now."
   # If plugin configuration is being reloaded (/sn reload):
   reload: "&7[&6SecuredNetwork&7] The plugin has been reloaded!"
-  # Connection logger
-  connection-logger:
-    # If the connection logger attached:
-    # - Placeholders: {name} - the name to which the logger attached
-    attached: "&7[&6SecuredNetwork&7] Connection logger attached to &6{name}&7. The logger will detach automatically detach after the specified player joins, or do that manually via &6/sn connection-logger detach&7."
-    # If the connection logger attached:
-    detached: "&7[&6SecuredNetwork&7] Connection logger detached."

@@ -34,31 +34,48 @@ public class AuthenticationRequest {
         /**
          * Authentication was passed.
          */
-        PASSED(true, "", "", 0),
+        PASSED(true, "", 0),
+
+        /**
+         * Authentication failed due to no passphrase configured.
+         * <p>
+         * Happens when there's no passphrase, or it's empty.
+         */
+        FAILED_PASSPHRASE_NOT_CONFIGURED(false, "passphrase is not configured.", 1),
 
         /**
          * Authentication failed due to insufficient length of the host data.
          * <p>
          * Usually happens when IP-forwarding is disabled.
          */
-        FAIL_INSUFFICIENT_LENGTH(false, "insufficient_length", "host has insufficient length. Is IP-forward in BungeeCord config set to true?", 1),
+        FAILED_INSUFFICIENT_LENGTH(false, "data has insufficient length. Is IP-forward in BungeeCord config set to true?", 2),
 
         /**
          * Authentication failed due to there being no properties available.
          */
-        FAIL_NO_PROPERTIES(false, "no_properties", "no properties found.", 2),
+        FAILED_NO_PROPERTIES(false, "no properties found.", 3),
 
         /**
-         * Authentication failed due the property not being found.
+         * Authentication failed due the passphrase not being found.
          * <p>
          * Usually happens when there are any plugin interfering.
          */
-        FAIL_PROPERTY_NOT_FOUND(false, "property_not_found", "property not found. If that was you and you believe this is an error, please try checking for incompatible plugins installed.", 3);
+        FAILED_PASSPHRASE_NOT_FOUND(false, "passphrase not found. If that was you and you believe this is an error, please try checking for incompatible plugins installed.", 4),
+
+        /**
+         * Authentication failed due to malformed data.
+         */
+        FAILED_MALFORMED_DATA(false, "data is malformed.", 5),
+
+        /**
+         * Authentication failed due to an unknown error.
+         */
+        FAILED_UNKNOWN_ERROR(false, "an unknown error occurred. Please check the console.", 6);
 
         // If passed
         private final boolean passed;
-        // String representation and message
-        private final String string, message;
+        // Message
+        private final String message;
         // Result code
         private final int code;
 
@@ -66,13 +83,11 @@ public class AuthenticationRequest {
          * Initializes the result.
          *
          * @param passed  if passed
-         * @param string  the string representation
          * @param message simple message to display
          * @param code    unique result code
          */
-        Result(boolean passed, String string, String message, int code) {
+        Result(boolean passed, String message, int code) {
             this.passed = passed;
-            this.string = string;
             this.message = message;
             this.code = code;
         }
@@ -84,15 +99,6 @@ public class AuthenticationRequest {
          */
         public boolean isPassed() {
             return passed;
-        }
-
-        /**
-         * Returns as string.
-         *
-         * @return as string
-         */
-        public String getAsString() {
-            return string;
         }
 
         /**
@@ -123,7 +129,7 @@ public class AuthenticationRequest {
     private final String playerId;
 
     /**
-     * Initializes the authentication result by the given host string and if the authentication passed.
+     * Initializes the authentication result by the given data.
      *
      * @param host     the host string that excludes the property with the passphrase
      * @param playerId the player's UUID, or <code>?</code> if unknown

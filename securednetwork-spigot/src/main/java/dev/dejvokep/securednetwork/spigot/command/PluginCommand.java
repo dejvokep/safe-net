@@ -16,7 +16,6 @@
 package dev.dejvokep.securednetwork.spigot.command;
 
 import dev.dejvokep.boostedyaml.YamlFile;
-import dev.dejvokep.securednetwork.core.log.LogSource;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -85,28 +84,6 @@ public class PluginCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     config.getString("command.reload")));
             return true;
-        }
-
-        // If to manage the connection logger
-        if (args.length >= 2 && args[0].equalsIgnoreCase("connection-logger")) {
-            // If to detach
-            if (args.length == 2 && args[1].equalsIgnoreCase("detach")) {
-                // Detach
-                plugin.getPacketHandler().getConnectionLogger().detach();
-                // Log
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        config.getString("command.connection-logger.detached")));
-                return true;
-            } else if (args.length == 3 && args[1].equalsIgnoreCase("attach")) {
-                // Replace all dashes
-                args[2] = args[2].replace("-", "");
-                // Attach
-                plugin.getPacketHandler().getConnectionLogger().attach(args[2]);
-                // Log
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        config.getString("command.connection-logger.attached").replace("{uuid}", args[2])));
-                return true;
-            }
         }
 
         // Invalid format

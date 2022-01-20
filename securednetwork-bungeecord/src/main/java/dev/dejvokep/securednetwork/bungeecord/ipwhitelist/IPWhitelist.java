@@ -16,9 +16,7 @@
 package dev.dejvokep.securednetwork.bungeecord.ipwhitelist;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,9 +48,6 @@ public class IPWhitelist {
     // Enabled
     private boolean enabled;
 
-    // Disconnect message
-    private TextComponent disconnectMessage;
-
     // The plugin instance
     private final SecuredNetworkBungeeCord plugin;
 
@@ -69,7 +64,7 @@ public class IPWhitelist {
     }
 
     /**
-     * Checks the connecting player's VirtualHost, if the IP player used to connect is whitelisted (contains if-enabled
+     * Checks the connecting player's virtual host, if the IP player used to connect is whitelisted (contains if-enabled
      * check).
      * <p>
      * The <code>virtualHost</code> parameter should be an instance got from {@link PendingConnection#getVirtualHost()}
@@ -78,10 +73,10 @@ public class IPWhitelist {
      * @param virtualHost the player's virtual host
      * @return if the IP player used to connect is whitelisted
      */
-    public IPCheckResult checkIP(@NotNull InetSocketAddress virtualHost) {
+    public boolean checkIP(@NotNull InetSocketAddress virtualHost) {
         // If disabled
         if (!enabled)
-            return new IPCheckResult(true);
+            return true;
 
         // The IP
         String ip = virtualHost.getHostString() + IPHolder.PORT_COLON + virtualHost.getPort();
@@ -90,11 +85,11 @@ public class IPWhitelist {
         for (IPHolder ipHolder : whitelisted) {
             // If do equal
             if (ipHolder.compare(ip))
-                return new IPCheckResult(true);
+                return true;
         }
 
         // Not found, return the default message
-        return new IPCheckResult(false, disconnectMessage);
+        return false;
     }
 
     /**
@@ -106,9 +101,6 @@ public class IPWhitelist {
         // Do not continue if disabled
         if (!enabled)
             return;
-
-        // The default message
-        disconnectMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect.whitelist")));
 
         // Reload whitelisted IPs
         if (reloadIPs())
@@ -167,15 +159,6 @@ public class IPWhitelist {
                 plugin.getLogger().log(Level.SEVERE, "An error occurred while getting the IP of the server for the {ip} placeholder! Is the server address correct?", ex);
             }
         });
-    }
-
-    /**
-     * Returns the whitelisted IPs.
-     *
-     * @return the whitelisted IPs
-     */
-    public Set<IPHolder> getWhitelisted() {
-        return whitelisted;
     }
 
 }

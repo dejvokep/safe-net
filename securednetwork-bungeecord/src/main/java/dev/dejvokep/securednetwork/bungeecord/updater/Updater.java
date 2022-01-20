@@ -64,6 +64,14 @@ public class Updater {
      * Reloads the internal data and schedules delayed update checking.
      */
     public void reload() {
+        // If the task is not null
+        if (task != null) {
+            // Cancel
+            task.cancel();
+            // Set to null
+            task = null;
+        }
+
         // If checking is enabled
         this.enabled = plugin.getConfiguration().getBoolean("updater.enabled");
         // If not enabled
@@ -75,16 +83,8 @@ public class Updater {
         // Refresh
         check();
 
-        // If the task is not null
-        if (task != null) {
-            // Cancel
-            task.cancel();
-            // Set to null
-            task = null;
-        }
-
         // Rechecking for updates
-        if (enabled && recheck != -1) {
+        if (recheck != -1) {
             // Check if not invalid
             if (recheck < 1) {
                 // Log that refresh rate is invalid
@@ -100,8 +100,7 @@ public class Updater {
     /**
      * Checks for a new update of the plugin and logs the result.
      * <p>
-     * More specifically, reads the newest version from a website API, then announces if a new update is available or
-     * not.
+     * More specifically, reads the newest version from an API, then announces if a new update is available or not.
      */
     private void check() {
         // If not enabled
@@ -137,16 +136,15 @@ public class Updater {
     /**
      * Returns a join message to be sent to a player informing about plugin version status.
      *
-     * @return the join message informing about plugin version status
+     * @return the join message informing about plugin version status (an empty string represents no message)
      */
     public String getJoinMessage() {
-        // Checking for updates is disabled
-        if (!enabled) return "";
+        // Checking for updates is disabled or there is no new version
+        if (!enabled || !isNewVersion) return "";
 
         // Replace and return
         return plugin.getConfiguration().getString("updater.message")
                 .replace("{version_current}", currentVersion)
                 .replace("{version_latest}", latestVersion);
     }
-
 }

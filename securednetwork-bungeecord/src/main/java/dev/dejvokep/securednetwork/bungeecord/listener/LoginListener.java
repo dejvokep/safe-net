@@ -16,7 +16,6 @@
 package dev.dejvokep.securednetwork.bungeecord.listener;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPCheckResult;
 import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPHolder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
@@ -49,6 +48,11 @@ import java.util.logging.Level;
 public class LoginListener implements Listener {
 
     /**
+     * Default disconnect message used if the one provided in the config is invalid.
+     */
+    private static final String DEFAULT_DISCONNECT_MESSAGE = "Disconnected";
+
+    /**
      * If the cancel reason is set using a string - if using server version <code>1.7</code>.
      */
     private static final boolean OLD_CANCEL_REASON = ProxyServer.getInstance().getVersion().contains("1.7");
@@ -59,7 +63,7 @@ public class LoginListener implements Listener {
     private final SecuredNetworkBungeeCord plugin;
 
     // The passphrase error message
-    private TextComponent passphraseErrorMessage;
+    private TextComponent disconnectMessage;
 
     /**
      * Utilizes the login result field of the {@link InitialHandler} class. Loads the passphrase error disconnect
@@ -89,7 +93,7 @@ public class LoginListener implements Listener {
         // Player
         ProxiedPlayer player = event.getPlayer();
 
-        // Check the permission
+        // If does not have the permission
         if (!player.hasPermission("secured-network.updater") && !player.hasPermission("secured-network.*"))
             return;
         // Send the message
@@ -105,24 +109,26 @@ public class LoginListener implements Listener {
         // Connection name
         String name = connection.getName();
         // Check the IP
-        IPCheckResult result = plugin.getIpWhitelist().checkIP(connection.getVirtualHost());
+        boolean result = plugin.getIpWhitelist().checkIP(connection.getVirtualHost());
 
         // If not passed
-        if (!result.isPassed()) {
+        if (!result) {
             // Rejected
             plugin.getLogger().info(String.format("ERROR (code P1): Rejected connection of name \"%s\" by IP whitelist; used address was %s. Didn't you mean to whitelist it?", name, virtualHost));
-            cancel(event, result.getMessage());
+            cancel(event);
             return;
         }
 
+        // If the passphrase is valid
+        boolean validPassphrase = plugin.getAuthenticator().getPassphrase() != null && plugin.getAuthenticator().getPassphrase().length() > 0;
         // Insert the custom result
-        if (plugin.getAuthenticator().getPassphrase().length() > 0 && setResult(event.getConnection())) {
+        if (validPassphrase && setResult(event.getConnection())) {
             // Accepted
             plugin.getLogger().info(String.format("OK (code P0): Accepted connection of \"%s\".", name));
         } else {
             // Rejected
-            plugin.getLogger().info(String.format("ERROR (code P2): Failed to process the connection of \"%s\". Isn't there an error on server startup?", name));
-            cancel(event, passphraseErrorMessage);
+            plugin.getLogger().info(String.format("ERROR (code P%d): Rejected connection of \"%s\"; %s", validPassphrase ? 3 : 2, name, validPassphrase ? "failed to process. Please check for any errors." : "passphrase is not configured."));
+            cancel(event);
         }
     }
 
@@ -131,7 +137,7 @@ public class LoginListener implements Listener {
      */
     public void reload() {
         // Set
-        passphraseErrorMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect.passphrase-error")));
+        disconnectMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE)));
     }
 
     /**
@@ -162,15 +168,14 @@ public class LoginListener implements Listener {
     /**
      * Cancels a event and sets a disconnect message.
      *
-     * @param event   the event to cancel
-     * @param message the message
+     * @param event the event to cancel
      */
-    private void cancel(@NotNull LoginEvent event, @NotNull TextComponent message) {
+    private void cancel(@NotNull LoginEvent event) {
         // Set the message
         if (OLD_CANCEL_REASON)
-            event.setCancelReason(message.getText());
+            event.setCancelReason(disconnectMessage.getText());
         else
-            event.setCancelReason(message);
+            event.setCancelReason(disconnectMessage);
 
         // Cancel the event
         event.setCancelled(true);

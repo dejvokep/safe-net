@@ -62,7 +62,7 @@ public class SecuredNetworkBungeeCord extends Plugin {
 
         try {
             // Load the config file
-            config = Config.create(new File(getDataFolder(), "config.yml"), getResourceAsStream("bungee_config.yml"));
+            config = Config.create(new File(getDataFolder(), "config.yml"), getResourceAsStream("bungee-config.yml"));
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, "Failed to initialize the config file! Shutting down...", ex);
             ProxyServer.getInstance().stop();

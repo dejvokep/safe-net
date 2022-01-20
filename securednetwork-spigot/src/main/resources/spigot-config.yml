@@ -17,21 +17,14 @@ config-version: 1
 passphrase: ""
 # Block server pings for unauthenticated requests:
 block-pings: false
-# Disconnect message sent to the player if bypassing the proxy (failed the authentication - invalid passphrase, property):
+# Disconnect message sent to the player when the request is malformed or did not connect through the proxy server:
 # - Info: "\n" can be used for a new line.
-disconnect-failed-authentication: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!"
+disconnect-message: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!\n\n&7&oIf you believe this is an error, contact server administrators."
 # Command messages:
 command:
   # If a player runs the command:
   console-only: "&7[&6SecuredNetwork&7] Command is available only in the console."
   # If the sender uses an invalid format of a command:
-  invalid-format: "&7[&6SecuredNetwork&7] Invalid format! Please use &6/sn reload &7to reload the plugin, or &6/sn connection-logger <attach|detach> [uuid|all] to manage the connection logger."
+  invalid-format: "&7[&6SecuredNetwork&7] Invalid format! Please use &6/sn reload &7to reload the plugin."
   # If plugin configuration is being reloaded (/sn reload):
-  reload: "&7[&6SecuredNetwork&7] The plugin (except the logger) has been reloaded!"
-  # Connection logger
-  connection-logger:
-    # If the connection logger attached:
-    # - Placeholders: {uuid} - the UUID to which the logger attached
-    attached: "&7[&6SecuredNetwork&7] Connection logger attached to &6{uuid}&7. The logger will detach automatically detach after the specified player joins, or do that manually via &6/sn connection-logger detach&7."
-    # If the connection logger attached:
-    detached: "&7[&6SecuredNetwork&7] Connection logger detached."
+  reload: "&7[&6SecuredNetwork&7] The plugin has been reloaded!"

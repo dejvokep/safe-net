@@ -20,11 +20,13 @@ import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import dev.dejvokep.boostedyaml.YamlFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -49,6 +51,11 @@ public class Authenticator {
      * (in the hostname split).
      */
     private static final String GEYSER_FLOODGATE_ID = "Geyser-Floodgate";
+
+    /**
+     * Replacement for unknown data.
+     */
+    public static final String UNKNOWN_DATA = "<unknown>";
 
     /**
      * Recommended passphrase length.
@@ -103,15 +110,22 @@ public class Authenticator {
      * @param host the host string obtained from the handshake packet
      * @return an authentication result
      */
-    public AuthenticationRequest authenticate(@NotNull String host) {
+    public AuthenticationRequest authenticate(@Nullable String host) {
+        // If null
+        if (host == null)
+            return new AuthenticationRequest(UNKNOWN_DATA, UNKNOWN_DATA, AuthenticationRequest.Result.FAILED_MALFORMED_DATA);
+        // No passphrase configured
+        if (passphrase == null || passphrase.length() == 0)
+            return new AuthenticationRequest(host, UNKNOWN_DATA, AuthenticationRequest.Result.FAILED_PASSPHRASE_NOT_CONFIGURED);
+
+        // Replaced host
+        String replacedHost = host.replace(this.passphrase, "");
         // Split the host value
         String[] data = host.split(HOST_SPLIT_REGEX);
 
         // If the length is less than 3 or greater than 7 (GeyserMC compatibility)
-        if (data.length < 3 || data.length > 7) {
-            // Return
-            return new AuthenticationRequest(host.replace(this.passphrase, ""), "?", AuthenticationRequest.Result.FAIL_INSUFFICIENT_LENGTH);
-        }
+        if (data.length < 3 || data.length > 7)
+            return new AuthenticationRequest(replacedHost, UNKNOWN_DATA, AuthenticationRequest.Result.FAILED_INSUFFICIENT_LENGTH);
 
         // The player's UUID
         String uuid = data.length <= 4 ? data[2] : null;
@@ -136,11 +150,12 @@ public class Authenticator {
         ArrayList<Property> properties;
         // Parse properties from the last index
         try {
-            // Parse
             properties = GSON.fromJson(data[propertiesIndex], PROPERTY_LIST_TYPE);
-        } catch (JsonSyntaxException | ArrayIndexOutOfBoundsException ignored) {
-            // Return
-            return new AuthenticationRequest(host.replace(this.passphrase, ""), uuid, AuthenticationRequest.Result.FAIL_NO_PROPERTIES);
+            //If null
+            if (properties == null)
+                return new AuthenticationRequest(replacedHost, uuid, AuthenticationRequest.Result.FAILED_NO_PROPERTIES);
+        } catch (Exception ignored) {
+            return new AuthenticationRequest(replacedHost, uuid, AuthenticationRequest.Result.FAILED_NO_PROPERTIES);
         }
 
         try {
@@ -149,8 +164,11 @@ public class Authenticator {
 
             // Loop through all properties
             for (int index = properties.size() - 1; index >= 0; index--) {
-                // Get the property
+                // The property
                 property = properties.get(index);
+                // If null
+                if (property == null || property.getName() == null || property.getValue() == null)
+                    continue;
 
                 // If the names equal
                 if (property.getName().equals(PROPERTY_NAME)) {
@@ -158,20 +176,19 @@ public class Authenticator {
                     properties.remove(index);
 
                     // If the values equal
-                    if (property.getValue().equals(this.passphrase)) {
-                        // Return and replace the passphrase just in case
+                    if (property.getValue().equals(this.passphrase))
                         return new AuthenticationRequest(host.replace(data[propertiesIndex], GSON.toJson(properties)), uuid, AuthenticationRequest.Result.PASSED);
-                    } else {
-                        // Break
+                    else
                         break;
-                    }
                 }
             }
-        } catch (NullPointerException | IndexOutOfBoundsException ignored) {
+        } catch (Exception ex) {
+            logger.log(Level.SEVERE, "An unknown error occurred while processing player's connection!", ex);
+            return new AuthenticationRequest(replacedHost, uuid, AuthenticationRequest.Result.FAILED_UNKNOWN_ERROR);
         }
 
         // Return
-        return new AuthenticationRequest(host.replace(this.passphrase, ""), uuid, AuthenticationRequest.Result.FAIL_PROPERTY_NOT_FOUND);
+        return new AuthenticationRequest(replacedHost, uuid, AuthenticationRequest.Result.FAILED_PASSPHRASE_NOT_FOUND);
     }
 
     /**
