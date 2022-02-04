@@ -69,6 +69,8 @@ public class PacketHandler {
         // Set
         this.protocolManager = protocolManager;
         this.plugin = plugin;
+        // Reload
+        reload();
         // Authenticator
         final Authenticator authenticator = plugin.getAuthenticator();
 
@@ -98,10 +100,16 @@ public class PacketHandler {
                     plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
 
                     // If failed
-                    if (!request.getResult().isPassed())
+                    if (!request.getResult().isPassed()) {
+                        // Log
+                        plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
                         disconnect(event);
+                    }
+
                     // Set the host
                     strings.write(0, request.getHost());
+                    // Log
+                    plugin.getLogger().info(String.format("OK (code B0): Accepted connection of \"%s\".\nConnection data: %s", request.getPlayerId(), request.getHost()));
                 } catch (Exception ex) {
                     // Log
                     plugin.getLogger().log(Level.SEVERE, "An exception occurred while processing a packet!", ex);

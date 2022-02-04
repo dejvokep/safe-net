@@ -16,9 +16,8 @@
 package dev.dejvokep.securednetwork.core.authenticator;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
-import dev.dejvokep.boostedyaml.YamlFile;
+import dev.dejvokep.boostedyaml.YamlDocument;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,7 +85,7 @@ public class Authenticator {
     private String passphrase;
 
     // The config
-    private final YamlFile config;
+    private final YamlDocument config;
     // The logger
     private final Logger logger;
 
@@ -96,7 +95,7 @@ public class Authenticator {
      * @param config          the configuration file
      * @param logger    the logger
      */
-    public Authenticator(@NotNull YamlFile config, @NotNull Logger logger) {
+    public Authenticator(@NotNull YamlDocument config, @NotNull Logger logger) {
         // Set
         this.config = config;
         this.logger = logger;
@@ -119,7 +118,7 @@ public class Authenticator {
             return new AuthenticationRequest(host, UNKNOWN_DATA, AuthenticationRequest.Result.FAILED_PASSPHRASE_NOT_CONFIGURED);
 
         // Replaced host
-        String replacedHost = host.replace(this.passphrase, "");
+        String replacedHost = host.replace(this.passphrase, "<passphrase>");
         // Split the host value
         String[] data = host.split(HOST_SPLIT_REGEX);
 
@@ -162,7 +161,7 @@ public class Authenticator {
             // The property
             Property property;
 
-            // Loop through all properties
+            // Iterate
             for (int index = properties.size() - 1; index >= 0; index--) {
                 // The property
                 property = properties.get(index);

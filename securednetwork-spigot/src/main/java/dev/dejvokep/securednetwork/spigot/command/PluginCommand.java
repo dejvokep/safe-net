@@ -15,7 +15,7 @@
  */
 package dev.dejvokep.securednetwork.spigot.command;
 
-import dev.dejvokep.boostedyaml.YamlFile;
+import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -48,7 +48,7 @@ public class PluginCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         // The config
-        YamlFile config = plugin.getConfiguration();
+        YamlDocument config = plugin.getConfiguration();
         // Check the sender
         if (!(sender instanceof ConsoleCommandSender)) {
             // Console only

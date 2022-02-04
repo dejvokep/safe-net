@@ -30,10 +30,9 @@ import java.util.Set;
 import java.util.logging.Level;
 
 /**
- * Class covering the IP-whitelisting feature. Using this class, for example, an incoming connection can be checked, or
- * a set of whitelisted IPs can be retrieved.
+ * Class covering the address-whitelisting feature.
  */
-public class IPWhitelist {
+public class AddressWhitelist {
 
     /**
      * The server IP placeholder.
@@ -43,8 +42,8 @@ public class IPWhitelist {
     // Proxy IP
     private String proxyIP;
 
-    // Whitelisted IPs
-    private final Set<IPHolder> whitelisted = new HashSet<>();
+    // Whitelisted addresses
+    private final Set<AddressHolder> whitelisted = new HashSet<>();
     // Enabled
     private boolean enabled;
 
@@ -56,7 +55,7 @@ public class IPWhitelist {
      *
      * @param plugin the plugin instance
      */
-    public IPWhitelist(@NotNull SecuredNetworkBungeeCord plugin) {
+    public AddressWhitelist(@NotNull SecuredNetworkBungeeCord plugin) {
         // Set
         this.plugin = plugin;
         // Reload
@@ -64,27 +63,27 @@ public class IPWhitelist {
     }
 
     /**
-     * Checks the connecting player's virtual host, if the IP player used to connect is whitelisted (contains if-enabled
+     * Verifies the connecting player's virtual host, if the address player used to connect is whitelisted (contains if-enabled
      * check).
      * <p>
      * The <code>virtualHost</code> parameter should be an instance got from {@link PendingConnection#getVirtualHost()}
      * or similar method.
      *
      * @param virtualHost the player's virtual host
-     * @return if the IP player used to connect is whitelisted
+     * @return if the address player used to connect is whitelisted
      */
-    public boolean checkIP(@NotNull InetSocketAddress virtualHost) {
+    public boolean verifyAddress(@NotNull InetSocketAddress virtualHost) {
         // If disabled
         if (!enabled)
             return true;
 
-        // The IP
-        String ip = virtualHost.getHostString() + IPHolder.PORT_COLON + virtualHost.getPort();
+        // The address
+        String address = virtualHost.getHostString() + AddressHolder.PORT_COLON + virtualHost.getPort();
 
-        // Loop through whitelisted IPs
-        for (IPHolder ipHolder : whitelisted) {
+        // Iterate
+        for (AddressHolder addressHolder : whitelisted) {
             // If do equal
-            if (ipHolder.compare(ip))
+            if (addressHolder.compare(address))
                 return true;
         }
 
@@ -97,42 +96,42 @@ public class IPWhitelist {
      */
     public void reload() {
         // If enabled
-        enabled = plugin.getConfiguration().getBoolean("ip-whitelist.enabled");
+        enabled = plugin.getConfiguration().getBoolean("address-whitelist.enabled");
         // Do not continue if disabled
         if (!enabled)
             return;
 
-        // Reload whitelisted IPs
-        if (reloadIPs())
+        // Reload whitelisted addresses
+        if (reloadAddresses())
             // Get the proxy IP
             getProxyIP();
     }
 
     /**
-     * Reloads whitelisted IPs.
+     * Reloads whitelisted addresses.
      *
-     * @return if any of the IPs uses {@link #IP_PLACEHOLDER} and calling {@link #getProxyIP()} is needed
+     * @return if any of the addresses uses {@link #IP_PLACEHOLDER} and calling {@link #getProxyIP()} is needed
      */
-    private boolean reloadIPs() {
-        // Get whitelisted IPs
-        List<String> whitelistedList = plugin.getConfiguration().getStringList("ip-whitelist.ips");
+    private boolean reloadAddresses() {
+        // Whitelisted addresses
+        List<String> whitelisted = plugin.getConfiguration().getStringList("address-whitelist.addresses");
         // Clear the list
-        whitelisted.clear();
-        // Iterate through every IP
-        for (String ip : whitelistedList) {
+        this.whitelisted.clear();
+        // Iterate through every address
+        for (String address : whitelisted) {
             // Create a new holder
-            IPHolder ipHolder = new IPHolder();
-            // Set the IP
-            if (ipHolder.setIp(ip))
+            AddressHolder addressHolder = new AddressHolder();
+            // Set the address
+            if (addressHolder.setAddress(address))
                 // Add
-                whitelisted.add(ipHolder);
+                this.whitelisted.add(addressHolder);
             else
                 // Log
-                plugin.getLogger().severe("IP \"" + ip + "\" is not specified correctly! Removing from the whitelist.");
+                plugin.getLogger().severe("Address \"" + address + "\" is not specified correctly! Removing from the whitelist.");
         }
 
-        // If IP placeholder is present
-        return whitelistedList.toString().contains(IP_PLACEHOLDER);
+        // If address placeholder is present
+        return this.whitelisted.toString().contains(IP_PLACEHOLDER);
     }
 
     /**
@@ -145,15 +144,15 @@ public class IPWhitelist {
                 plugin.getLogger().info("Getting the IP of the server for {ip} placeholder...");
 
                 // Open stream and initialize reader
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new URL(plugin.getConfiguration().getString("ip-whitelist.ip-website")).openStream()));
+                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(new URL(plugin.getConfiguration().getString("address-whitelist.ip-website")).openStream()));
                 // Set the IP
                 proxyIP = bufferedReader.readLine();
 
                 // Log the IP
                 plugin.getLogger().info("Public IP for {ip} placeholder got successfully, hosting on " + proxyIP + "!");
                 // Replace {ip} with the server's IP
-                for (IPHolder ipHolder : whitelisted)
-                    ipHolder.setIp(ipHolder.getIp().replace(IP_PLACEHOLDER, proxyIP));
+                for (AddressHolder addressHolder : whitelisted)
+                    addressHolder.setAddress(addressHolder.getAddress().replace(IP_PLACEHOLDER, proxyIP));
             } catch (Exception ex) {
                 // Log the error
                 plugin.getLogger().log(Level.SEVERE, "An error occurred while getting the IP of the server for the {ip} placeholder! Is the server address correct?", ex);

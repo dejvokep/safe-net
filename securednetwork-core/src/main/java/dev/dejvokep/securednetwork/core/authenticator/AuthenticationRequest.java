@@ -48,7 +48,7 @@ public class AuthenticationRequest {
          * <p>
          * Usually happens when IP-forwarding is disabled.
          */
-        FAILED_INSUFFICIENT_LENGTH(false, "data has insufficient length. Is IP-forward in BungeeCord config set to true?", 2),
+        FAILED_INSUFFICIENT_LENGTH(false, "data has insufficient length. Is ip-forward in BungeeCord config set to true?", 2),
 
         /**
          * Authentication failed due to there being no properties available.

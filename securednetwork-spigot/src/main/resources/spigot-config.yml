@@ -11,15 +11,15 @@
 # Join the Discord server (https://discord.com/invite/BbhADEy) and we will more than happily help you :) (nonstop 24/7 bot support)
 #
 # Config version:
-# - Note: Do not change unless you know what you are doing. Changing this might break the plugin.
+# - IMPORTANT >> Do NOT change unless you know what you are doing. Changing this might break the plugin.
 config-version: 1
 # Passphrase (equal to what you set on the proxy):
 passphrase: ""
 # Block server pings for unauthenticated requests:
 block-pings: false
 # Disconnect message sent to the player when the request is malformed or did not connect through the proxy server:
-# - Info: "\n" can be used for a new line.
-disconnect-message: "&7[&6SecuredNetwork&7] &cPlease connect with IP: yourserver.com!\n\n&7&oIf you believe this is an error, contact server administrators."
+# - "\n" can be used for a new line.
+disconnect-message: "&7[&6SecuredNetwork&7] &cPlease connect with address: yourserver.com!\n\n&7&oIf you believe this is an error, contact server administrators."
 # Command messages:
 command:
   # If a player runs the command:

@@ -15,7 +15,7 @@
  */
 package dev.dejvokep.securednetwork.bungeecord.command;
 
-import dev.dejvokep.boostedyaml.YamlFile;
+import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
 import dev.dejvokep.securednetwork.bungeecord.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
@@ -33,7 +33,7 @@ import java.util.logging.Level;
 public class PluginCommand extends Command {
 
     // The config
-    private final YamlFile config;
+    private final YamlDocument config;
     // The messenger
     private final Messenger messenger;
     // The plugin instance
@@ -80,8 +80,8 @@ public class PluginCommand extends Command {
             }
             // Authenticator
             plugin.getAuthenticator().reload();
-            // IP whitelist
-            plugin.getIpWhitelist().reload();
+            // Address whitelist
+            plugin.getAddressWhitelist().reload();
             // Updater
             plugin.getUpdater().reload();
             // Login listener

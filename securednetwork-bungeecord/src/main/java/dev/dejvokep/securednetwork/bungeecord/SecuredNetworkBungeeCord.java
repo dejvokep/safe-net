@@ -15,14 +15,18 @@
  */
 package dev.dejvokep.securednetwork.bungeecord;
 
-import dev.dejvokep.boostedyaml.YamlFile;
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import dev.dejvokep.securednetwork.bungeecord.command.PluginCommand;
-import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPWhitelist;
+import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.AddressWhitelist;
 import dev.dejvokep.securednetwork.bungeecord.listener.LoginListener;
 import dev.dejvokep.securednetwork.bungeecord.message.Messenger;
 import dev.dejvokep.securednetwork.bungeecord.updater.Updater;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.config.Config;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
@@ -45,11 +49,11 @@ public class SecuredNetworkBungeeCord extends Plugin {
     // Updater
     private Updater updater;
     // Config
-    private YamlFile config;
+    private YamlDocument config;
     // Authenticator
     private Authenticator authenticator;
-    // IP whitelist
-    private IPWhitelist ipWhitelist;
+    // Address whitelist
+    private AddressWhitelist addressWhitelist;
     // Login listener
     private LoginListener listener;
 
@@ -61,8 +65,8 @@ public class SecuredNetworkBungeeCord extends Plugin {
         getLogger().info("Thank you for downloading SecuredNetwork!");
 
         try {
-            // Load the config file
-            config = Config.create(new File(getDataFolder(), "config.yml"), getResourceAsStream("bungee-config.yml"));
+            // Create the config file
+            config = YamlDocument.create(new File(getDataFolder(), "config.yml"), getResourceAsStream("bungee-config.yml"), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, "Failed to initialize the config file! Shutting down...", ex);
             ProxyServer.getInstance().stop();
@@ -73,7 +77,7 @@ public class SecuredNetworkBungeeCord extends Plugin {
         authenticator = new Authenticator(config, getLogger());
 
         // Initialize
-        ipWhitelist = new IPWhitelist(this);
+        addressWhitelist = new AddressWhitelist(this);
 
         // Plugin manager
         PluginManager pluginManager = ProxyServer.getInstance().getPluginManager();
@@ -110,7 +114,7 @@ public class SecuredNetworkBungeeCord extends Plugin {
      *
      * @return the configuration file.
      */
-    public YamlFile getConfiguration() {
+    public YamlDocument getConfiguration() {
         return config;
     }
 
@@ -133,12 +137,12 @@ public class SecuredNetworkBungeeCord extends Plugin {
     }
 
     /**
-     * Returns the IP whitelist.
+     * Returns the address whitelist.
      *
-     * @return the IP whitelist
+     * @return the address whitelist
      */
-    public IPWhitelist getIpWhitelist() {
-        return ipWhitelist;
+    public AddressWhitelist getAddressWhitelist() {
+        return addressWhitelist;
     }
 
     /**

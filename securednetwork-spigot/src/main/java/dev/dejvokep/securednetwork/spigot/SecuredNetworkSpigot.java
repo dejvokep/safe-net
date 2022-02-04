@@ -16,9 +16,13 @@
 package dev.dejvokep.securednetwork.spigot;
 
 import com.comphenix.protocol.ProtocolLibrary;
-import dev.dejvokep.boostedyaml.YamlFile;
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.config.Config;
 import dev.dejvokep.securednetwork.spigot.command.PluginCommand;
 import dev.dejvokep.securednetwork.spigot.packet.PacketHandler;
 import org.bukkit.Bukkit;
@@ -27,6 +31,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.logging.Level;
 
 /**
@@ -38,7 +43,7 @@ public class SecuredNetworkSpigot extends JavaPlugin {
     private Plugin plugin;
 
     // Config
-    private YamlFile config;
+    private YamlDocument config;
 
     // Authenticator
     private Authenticator authenticator;
@@ -51,11 +56,11 @@ public class SecuredNetworkSpigot extends JavaPlugin {
         plugin = this;
 
         // Thank you message
-        System.out.println("[SecuredNetwork] Thank you for downloading SecuredNetwork!");
+        getLogger().info("Thank you for downloading SecuredNetwork!");
 
         try {
-            // Load the config file
-            config = Config.create(new File(getDataFolder(), "config.yml"), getResource("spigot-config.yml"));
+            // Create the config file
+            config = YamlDocument.create(new File(getDataFolder(), "config.yml"), Objects.requireNonNull(getResource("spigot-config.yml")), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
         } catch (IOException ex) {
             getLogger().log(Level.SEVERE, "Failed to initialize the config file! Shutting down...", ex);
             Bukkit.shutdown();
@@ -85,7 +90,7 @@ public class SecuredNetworkSpigot extends JavaPlugin {
      *
      * @return the configuration file.
      */
-    public YamlFile getConfiguration() {
+    public YamlDocument getConfiguration() {
         return config;
     }
 

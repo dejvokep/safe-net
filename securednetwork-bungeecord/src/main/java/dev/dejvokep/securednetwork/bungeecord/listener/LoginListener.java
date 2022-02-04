@@ -16,7 +16,7 @@
 package dev.dejvokep.securednetwork.bungeecord.listener;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPHolder;
+import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.AddressHolder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -24,6 +24,7 @@ import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
@@ -40,7 +41,7 @@ import java.util.logging.Level;
  *     <li>{@link LoginEvent} processes the connection and inserts a special login result into the connection. This event
  *     was chosen because if the network is in online-mode, the player's textures (with the login profile) are set into the
  *     {@link InitialHandler}'s field just before the event fires - the old profile, which would be set before, if any of
- *     earlier events were used (e.g. {@link net.md_5.bungee.api.event.PreLoginEvent} for this task, would be overwritten.
+ *     earlier events were used (e.g. {@link PreLoginEvent} for this task, would be overwritten.
  *     Therefore, this event is the first event that is suitable.</li>
  *     <li>{@link PostLoginEvent} sends players with the updater permission an updater message.</li>
  * </ul>
@@ -105,16 +106,16 @@ public class LoginListener implements Listener {
         // The connection
         PendingConnection connection = event.getConnection();
         // Virtual host address
-        String virtualHost = connection.getVirtualHost().getHostString() + IPHolder.PORT_COLON + connection.getVirtualHost().getPort();
+        String virtualHost = connection.getVirtualHost().getHostString() + AddressHolder.PORT_COLON + connection.getVirtualHost().getPort();
         // Connection name
         String name = connection.getName();
-        // Check the IP
-        boolean result = plugin.getIpWhitelist().checkIP(connection.getVirtualHost());
+        // Check the address
+        boolean result = plugin.getAddressWhitelist().verifyAddress(connection.getVirtualHost());
 
         // If not passed
         if (!result) {
             // Rejected
-            plugin.getLogger().info(String.format("ERROR (code P1): Rejected connection of name \"%s\" by IP whitelist; used address was %s. Didn't you mean to whitelist it?", name, virtualHost));
+            plugin.getLogger().info(String.format("ERROR (code P1): Rejected connection of name \"%s\" by address whitelist; used address was %s. Didn't you mean to whitelist it?", name, virtualHost));
             cancel(event);
             return;
         }
