@@ -35,8 +35,8 @@ address-whitelist:
   # - Port must be specified after each entry separated by colon (IP/DNS name:port).
   # - If your server has dynamic IP, use the "{ip}" placeholder as the server's IP. Please configure the ip-website
   #   field, too.
-  # - DNS servers do not recognize the case-sensitivity, so does the plugin. If you would like to disable this for a
-  #   certain address, put an exclamation mark before it, like !test.yourserver.com.
+  # - DNS servers do not recognize the case-sensitivity, so does not the plugin. If you would like to disable this for a
+  #   certain address (to be compared case-sensitively), put an exclamation mark before it, like !test.yourserver.com.
   addresses: [ ]
   # Website used to obtain the value of the "{ip}" placeholder (the public IP of your server):
   # - This should be a website that returns only your IP on the HTTP GET request (if you open it in your browser).
