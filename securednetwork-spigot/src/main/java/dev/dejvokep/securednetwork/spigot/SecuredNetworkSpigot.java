@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 https://dejvokep.dev/
+ * Copyright 2022 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,22 @@
 package dev.dejvokep.securednetwork.spigot;
 
 import com.comphenix.protocol.ProtocolLibrary;
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
 import dev.dejvokep.securednetwork.spigot.command.PluginCommand;
-import dev.dejvokep.securednetwork.spigot.config.ConfigBackend;
 import dev.dejvokep.securednetwork.spigot.packet.PacketHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Objects;
 import java.util.logging.Level;
 
 /**
@@ -38,9 +43,8 @@ public class SecuredNetworkSpigot extends JavaPlugin {
     private Plugin plugin;
 
     // Config
-    private Config config;
-    // Logger
-    private Log log;
+    private YamlDocument config;
+
     // Authenticator
     private Authenticator authenticator;
     // Packet handler
@@ -52,40 +56,24 @@ public class SecuredNetworkSpigot extends JavaPlugin {
         plugin = this;
 
         // Thank you message
-        System.out.println("[SecuredNetwork] Thank you for downloading SecuredNetwork!");
+        getLogger().info("Thank you for downloading SecuredNetwork!");
 
-        // Load the config file
-        config = new ConfigBackend(this, "backend_config.yml", "config.yml");
-        // Initialize log class
-        log = new Log(getLogger(), new File(getDataFolder(), "logs"), config);
+        try {
+            // Create the config file
+            config = YamlDocument.create(new File(getDataFolder(), "config.yml"), Objects.requireNonNull(getResource("spigot-config.yml")), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Failed to initialize the config file! Shutting down...", ex);
+            Bukkit.shutdown();
+            return;
+        }
 
-        // Enabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Enabling SecuredNetwork... (BACKEND)");
-
-        // Initializing the authenticator
-        log.log(Level.INFO, Log.Source.GENERAL, "Initializing the authenticator.");
         // Initialize
-        authenticator = new Authenticator(config, log);
-
-        // Registering listeners and commands
-        log.log(Level.INFO, Log.Source.GENERAL, "Registering listeners and commands.");
+        authenticator = new Authenticator(config, getLogger());
         // Register commands
         Bukkit.getPluginCommand("securednetwork").setExecutor(new PluginCommand(this));
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
-
-        // Registering the packet listener
-        log.log(Level.INFO, Log.Source.GENERAL, "Registering the packet listener.");
         // Register
         packetHandler = new PacketHandler(ProtocolLibrary.getProtocolManager(), this);
-
-        // Finished enabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Finished enabling SecuredNetwork.");
-    }
-
-    @Override
-    public void onDisable() {
-        // Finished disabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Finished disabling SecuredNetwork.");
     }
 
     /**
@@ -102,17 +90,8 @@ public class SecuredNetworkSpigot extends JavaPlugin {
      *
      * @return the configuration file.
      */
-    public Config getConfiguration() {
+    public YamlDocument getConfiguration() {
         return config;
-    }
-
-    /**
-     * Returns the logging utility which is used to log plugin messages.
-     *
-     * @return the logging utility
-     */
-    public Log getLog() {
-        return log;
     }
 
     /**

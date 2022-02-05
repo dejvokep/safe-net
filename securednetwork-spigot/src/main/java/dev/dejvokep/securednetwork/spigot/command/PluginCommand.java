@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 https://dejvokep.dev/
+ * Copyright 2022 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,7 @@
  */
 package dev.dejvokep.securednetwork.spigot.command;
 
-import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -25,6 +24,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -48,7 +48,7 @@ public class PluginCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         // The config
-        Config config = plugin.getConfiguration();
+        YamlDocument config = plugin.getConfiguration();
         // Check the sender
         if (!(sender instanceof ConsoleCommandSender)) {
             // Console only
@@ -67,45 +67,23 @@ public class PluginCommand implements CommandExecutor {
 
         // If to reload
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-            // Reloading
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloading...");
-
             // Config
-            config.load();
+            try {
+                config.reload();
+            } catch (IOException ex) {
+                plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config! If you believe this is not caused by improper configuration, please report it.", ex);
+                return true;
+            }
+
             // Authenticator
             plugin.getAuthenticator().reload();
             // Packet handler
             plugin.getPacketHandler().reload();
 
             // Reloaded
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloaded.");
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                     config.getString("command.reload")));
             return true;
-        }
-
-        // If to manage the connection logger
-        if (args.length >= 2 && args[0].equalsIgnoreCase("connection-logger")) {
-            // If to detach
-            if (args.length == 2 && args[1].equalsIgnoreCase("detach")) {
-                // Detach
-                plugin.getPacketHandler().getConnectionLogger().detach();
-                // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger detached.");
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        config.getString("command.connection-logger.detached")));
-                return true;
-            } else if (args.length == 3 && args[1].equalsIgnoreCase("attach")) {
-                // Replace all dashes
-                args[2] = args[2].replace("-", "");
-                // Attach
-                plugin.getPacketHandler().getConnectionLogger().attach(args[2]);
-                // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger attached to UUID \"" + args[2] + "\".");
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
-                        config.getString("command.connection-logger.attached").replace("{uuid}", args[2])));
-                return true;
-            }
         }
 
         // Invalid format

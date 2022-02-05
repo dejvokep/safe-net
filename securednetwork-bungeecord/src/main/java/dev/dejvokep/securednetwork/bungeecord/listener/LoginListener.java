@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 https://dejvokep.dev/
+ * Copyright 2022 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 package dev.dejvokep.securednetwork.bungeecord.listener;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPCheckResult;
-import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPHolder;
-import dev.dejvokep.securednetwork.core.connection.ConnectionLogger;
-import dev.dejvokep.securednetwork.core.log.Log;
+import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.AddressHolder;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -27,13 +24,13 @@ import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
+import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.logging.Level;
@@ -44,12 +41,17 @@ import java.util.logging.Level;
  *     <li>{@link LoginEvent} processes the connection and inserts a special login result into the connection. This event
  *     was chosen because if the network is in online-mode, the player's textures (with the login profile) are set into the
  *     {@link InitialHandler}'s field just before the event fires - the old profile, which would be set before, if any of
- *     earlier events were used (e.g. {@link net.md_5.bungee.api.event.PreLoginEvent} for this task, would be overwritten.
+ *     earlier events were used (e.g. {@link PreLoginEvent} for this task, would be overwritten.
  *     Therefore, this event is the first event that is suitable.</li>
  *     <li>{@link PostLoginEvent} sends players with the updater permission an updater message.</li>
  * </ul>
  */
 public class LoginListener implements Listener {
+
+    /**
+     * Default disconnect message used if the one provided in the config is invalid.
+     */
+    private static final String DEFAULT_DISCONNECT_MESSAGE = "Disconnected";
 
     /**
      * If the cancel reason is set using a string - if using server version <code>1.7</code>.
@@ -62,20 +64,17 @@ public class LoginListener implements Listener {
     private final SecuredNetworkBungeeCord plugin;
 
     // The passphrase error message
-    private TextComponent passphraseErrorMessage;
-
-    //  Connection logger
-    private final ConnectionLogger connectionLogger;
+    private TextComponent disconnectMessage;
 
     /**
-     * Utilizes the login result field of the {@link InitialHandler} class. Loads the passphrase error disconnect message.
+     * Utilizes the login result field of the {@link InitialHandler} class. Loads the passphrase error disconnect
+     * message.
      *
      * @param plugin the plugin instance
      */
     public LoginListener(@NotNull SecuredNetworkBungeeCord plugin) {
         // Set
         this.plugin = plugin;
-        this.connectionLogger = new ConnectionLogger(plugin.getLogger()::info);
         // Reload
         reload();
 
@@ -86,7 +85,7 @@ public class LoginListener implements Listener {
             loginResultField.setAccessible(true);
         } catch (NoSuchFieldException | SecurityException ex) {
             // Log
-            plugin.getLog().log(Level.SEVERE, Log.Source.AUTHENTICATOR, "Failed to utilize the LoginResult field!", ex);
+            plugin.getLogger().log(Level.SEVERE, "Failed to utilize the loginProfile field!", ex);
         }
     }
 
@@ -95,7 +94,7 @@ public class LoginListener implements Listener {
         // Player
         ProxiedPlayer player = event.getPlayer();
 
-        // Check the permission
+        // If does not have the permission
         if (!player.hasPermission("secured-network.updater") && !player.hasPermission("secured-network.*"))
             return;
         // Send the message
@@ -107,28 +106,30 @@ public class LoginListener implements Listener {
         // The connection
         PendingConnection connection = event.getConnection();
         // Virtual host address
-        String virtualHost = connection.getVirtualHost().getHostString() + IPHolder.PORT_COLON + connection.getVirtualHost().getPort();
+        String virtualHost = connection.getVirtualHost().getHostString() + AddressHolder.PORT_COLON + connection.getVirtualHost().getPort();
         // Connection name
         String name = connection.getName();
-        // Check the IP
-        IPCheckResult result = plugin.getIpWhitelist().checkIP(connection.getVirtualHost());
+        // Check the address
+        boolean result = plugin.getAddressWhitelist().verifyAddress(connection.getVirtualHost());
 
         // If not passed
-        if (!result.isPassed()) {
+        if (!result) {
             // Rejected
-            logResult(name, false, "whitelist", virtualHost);
-            informedCancellation(event, result.getMessage());
+            plugin.getLogger().info(String.format("ERROR (code P1): Rejected connection of name \"%s\" by address whitelist; used address was %s. Didn't you mean to whitelist it?", name, virtualHost));
+            cancel(event);
             return;
         }
 
+        // If the passphrase is valid
+        boolean validPassphrase = plugin.getAuthenticator().getPassphrase() != null && plugin.getAuthenticator().getPassphrase().length() > 0;
         // Insert the custom result
-        if (plugin.getAuthenticator().getPassphrase().length() > 0 && insertCustomResult(event.getConnection())) {
+        if (validPassphrase && setResult(event.getConnection())) {
             // Accepted
-            logResult(name, true, null, virtualHost);
+            plugin.getLogger().info(String.format("OK (code P0): Accepted connection of \"%s\".", name));
         } else {
             // Rejected
-            logResult(name, false, "passphrase-error", virtualHost);
-            informedCancellation(event, passphraseErrorMessage);
+            plugin.getLogger().info(String.format("ERROR (code P%d): Rejected connection of \"%s\"; %s", validPassphrase ? 3 : 2, name, validPassphrase ? "failed to process. Please check for any errors." : "passphrase is not configured."));
+            cancel(event);
         }
     }
 
@@ -137,16 +138,16 @@ public class LoginListener implements Listener {
      */
     public void reload() {
         // Set
-        passphraseErrorMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect.passphrase-error")));
+        disconnectMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE)));
     }
 
     /**
-     * Inserts a custom login result (with the passphrase) into the given connection's {@link LoginResult}.
+     * Sets a custom login result (with the passphrase) into the given connection's {@link LoginResult}.
      *
      * @param pendingConnection the connection to insert the custom result into
      * @return if the process finished without any error
      */
-    private boolean insertCustomResult(@NotNull PendingConnection pendingConnection) {
+    private boolean setResult(@NotNull PendingConnection pendingConnection) {
         // If null
         if (loginResultField == null)
             // Should not happen
@@ -157,7 +158,7 @@ public class LoginListener implements Listener {
             loginResultField.set(pendingConnection, new SecuredLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getAuthenticator()));
         } catch (Exception ex) {
             // Log
-            plugin.getLog().log(Level.SEVERE, Log.Source.CONNECTOR, "An error occurred while setting the custom login result into the connection!", ex);
+            plugin.getLogger().log(Level.SEVERE, "An error occurred while setting the custom login result into the connection!", ex);
             return false;
         }
 
@@ -168,43 +169,16 @@ public class LoginListener implements Listener {
     /**
      * Cancels a event and sets a disconnect message.
      *
-     * @param event   the event to cancel
-     * @param message the message
+     * @param event the event to cancel
      */
-    private void informedCancellation(@NotNull LoginEvent event, @NotNull TextComponent message) {
+    private void cancel(@NotNull LoginEvent event) {
         // Set the message
         if (OLD_CANCEL_REASON)
-            event.setCancelReason(message.getText());
+            event.setCancelReason(disconnectMessage.getText());
         else
-            event.setCancelReason(message);
+            event.setCancelReason(disconnectMessage);
 
         // Cancel the event
         event.setCancelled(true);
-    }
-
-    /**
-     * Logs the result of a connection request determined in {@link #onPreLogin(LoginEvent)}.
-     *
-     * @param playerName  name of the player connecting
-     * @param accepted    if the connection was accepted
-     * @param cause       the cause (if the connection was rejected, otherwise <code>null</code>)
-     * @param virtualHost the player's virtual host (in format <code>ip:port</code>)
-     */
-    private void logResult(@Nullable String playerName, boolean accepted, @Nullable String cause, @NotNull String virtualHost) {
-        // Message
-        String message = "name=" + playerName + " result=" + (accepted ? "accepted" : "rejected") +
-                (cause != null ? ", cause=" + cause : "") + " host_address=" + virtualHost;
-        // Log
-        connectionLogger.handle(playerName, message);
-        plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, message);
-    }
-
-    /**
-     * Returns the connection logger.
-     *
-     * @return the connection logger
-     */
-    public ConnectionLogger getConnectionLogger() {
-        return connectionLogger;
     }
 }

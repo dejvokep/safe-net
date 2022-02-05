@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 https://dejvokep.dev/
+ * Copyright 2022 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,18 +23,15 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.injector.server.TemporaryPlayerFactory;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import dev.dejvokep.securednetwork.core.authenticator.AuthenticationResult;
+import dev.dejvokep.securednetwork.core.authenticator.AuthenticationRequest;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.connection.ConnectionLogger;
-import dev.dejvokep.securednetwork.core.log.Log;
 import dev.dejvokep.securednetwork.spigot.SecuredNetworkSpigot;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
 
@@ -47,6 +44,11 @@ import java.util.logging.Level;
  */
 public class PacketHandler {
 
+    /**
+     * Default disconnect message used if the one provided in the config is invalid.
+     */
+    private static final String DEFAULT_DISCONNECT_MESSAGE = "Disconnected";
+
     // Protocol manager
     private final ProtocolManager protocolManager;
     // The plugin instance
@@ -54,9 +56,8 @@ public class PacketHandler {
 
     // If to block pings
     private boolean blockPings;
-
-    // Connection logger
-    private final ConnectionLogger connectionLogger;
+    // Disconnect message
+    private String disconnectMessage;
 
     /**
      * Registers the packet listener and handles the incoming connections.
@@ -68,7 +69,8 @@ public class PacketHandler {
         // Set
         this.protocolManager = protocolManager;
         this.plugin = plugin;
-        this.connectionLogger = new ConnectionLogger(plugin.getLogger()::info);
+        // Reload
+        reload();
         // Authenticator
         final Authenticator authenticator = plugin.getAuthenticator();
 
@@ -76,57 +78,72 @@ public class PacketHandler {
         protocolManager.addPacketListener(new PacketAdapter(plugin.getPlugin(), PacketType.Handshake.Client.SET_PROTOCOL) {
             @Override
             public void onPacketReceiving(PacketEvent event) {
-                // If pinging and it is allowed
-                if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS && !blockPings)
-                    return;
-                // The strings
-                StructureModifier<String> strings = event.getPacket().getStrings();
-                // Authenticate
-                AuthenticationResult result = authenticator.authenticate(strings.read(0));
-                // Log the result
-                logResult(result.getPlayerId(), result.isPassed(), strings.read(0));
-                // If failed
-                if (!result.isPassed()) {
-                    // Disconnect
-                    if (!disconnect(event.getPlayer())) {
-                        // Mess up the hostname so the server will disconnect the player
-                        strings.write(0, "");
+                try {
+                    // If malformed
+                    if (event.getPacket().getProtocols().size() == 0 || event.getPacket().getStrings().size() == 0) {
+                        // Log
+                        plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", AuthenticationRequest.Result.FAILED_MALFORMED_DATA.getCode(), Authenticator.UNKNOWN_DATA, AuthenticationRequest.Result.FAILED_MALFORMED_DATA.getMessage(), Authenticator.UNKNOWN_DATA));
+                        // Disconnect
+                        disconnect(event);
                         return;
                     }
+                    // If pinging and it is allowed
+                    if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS && !blockPings)
+                        return;
+                    // The strings
+                    StructureModifier<String> strings = event.getPacket().getStrings();
+                    // Host
+                    String host = strings.readSafely(0);
+                    // Authenticate
+                    AuthenticationRequest request = authenticator.authenticate(host);
+                    // Log
+                    plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
+
+                    // If failed
+                    if (!request.getResult().isPassed()) {
+                        // Log
+                        plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
+                        disconnect(event);
+                    }
+
+                    // Set the host
+                    strings.write(0, request.getHost());
+                    // Log
+                    plugin.getLogger().info(String.format("OK (code B0): Accepted connection of \"%s\".\nConnection data: %s", request.getPlayerId(), request.getHost()));
+                } catch (Exception ex) {
+                    // Log
+                    plugin.getLogger().log(Level.SEVERE, "An exception occurred while processing a packet!", ex);
+                    disconnect(event);
                 }
-                // Set the host
-                strings.write(0, result.getHost());
             }
         });
     }
 
     /**
-     * Disconnects the given player. Returns if disconnection was successful.
+     * Disconnects the source of the given event.
      *
-     * @param player the player to disconnect
-     * @return if the player was disconnected
+     * @param event the event
      */
-    private boolean disconnect(@NotNull Player player) {
+    private void disconnect(@NotNull PacketEvent event) {
         try {
             // Create the disconnect packet
             PacketContainer disconnectPacket = new PacketContainer(PacketType.Login.Server.DISCONNECT);
-            // Message
-            String message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-failed-authentication"));
             // Write defaults
             disconnectPacket.getModifier().writeDefaults();
-            BaseComponent[] textComponent = TextComponent.fromLegacyText(message);
+            BaseComponent[] textComponent = TextComponent.fromLegacyText(disconnectMessage);
             String serialized = ComponentSerializer.toString(textComponent);
             WrappedChatComponent wrappedChatComponent = WrappedChatComponent.fromJson(serialized);
             // Set the message
             disconnectPacket.getChatComponents().write(0, wrappedChatComponent);
             // Send
-            protocolManager.sendServerPacket(player, disconnectPacket);
+            protocolManager.sendServerPacket(event.getPlayer(), disconnectPacket);
 
             // Disconnect the player
-            TemporaryPlayerFactory.getInjectorFromPlayer(player).disconnect(message);
-            return true;
-        } catch (ReflectiveOperationException ignored) {
-            return false;
+            TemporaryPlayerFactory.getInjectorFromPlayer(event.getPlayer()).disconnect(disconnectMessage);
+        } catch (Exception ex) {
+            // Log
+            plugin.getLogger().log(Level.SEVERE, "Failed to disconnect a player! Shutting down...", ex);
+            Bukkit.shutdown();
         }
     }
 
@@ -136,31 +153,8 @@ public class PacketHandler {
     public void reload() {
         // If to block ping packets
         blockPings = plugin.getConfiguration().getBoolean("block-pings");
+        // Disconnect message
+        disconnectMessage = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE));
     }
 
-    /**
-     * Logs the result of a connection request determined by the authentication result. The cause is always
-     * <code>failed_authentication</code> if the connection was rejected.
-     *
-     * @param playerId     UUID of the player connecting, or <code>?</code> if unknown
-     * @param accepted     if the connection was accepted
-     * @param propertyDump property array dump
-     */
-    private void logResult(@Nullable String playerId, boolean accepted, @NotNull String propertyDump) {
-        // Message
-        String message = "uuid=" + playerId + " result=" + (accepted ? "accepted" : "rejected") +
-                (accepted ? "" : " cause=failed_authentication") + (accepted ? "" : " properties=" + propertyDump);
-        // Log
-        connectionLogger.handle(playerId, message);
-        plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, message);
-    }
-
-    /**
-     * Returns the connection logger.
-     *
-     * @return the connection logger
-     */
-    public ConnectionLogger getConnectionLogger() {
-        return connectionLogger;
-    }
 }

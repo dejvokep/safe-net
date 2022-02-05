@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 https://dejvokep.dev/
+ * Copyright 2022 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 package dev.dejvokep.securednetwork.bungeecord.updater;
 
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.core.log.Log;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.jetbrains.annotations.NotNull;
@@ -38,8 +37,6 @@ public class Updater {
     public static final String URL = "https://api.spigotmc.org/legacy/update.php?resource=65075";
     // If is new version available and if to check that
     private boolean isNewVersion, enabled;
-    // Recheck delay in minutes
-    private int recheck;
 
     // Current version and the latest version of the plugin
     private final String currentVersion;
@@ -67,17 +64,6 @@ public class Updater {
      * Reloads the internal data and schedules delayed update checking.
      */
     public void reload() {
-        // If checking is enabled
-        this.enabled = plugin.getConfiguration().getBoolean("updater.enabled");
-        // If not enabled
-        if (!enabled)
-            return;
-
-        // Get the refresh delay
-        this.recheck = plugin.getConfiguration().getInt("updater.delay");
-        // Refresh
-        check();
-
         // If the task is not null
         if (task != null) {
             // Cancel
@@ -86,12 +72,23 @@ public class Updater {
             task = null;
         }
 
+        // If checking is enabled
+        this.enabled = plugin.getConfiguration().getBoolean("updater.enabled");
+        // If not enabled
+        if (!enabled)
+            return;
+
+        // Recheck delay in minutes
+        int recheck = plugin.getConfiguration().getInt("updater.delay");
+        // Refresh
+        check();
+
         // Rechecking for updates
-        if (enabled && recheck != -1) {
+        if (recheck != -1) {
             // Check if not invalid
             if (recheck < 1) {
                 // Log that refresh rate is invalid
-                plugin.getLog().log(Level.WARNING, Log.Source.UPDATER, "Recheck rate is smaller than 1min! Using value 1min.");
+                plugin.getLogger().warning("Updater recheck rate is smaller than 1min! Using value 1min.");
                 recheck = 1;
             }
 
@@ -103,7 +100,7 @@ public class Updater {
     /**
      * Checks for a new update of the plugin and logs the result.
      * <p>
-     * More specifically, reads the newest version from a website API, then announces if a new update is available or not.
+     * More specifically, reads the newest version from an API, then announces if a new update is available or not.
      */
     private void check() {
         // If not enabled
@@ -112,7 +109,7 @@ public class Updater {
 
         ProxyServer.getInstance().getScheduler().runAsync(plugin, () -> {
             // Checking for updates
-            plugin.getLog().logConsole(Level.INFO, Log.Source.UPDATER, "Checking for updates...");
+            plugin.getLogger().info("Checking for updates...");
 
             // Get current version of plugin
             int currentVersionNumbers = Integer.parseInt(this.currentVersion.replace(".", ""));
@@ -122,10 +119,7 @@ public class Updater {
                 this.latestVersion = new BufferedReader(new InputStreamReader(new URL(URL).openStream())).readLine();
             } catch (IOException ex) {
                 // Log the error
-                plugin.getLog().logConsoleWithoutThrowable(Level.WARNING, Log.Source.UPDATER,
-                        "Failed to check for updates.", ex);
-
-                // Return
+                plugin.getLogger().log(Level.WARNING, "Failed to check for updates.", ex);
                 return;
             }
 
@@ -133,62 +127,24 @@ public class Updater {
             int latestVersionNumbers = Integer.parseInt(this.latestVersion.replace(".", ""));
             this.isNewVersion = latestVersionNumbers > currentVersionNumbers;
 
-            // Log and print to console
+            // New version available
             if (isNewVersion)
-                // New version available
-                plugin.getLog().logConsole(Level.INFO, Log.Source.UPDATER, "New version " + latestVersion + " is available! You are using version " + currentVersion + ".");
+                plugin.getLogger().info("New version " + latestVersion + " is available! You are using version " + currentVersion + ".");
         });
     }
 
     /**
      * Returns a join message to be sent to a player informing about plugin version status.
      *
-     * @return the join message informing about plugin version status
+     * @return the join message informing about plugin version status (an empty string represents no message)
      */
     public String getJoinMessage() {
-        // Checking for updates is disabled
-        if (!enabled) return "";
+        // Checking for updates is disabled or there is no new version
+        if (!enabled || !isNewVersion) return "";
 
         // Replace and return
         return plugin.getConfiguration().getString("updater.message")
                 .replace("{version_current}", currentVersion)
                 .replace("{version_latest}", latestVersion);
     }
-
-    /**
-     * Returns if checking for updates is enabled.
-     *
-     * @return if checking for updates is enabled
-     */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Returns the latest version of the plugin in a string (x.x).
-     *
-     * @return the latest version
-     */
-    public String getLatestVersion() {
-        return latestVersion;
-    }
-
-    /**
-     * Returns the current version of the plugin in a string (x.x).
-     *
-     * @return the current version
-     */
-    public String getCurrentVersion() {
-        return currentVersion;
-    }
-
-    /**
-     * Returns if a new version of the plugin is available.
-     *
-     * @return if a new version is available
-     */
-    public boolean isNewVersionAvailable() {
-        return isNewVersion;
-    }
-
 }

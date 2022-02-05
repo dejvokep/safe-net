@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2021 https://dejvokep.dev/
+    Copyright 2022 https://dejvokep.dev/
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
     <groupId>dev.dejvokep</groupId>
     <artifactId>securednetwork-parent</artifactId>
     <packaging>pom</packaging>
-    <version>3.1</version>
+    <version>3.2</version>
     <modules>
         <module>securednetwork-core</module>
         <module>securednetwork-bungeecord</module>
@@ -34,27 +34,14 @@
     </modules>
     <name>SecuredNetwork</name>
     <description>A lightweight protection for your network with powerful configuration.</description>
+
+    <!-- Developers -->
     <developers>
         <developer>
-            <name>dejvokep</name>
+            <name>Dávid Kepič</name>
             <email>admin@dejvokep.dev</email>
-            <timezone>CET</timezone>
-            <url>https://dejvokep.dev</url>
         </developer>
     </developers>
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>manual</distribution>
-        </license>
-    </licenses>
-
-    <!-- Source encoding -->
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <!-- Build configuration -->
     <build>
@@ -90,12 +77,34 @@
         </plugins>
     </build>
 
+    <!-- Licenses -->
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
+
+    <!-- Source encoding -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- Dependencies -->
     <dependencies>
         <!-- Annotations -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>22.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- BoostedYAML -->
+        <dependency>
+            <groupId>dev.dejvokep</groupId>
+            <artifactId>boosted-yaml</artifactId>
+            <version>1.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

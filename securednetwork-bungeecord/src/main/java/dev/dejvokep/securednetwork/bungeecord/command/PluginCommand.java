@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 https://dejvokep.dev/
+ * Copyright 2022 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,16 +15,16 @@
  */
 package dev.dejvokep.securednetwork.bungeecord.command;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord;
-import dev.dejvokep.securednetwork.bungeecord.util.message.Messenger;
+import dev.dejvokep.securednetwork.bungeecord.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.command.ConsoleCommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -32,8 +32,8 @@ import java.util.logging.Level;
  */
 public class PluginCommand extends Command {
 
-    // The configuration file
-    private final Config config;
+    // The config
+    private final YamlDocument config;
     // The messenger
     private final Messenger messenger;
     // The plugin instance
@@ -71,53 +71,39 @@ public class PluginCommand extends Command {
 
         // If to reload
         if (args.length == 1 && args[0].equalsIgnoreCase("reload")) {
-            // Reloading
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloading...");
-
             // Config
-            config.load();
+            try {
+                config.reload();
+            } catch (IOException ex) {
+                plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config! If you believe this is not caused by improper configuration, please report it.", ex);
+                return;
+            }
             // Authenticator
             plugin.getAuthenticator().reload();
-            // IP whitelist
-            plugin.getIpWhitelist().reload();
+            // Address whitelist
+            plugin.getAddressWhitelist().reload();
             // Updater
             plugin.getUpdater().reload();
             // Login listener
             plugin.getListener().reload();
 
             // Reloaded
-            plugin.getLog().log(Level.INFO, Log.Source.GENERAL, "Reloaded.");
             messenger.sendMessage(sender, config.getString("command.reload"));
             return;
         }
 
         // If to generate
         if (args.length <= 2 && args[0].equalsIgnoreCase("generate")) {
-            // Generate
-            plugin.getAuthenticator().generatePassphrase(args.length == 1 ? Authenticator.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+            try {
+                // Generate
+                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? Authenticator.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+            } catch (IOException ex) {
+                plugin.getLogger().log(Level.SEVERE, "An error occurred while saving the config!", ex);
+                return;
+            }
             // Generated
             messenger.sendMessage(sender, config.getString("command.generate"));
             return;
-        }
-
-        // If to manage the connection logger
-        if (args.length >= 2 && args[0].equalsIgnoreCase("connection-logger")) {
-            // If to detach
-            if (args.length == 2 && args[1].equalsIgnoreCase("detach")) {
-                // Detach
-                plugin.getListener().getConnectionLogger().detach();
-                // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger detached.");
-                messenger.sendMessage(sender, config.getString("command.connection-logger.detached"));
-                return;
-            } else if (args.length == 3 && args[1].equalsIgnoreCase("attach")) {
-                // Attach
-                plugin.getListener().getConnectionLogger().attach(args[2]);
-                // Log
-                plugin.getLog().log(Level.INFO, Log.Source.CONNECTOR, "Connection logger attached to name \"" + args[2] + "\".");
-                messenger.sendMessage(sender, config.getString("command.connection-logger.attached").replace("{name}", args[2]));
-                return;
-            }
         }
 
         // Invalid format

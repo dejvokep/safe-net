@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2021 https://dejvokep.dev/
+    Copyright 2022 https://dejvokep.dev/
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
     <parent>
         <artifactId>securednetwork-parent</artifactId>
         <groupId>dev.dejvokep</groupId>
-        <version>3.1</version>
+        <version>3.2</version>
     </parent>
     <packaging>jar</packaging>
     <artifactId>securednetwork-distribution</artifactId>
@@ -66,6 +66,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>dev.dejvokep:securednetwork-*</include>
+                                    <include>dev.dejvokep:boosted-yaml</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
@@ -120,25 +121,31 @@
         <dependency>
             <groupId>dev.dejvokep</groupId>
             <artifactId>securednetwork-core</artifactId>
-            <version>3.1</version>
+            <version>3.2</version>
         </dependency>
-        <!-- Backend module -->
+        <!-- Spigot module -->
         <dependency>
             <groupId>dev.dejvokep</groupId>
             <artifactId>securednetwork-spigot</artifactId>
-            <version>3.1</version>
+            <version>3.2</version>
         </dependency>
-        <!-- Proxy module -->
+        <!-- BungeeCord module -->
         <dependency>
             <groupId>dev.dejvokep</groupId>
             <artifactId>securednetwork-bungeecord</artifactId>
-            <version>3.1</version>
+            <version>3.2</version>
         </dependency>
         <!-- Annotations -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>22.0.0</version>
+        </dependency>
+        <!-- BoostedYAML -->
+        <dependency>
+            <groupId>dev.dejvokep</groupId>
+            <artifactId>boosted-yaml</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 https://dejvokep.dev/
+ * Copyright 2022 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,21 +15,25 @@
  */
 package dev.dejvokep.securednetwork.bungeecord;
 
+import dev.dejvokep.boostedyaml.YamlDocument;
+import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
+import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
+import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
+import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
+import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import dev.dejvokep.securednetwork.bungeecord.command.PluginCommand;
-import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.IPWhitelist;
+import dev.dejvokep.securednetwork.bungeecord.ipwhitelist.AddressWhitelist;
 import dev.dejvokep.securednetwork.bungeecord.listener.LoginListener;
+import dev.dejvokep.securednetwork.bungeecord.message.Messenger;
 import dev.dejvokep.securednetwork.bungeecord.updater.Updater;
-import dev.dejvokep.securednetwork.bungeecord.util.config.ConfigProxy;
-import dev.dejvokep.securednetwork.bungeecord.util.message.Messenger;
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
-import dev.dejvokep.securednetwork.core.config.Config;
-import dev.dejvokep.securednetwork.core.log.Log;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
 import org.bstats.bungeecord.Metrics;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -45,13 +49,11 @@ public class SecuredNetworkBungeeCord extends Plugin {
     // Updater
     private Updater updater;
     // Config
-    private Config config;
-    // Logger
-    private Log log;
+    private YamlDocument config;
     // Authenticator
     private Authenticator authenticator;
-    // IP whitelist
-    private IPWhitelist ipWhitelist;
+    // Address whitelist
+    private AddressWhitelist addressWhitelist;
     // Login listener
     private LoginListener listener;
 
@@ -62,26 +64,21 @@ public class SecuredNetworkBungeeCord extends Plugin {
         // Thank you message
         getLogger().info("Thank you for downloading SecuredNetwork!");
 
-        // Load the config file
-        config = new ConfigProxy(this, "proxy_config.yml", "config.yml");
-        // Initialize log class
-        log = new Log(getLogger(), new File(getDataFolder(), "logs"), config);
+        try {
+            // Create the config file
+            config = YamlDocument.create(new File(getDataFolder(), "config.yml"), getResourceAsStream("bungee-config.yml"), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
+        } catch (IOException ex) {
+            getLogger().log(Level.SEVERE, "Failed to initialize the config file! Shutting down...", ex);
+            ProxyServer.getInstance().stop();
+            return;
+        }
 
-        // Enabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Enabling SecuredNetwork... (PROXY)");
-
-        // Initializing the authenticator
-        log.log(Level.INFO, Log.Source.GENERAL, "Initializing the authenticator.");
         // Initialize
-        authenticator = new Authenticator(config, log);
+        authenticator = new Authenticator(config, getLogger());
 
-        // Initializing the IP whitelist
-        log.log(Level.INFO, Log.Source.GENERAL, "Initializing the IP whitelist...");
         // Initialize
-        ipWhitelist = new IPWhitelist(this);
+        addressWhitelist = new AddressWhitelist(this);
 
-        // Registering listeners and commands
-        log.log(Level.INFO, Log.Source.GENERAL, "Registering listeners and commands.");
         // Plugin manager
         PluginManager pluginManager = ProxyServer.getInstance().getPluginManager();
         // Register listener
@@ -90,27 +87,17 @@ public class SecuredNetworkBungeeCord extends Plugin {
         pluginManager.registerCommand(this, new PluginCommand(this, "securednetwork"));
         pluginManager.registerCommand(this, new PluginCommand(this, "sn"));
 
-        // Starting updater
-        log.log(Level.INFO, Log.Source.GENERAL, "Starting updater.");
         // Initialize
         updater = new Updater(this);
 
         // If enabled
         if (config.getBoolean("metrics")) {
             // Initializing metrics
-            log.log(Level.INFO, Log.Source.GENERAL, "Initializing metrics.");
+            getLogger().info("Initializing metrics.");
             // Initialize Metrics
             new Metrics(this, 6479);
         }
 
-        // Finished enabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Finished enabling SecuredNetwork.");
-    }
-
-    @Override
-    public void onDisable() {
-        // Finished disabling
-        log.log(Level.INFO, Log.Source.GENERAL, "Finished disabling SecuredNetwork.");
     }
 
     /**
@@ -127,17 +114,8 @@ public class SecuredNetworkBungeeCord extends Plugin {
      *
      * @return the configuration file.
      */
-    public Config getConfiguration() {
+    public YamlDocument getConfiguration() {
         return config;
-    }
-
-    /**
-     * Returns the logging utility which is used to log plugin messages.
-     *
-     * @return the logging utility
-     */
-    public Log getLog() {
-        return log;
     }
 
     /**
@@ -159,12 +137,12 @@ public class SecuredNetworkBungeeCord extends Plugin {
     }
 
     /**
-     * Returns the IP whitelist.
+     * Returns the address whitelist.
      *
-     * @return the IP whitelist
+     * @return the address whitelist
      */
-    public IPWhitelist getIpWhitelist() {
-        return ipWhitelist;
+    public AddressWhitelist getAddressWhitelist() {
+        return addressWhitelist;
     }
 
     /**

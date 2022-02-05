@@ -20,7 +20,6 @@
     <bytecodeTargetLevel>
       <module name="distribution" target="1.5" />
       <module name="proxy" target="8" />
-      <module name="SecuredNetwork" target="8" />
       <module name="securednetwork" target="8" />
       <module name="SecuredNetwork (core)" target="8" />
     </bytecodeTargetLevel>
