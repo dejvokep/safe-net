@@ -34,27 +34,14 @@
     </modules>
     <name>SecuredNetwork</name>
     <description>A lightweight protection for your network with powerful configuration.</description>
+
+    <!-- Developers -->
     <developers>
         <developer>
-            <name>dejvokep</name>
+            <name>Dávid Kepič</name>
             <email>admin@dejvokep.dev</email>
-            <timezone>CET</timezone>
-            <url>https://dejvokep.dev</url>
         </developer>
     </developers>
-
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>manual</distribution>
-        </license>
-    </licenses>
-
-    <!-- Source encoding -->
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <!-- Build configuration -->
     <build>
@@ -90,6 +77,21 @@
         </plugins>
     </build>
 
+    <!-- Licenses -->
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>manual</distribution>
+        </license>
+    </licenses>
+
+    <!-- Source encoding -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- Dependencies -->
     <dependencies>
         <!-- Annotations -->
         <dependency>
