@@ -104,6 +104,7 @@ public class PacketHandler {
                         // Log
                         plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
                         disconnect(event);
+                        return;
                     }
 
                     // Set the host
