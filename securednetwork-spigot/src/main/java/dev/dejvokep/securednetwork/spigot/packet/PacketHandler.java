@@ -96,8 +96,6 @@ public class PacketHandler {
                     String host = strings.readSafely(0);
                     // Authenticate
                     AuthenticationRequest request = authenticator.authenticate(host);
-                    // Log
-                    plugin.getLogger().info(String.format("ERROR (code B%d): Rejected connection of %s due to failed authentication; %s\nConnection data: %s", request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
 
                     // If failed
                     if (!request.getResult().isPassed()) {
