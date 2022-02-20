@@ -25,7 +25,7 @@
     <parent>
         <artifactId>securednetwork-parent</artifactId>
         <groupId>dev.dejvokep</groupId>
-        <version>3.2</version>
+        <version>3.3</version>
     </parent>
     <packaging>jar</packaging>
     <description>SecuredNetwork - Lightweight but yet unbeaten protection for your server.</description>
@@ -68,7 +68,7 @@
                     <relocations>
                         <relocation>
                             <pattern>org.bstats</pattern>
-                            <shadedPattern>dev.dejvokep.securednetwork.bungeecord.util.metrics</shadedPattern>
+                            <shadedPattern>dev.dejvokep.securednetwork.bungeecord.libs.org.bstats</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>
@@ -132,7 +132,7 @@
         <dependency>
             <groupId>dev.dejvokep</groupId>
             <artifactId>securednetwork-core</artifactId>
-            <version>3.2</version>
+            <version>3.3</version>
             <scope>provided</scope>
         </dependency>
         <!-- BungeeCord API -->
@@ -155,7 +155,7 @@
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bungeecord</artifactId>
-            <version>2.2.1</version>
+            <version>3.0.0</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
