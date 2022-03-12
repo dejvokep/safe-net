@@ -65,7 +65,7 @@
                         <configuration>
                             <artifactSet>
                                 <includes>
-                                    <include>dev.dejvokep:securednetwork-*</include>
+                                    <include>dev.dejvokep:secured-network-*</include>
                                     <include>dev.dejvokep:boosted-yaml</include>
                                 </includes>
                             </artifactSet>
