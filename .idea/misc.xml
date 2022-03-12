@@ -12,6 +12,7 @@
       <list>
         <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/securednetwork-spigot/pom.xml" />
+        <option value="$PROJECT_DIR$/securednetwork-distribution/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

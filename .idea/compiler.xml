@@ -6,15 +6,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="securednetwork-core" />
-        <module name="securednetwork-bungeecord" />
-        <module name="securednetwork-spigot" />
+        <module name="secured-network-bungeecord" />
+        <module name="secured-network-core" />
+        <module name="secured-network-spigot" />
       </profile>
       <profile name="Annotation profile for SecuredNetwork" enabled="true">
         <sourceOutputDir name="../target/generated-sources/annotations" />
         <sourceTestOutputDir name="../target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="securednetwork-distribution" />
+        <module name="secured-network-distribution" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -22,6 +22,7 @@
       <module name="proxy" target="8" />
       <module name="securednetwork" target="8" />
       <module name="SecuredNetwork (core)" target="8" />
+      <module name="securednetwork-distribution" target="1.5" />
     </bytecodeTargetLevel>
   </component>
 </project>
