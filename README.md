@@ -5,6 +5,8 @@ bypass exploit, mainly for those who cannot access or configure their firewall s
 protection for everyone since 2019, connecting [BungeeGuard](https://github.com/lucko/BungeeGuard) (from which it took
 the inspiration) and the good old IP-whitelisting feature.
 
+[![SecuredNetwork is powered by Senior Hosting. Use code "YAML" for 10% off!](https://cdn.discordapp.com/attachments/927561782279675977/945372759289126973/Group_129.png)](https://senior-host.com/)
+
 # ❓ What is IP-forwarding bypass?
 
 When using a proxy server (e.g. BungeeCord) to connect your servers together, the backend servers must run on offline
@@ -22,7 +24,7 @@ use the IP-whitelist, this is the way to go. The plugin also supports [GeyserMC]
 including [Floodgate](https://github.com/GeyserMC/Floodgate/)), which other plugins do not. Logs everything to the
 console for easy verification.
 
-The plugin has been downloaded 10K+ times, and (on average) is active on 250+ networks managing over 1400 backend
+The plugin has been downloaded 10K+ times, and (on average) is active on 300+ networks managing over 1500 backend
 servers.
 
 # 🔧 Setup and support
