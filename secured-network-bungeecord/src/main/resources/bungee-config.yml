@@ -12,7 +12,7 @@
 #
 # Config version:
 # - IMPORTANT >> Do NOT change unless you know what you are doing. Changing this might break the plugin.
-config-version: 1
+config-version: 2
 # Passphrase:
 # - It is recommended to change this once in a while. Generate a new one using "/sn generate".
 passphrase: ""
