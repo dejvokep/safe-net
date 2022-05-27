@@ -80,7 +80,7 @@ public class SecuredNetworkSpigot extends JavaPlugin {
         * and will check for BungeeGuard (incompatible plugin)
         */
          Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () ->  {
-            if(plugin.checkForIncompatiblePlugin()) {
+            if(checkForIncompatiblePlugin()) {
                 getLogger().warning("######## WARNING ########");
                 getLogger().warning("");
                 getLogger().warning("SecuredNetwork has detected that BungeeGuard");
