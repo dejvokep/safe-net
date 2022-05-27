@@ -74,6 +74,26 @@ public class SecuredNetworkSpigot extends JavaPlugin {
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
         // Register
         packetHandler = new PacketHandler(ProtocolLibrary.getProtocolManager(), this);
+        
+        /**
+        * Scheduled task, will execute when the server is fully loaded
+        * and will check for BungeeGuard (incompatible plugin)
+        */
+         Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, () ->  {
+            if(plugin.checkForIncompatiblePlugin()) {
+                getLogger().warning("######## WARNING ########");
+                getLogger().warning("");
+                getLogger().warning("SecuredNetwork has detected that BungeeGuard");
+                getLogger().warning("is currently installed on your server.");
+                getLogger().warning("");
+                getLogger().warning("[!] You won't be able to join to your server until");
+                getLogger().warning("you remove BungeeGuard from your plugins' list.");
+                getLogger().warning("");
+                getLogger().warning("* Contact support if you think this is an error.");
+                getLogger().warning("");
+                getLogger().warning("######## WARNING ########");
+            }
+        }, 0L);
     }
 
     /**
@@ -111,5 +131,10 @@ public class SecuredNetworkSpigot extends JavaPlugin {
     public PacketHandler getPacketHandler() {
         return packetHandler;
     }
-
+    /**
+    * Check for incompatible plugins.
+    */
+    private boolean checkForIncompatiblePlugin() {
+    return getServer().getPluginManager().isPluginEnabled("BungeeGuard");
+    }
 }
