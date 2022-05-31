@@ -20,8 +20,7 @@ integrity.
 # 👍 Why to use SecuredNetwork over other plugins?
 
 You can't go wrong with classic [BungeeGuard](https://github.com/lucko/BungeeGuard), however, if you would also like to
-use the IP-whitelist, this is the way to go. The plugin also supports [GeyserMC](https://github.com/GeyserMC/Geyser) (
-including [Floodgate](https://github.com/GeyserMC/Floodgate/)), which other plugins do not. Logs everything to the
+use the IP-whitelist, this is the way to go. The plugin also supports [GeyserMC](https://github.com/GeyserMC/Geyser) (including [Floodgate](https://github.com/GeyserMC/Floodgate/)), which other plugins do not. Logs everything to the
 console for easy verification.
 
 The plugin has been downloaded 10K+ times, and (on average) is active on 300+ networks managing over 1500 backend
