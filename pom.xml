@@ -104,7 +104,7 @@
         <dependency>
             <groupId>dev.dejvokep</groupId>
             <artifactId>boosted-yaml</artifactId>
-            <version>1.0</version>
+            <version>1.2</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
