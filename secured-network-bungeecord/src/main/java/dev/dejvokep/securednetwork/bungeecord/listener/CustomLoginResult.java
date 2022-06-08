@@ -17,6 +17,7 @@ package dev.dejvokep.securednetwork.bungeecord.listener;
 
 import dev.dejvokep.securednetwork.core.authenticator.Authenticator;
 import net.md_5.bungee.connection.LoginResult;
+import net.md_5.bungee.protocol.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,10 +28,10 @@ import java.util.Arrays;
  * boss (see {@link #SERVER_CONNECTOR_CLASS} and {@link #HANDLER_BOSS_CLASS}) and by respective methods of these classes
  * ({@link #SERVER_CONNECTOR_CONNECTED_METHOD} and {@link #HANDLER_BOSS_CHANNEL_ACTIVE_METHOD}).
  * <p>
- * If the server is in online-mode, values from the previous login result are used. If in offline-mode, the server
- * does not supply the login result. As this custom login result is there every time (not depending on the mode), the
- * returned values are <code>null</code> (replacing the <code>null</code> login profile), except the properties.
- * The returned properties are (if not called by methods mentioned above) always an empty array, as during the testing
+ * If the server is in online-mode, values from the previous login result are used. If in offline-mode, the server does
+ * not supply the login result. As this custom login result is there every time (not depending on the mode), the
+ * returned values are <code>null</code> (replacing the <code>null</code> login profile), except the properties. The
+ * returned properties are (if not called by methods mentioned above) always an empty array, as during the testing
  * phase, a lot of problems were found when using some plugins if the value was <code>null</code>.
  */
 public class CustomLoginResult extends LoginResult {
@@ -53,12 +54,13 @@ public class CustomLoginResult extends LoginResult {
     public static final String HANDLER_BOSS_CHANNEL_ACTIVE_METHOD = "channelActive";
 
     // Property array with passphrase
-    private LoginResult.Property[] withPassphrase;
+    private Property[] withPassphrase;
     // Authenticator
     private final Authenticator authenticator;
 
     /**
-     * Copies references of variables from the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}. If the given result is <code>null</code>, all variables used by the result are set to <code>null</code>.
+     * Copies references of variables from the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}.
+     * If the given result is <code>null</code>, all variables used by the result are set to <code>null</code>.
      *
      * @param fromLogin     the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}
      * @param authenticator the authenticator providing the secret passphrase and other needed data
@@ -87,6 +89,10 @@ public class CustomLoginResult extends LoginResult {
     public Property[] getProperties() {
         // The stack trace
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        // If unable to verify
+        if (stackTrace.length < 4)
+            return super.getProperties();
+
         // Server connector caller
         StackTraceElement serverConnector = stackTrace[2];
         // Handler boss caller

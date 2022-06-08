@@ -25,7 +25,7 @@
     <parent>
         <artifactId>secured-network-parent</artifactId>
         <groupId>dev.dejvokep</groupId>
-        <version>3.4</version>
+        <version>3.5</version>
     </parent>
     <packaging>jar</packaging>
     <description>${project.parent.description}</description>
@@ -116,7 +116,7 @@
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
-            <version>1.18.1-R0.1-SNAPSHOT</version>
+            <version>1.19-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- ProtocolLib -->
