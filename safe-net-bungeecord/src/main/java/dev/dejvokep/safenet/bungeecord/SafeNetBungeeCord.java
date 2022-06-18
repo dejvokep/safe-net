@@ -86,7 +86,7 @@ public class SafeNetBungeeCord extends Plugin {
         pluginManager.registerCommand(this, new PluginCommand(this, "sn"));
 
         // Initialize
-        new Updater(this);
+        Updater.watch(this);
 
         // If enabled
         if (config.getBoolean("metrics")) {

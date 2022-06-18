@@ -44,7 +44,7 @@ public class Updater {
      *
      * @param plugin the plugin instance
      */
-    public Updater(@NotNull SafeNetBungeeCord plugin) {
+    public static void watch(@NotNull SafeNetBungeeCord plugin) {
         // Version
         String version = plugin.getDescription().getVersion();
 
