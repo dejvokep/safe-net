@@ -30,7 +30,7 @@ servers.
 # 🔧 Setup and support
 
 Download the latest release from the panel on the right. **BungeeCord 1.19 and ProtocolLib 5.0.0 or newer are
-required.** Otherwise, use release most suitable for your environment:
+required.** Otherwise, use the most suitable release for your environment:
 
 | SafeNET | BungeeCord | ProtocolLib | Game |
 | ------- | ---------- | ----------- | ---- |
