@@ -52,8 +52,9 @@ public class Updater {
         ProxyServer.getInstance().getScheduler().schedule(plugin, () -> {
             // The latest version
             String latest;
-            try {
-                latest = new BufferedReader(new InputStreamReader(new URL(URL).openStream())).readLine();
+            // Read
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new URL(URL).openStream()))) {
+                latest = reader.readLine();
             } catch (IOException ignored) {
                 return;
             }
