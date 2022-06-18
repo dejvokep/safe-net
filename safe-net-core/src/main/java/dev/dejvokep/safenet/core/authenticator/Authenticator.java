@@ -38,7 +38,7 @@ public class Authenticator {
     /**
      * Property name.
      */
-    public static final String PROPERTY_NAME = "secured_network";
+    public static final String PROPERTY_NAME = "safe_net";
     /**
      * Host data delimiter.
      */
