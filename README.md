@@ -1,11 +1,11 @@
-# 🔒 SecuredNetwork
+# 🔒 SafeNET
 
-[SecuredNetwork](https://www.spigotmc.org/resources/65075/) is a lightweight plugin protecting you from IP-forwarding
-bypass exploit, mainly for those who cannot access or configure their firewall systems. The plugin has been serving
-protection for everyone since 2019, connecting [BungeeGuard](https://github.com/lucko/BungeeGuard) (from which it took
-the inspiration) and the good old IP-whitelisting feature.
+[SafeNET](https://www.spigotmc.org/resources/65075/) is a lightweight plugin protecting you from IP-forwarding bypass
+exploit, mainly for those who cannot access or configure their firewall systems. The plugin has been serving protection
+for everyone since 2019, connecting [BungeeGuard](https://github.com/lucko/BungeeGuard) (from which it took the
+inspiration) and the good old IP-whitelisting feature.
 
-[![SecuredNetwork is powered by Senior Hosting. Use code "YAML" for 10% off!](https://cdn.discordapp.com/attachments/927561782279675977/945372759289126973/Group_129.png)](https://senior-host.com/)
+[![SafeNET is powered by Senior Hosting. Use code "YAML" for 10% off!](https://cdn.discordapp.com/attachments/927561782279675977/945372759289126973/Group_129.png)](https://senior-host.com/)
 
 # ❓ What is IP-forwarding bypass?
 
@@ -17,18 +17,27 @@ to the proxy server when a player joins and then forwarded by the proxy to backe
 passphrase, which is inserted into the player's profile and then forwarded to the backend servers to check for
 integrity.
 
-# 👍 Why to use SecuredNetwork over other plugins?
+# 👍 Why to use SafeNET over other plugins?
 
 You can't go wrong with classic [BungeeGuard](https://github.com/lucko/BungeeGuard), however, if you would also like to
 use the IP-whitelist, this is the way to go. The plugin also supports [GeyserMC](https://github.com/GeyserMC/Geyser) (
 including [Floodgate](https://github.com/GeyserMC/Floodgate/)), which other plugins do not. Logs everything to the
-console for easy verification.
+console for easy verification and control over connection flow.
 
-The plugin has been downloaded 10K+ times, and (on average) is active on 300+ networks managing over 1500 backend
+The plugin has been downloaded 13K+ times, and (on average) is active on 300+ networks managing over 1500 backend
 servers.
 
 # 🔧 Setup and support
 
-You can view the setup instructions at [the wiki](https://dejvokep.gitbook.io/securednetwork/). If you need help with
-anything, feel free join the [Discord server](https://discord.gg/BbhADEy) (nonstop 24/7 🤖 support). Or, just to talk
-with us 👋
+Download the latest release from the panel on the right. **BungeeCord 1.19 and ProtocolLib 5.0.0 or newer are
+required.** Otherwise, use release most suitable for your environment:
+
+| SafeNET | BungeeCord | ProtocolLib | Game |
+| ------- | ---------- | ----------- | ---- |
+| 3.6 (latest) | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 5.0.0 (or newer) | 1.8 - 1.19 |
+| 3.5 | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 4.8.0 (or older) | 1.8 - 1.19 |
+| 3.4 | Builds 1.18 or older | 4.8.0 (or older) | 1.8 - 1.18 |
+| 3.3 (legacy) | - | - | -
+
+You can view the setup instructions at [the wiki](https://dejvokep.gitbook.io/safenet/). If you need help with anything,
+feel free join the [Discord server](https://discord.gg/BbhADEy) (nonstop 24/7 🤖 support). Or, just to talk with us 👋
