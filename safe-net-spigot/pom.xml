@@ -23,7 +23,7 @@
 
     <!-- Artifact data -->
     <parent>
-        <artifactId>safe-net-parent</artifactId>
+        <artifactId>safe-net</artifactId>
         <groupId>dev.dejvokep</groupId>
         <version>3.5</version>
     </parent>
