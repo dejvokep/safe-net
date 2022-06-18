@@ -1,0 +1,18 @@
+# Plugin info:
+name: ${parent.name}
+version: ${parent.version}
+author: dejvokep
+main: dev.dejvokep.safenet.spigot.SafeNetSpigot
+description: ${parent.description}
+api-version: 1.13
+# Dependencies:
+depend:
+  - ProtocolLib
+# Commands:
+commands:
+  safenet:
+    description: "The main command of SafeNET plugin."
+    usage: /safenet
+  sn:
+    description: "The main command of SafeNET plugin."
+    usage: /sn

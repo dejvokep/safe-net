@@ -22,30 +22,42 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!-- Artifact data -->
-    <groupId>dev.dejvokep</groupId>
-    <artifactId>safe-net-parent</artifactId>
-    <packaging>pom</packaging>
-    <version>3.5</version>
-    <modules>
-        <module>safe-net-core</module>
-        <module>safe-net-bungeecord</module>
-        <module>safe-net-spigot</module>
-        <module>safe-net-distribution</module>
-    </modules>
-    <name>SafeNET</name>
-    <description>A lightweight protection from IP-forward bypass exploit for your network.</description>
-
-    <!-- Developers -->
+    <parent>
+        <artifactId>safe-net-parent</artifactId>
+        <groupId>dev.dejvokep</groupId>
+        <version>3.5</version>
+    </parent>
+    <packaging>jar</packaging>
+    <description>${project.parent.description}</description>
+    <artifactId>safe-net-spigot</artifactId>
     <developers>
         <developer>
-            <name>Dávid Kepič</name>
+            <name>dejvokep</name>
             <email>admin@dejvokep.dev</email>
+            <timezone>CET</timezone>
+            <url>https://dejvokep.dev</url>
         </developer>
     </developers>
 
     <!-- Build configuration -->
     <build>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>8</source>
+                    <target>8</target>
+                </configuration>
+                <version>3.8.1</version>
+            </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
@@ -55,7 +67,7 @@
                         <owner>dejvokep</owner>
                         <email>admin@dejvokep.dev</email>
                     </properties>
-                    <header>${project.basedir}/LICENSE-header.txt</header>
+                    <header>${project.parent.basedir}/LICENSE-header.txt</header>
                     <excludes>
                         <exclude>**/README</exclude>
                     </excludes>
@@ -77,34 +89,41 @@
         </plugins>
     </build>
 
-    <!-- Licenses -->
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>manual</distribution>
-        </license>
-    </licenses>
-
-    <!-- Source encoding -->
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+    <!-- Repositories -->
+    <repositories>
+        <!-- Spigot -->
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+        <!-- ProtocolLib -->
+        <repository>
+            <id>dmulloy2-repo</id>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
+        </repository>
+    </repositories>
 
     <!-- Dependencies -->
     <dependencies>
-        <!-- Annotations -->
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>23.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <!-- BoostedYAML -->
+        <!-- Core module -->
         <dependency>
             <groupId>dev.dejvokep</groupId>
-            <artifactId>boosted-yaml</artifactId>
-            <version>1.2</version>
+            <artifactId>safe-net-core</artifactId>
+            <version>${project.parent.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Spigot API -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.19-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- ProtocolLib -->
+        <dependency>
+            <groupId>com.comphenix.protocol</groupId>
+            <artifactId>ProtocolLib</artifactId>
+            <version>5.0.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
