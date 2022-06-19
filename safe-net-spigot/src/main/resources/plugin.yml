@@ -5,6 +5,7 @@ author: dejvokep
 main: dev.dejvokep.safenet.spigot.SafeNetSpigot
 description: ${parent.description}
 api-version: 1.13
+load: STARTUP
 # Dependencies:
 depend:
   - ProtocolLib

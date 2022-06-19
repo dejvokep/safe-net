@@ -16,16 +16,19 @@
 package dev.dejvokep.safenet.spigot.packet;
 
 import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.injector.InternalManager;
+import com.comphenix.protocol.injector.netty.manager.NetworkManagerInjector;
 import com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory;
 import com.comphenix.protocol.reflect.StructureModifier;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.core.authenticator.AuthenticationRequest;
 import dev.dejvokep.safenet.core.authenticator.Authenticator;
+import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
@@ -33,16 +36,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.logging.Level;
 
 /**
- * Listens for the {@link PacketType.Handshake.Client#SET_PROTOCOL} packet. This packet is then used to read the
- * <code>host</code> string and extract the property passed by the proxy server from it. If there is the correct
- * property and value, connection is allowed. The property is then removed from the packet to hide it from unwanted
- * exposures. This is also why this packet was chosen - it is the first packet sent between the server and client,
- * so we can remove the property as soon as possible.
+ * Listens for the {@link PacketType.Handshake.Client#SET_PROTOCOL} packet. This packet is the first one sent from the
+ * client and is then used to read the <code>host</code> string and extract the properties.
  */
 public class PacketHandler {
 
@@ -85,6 +83,31 @@ public class PacketHandler {
         reload();
         // Authenticator
         final Authenticator authenticator = plugin.getAuthenticator();
+
+        /*protocolManager.addPacketListener(new PacketAdapter(plugin.getPlugin(), PacketType.Handshake.Client.getInstance().values()) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                System.out.println(event.getPacketType());
+            }
+        });
+        protocolManager.addPacketListener(new PacketAdapter(plugin.getPlugin(), PacketType.Login.Client.getInstance().values()) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                System.out.println(event.getPacketType());
+            }
+        });
+        protocolManager.addPacketListener(new PacketAdapter(plugin.getPlugin(), PacketType.Play.Client.getInstance().values()) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                System.out.println(event.getPacketType());
+            }
+        });
+        protocolManager.addPacketListener(new PacketAdapter(plugin.getPlugin(), PacketType.Status.Client.getInstance().values()) {
+            @Override
+            public void onPacketReceiving(PacketEvent event) {
+                System.out.println(event.getPacketType());
+            }
+        });*/
 
         // Listen to the handshake packet
         protocolManager.addPacketListener(new PacketAdapter(plugin.getPlugin(), PacketType.Handshake.Client.SET_PROTOCOL) {
@@ -147,23 +170,17 @@ public class PacketHandler {
             disconnectPacket.getChatComponents().write(0, wrappedChatComponent);
             // Send
             protocolManager.sendServerPacket(event.getPlayer(), disconnectPacket);
+        } catch (Exception ignored) {
+        }
 
+        try {
             // Disconnect the player
             TemporaryPlayerFactory.getInjectorFromPlayer(event.getPlayer()).disconnect(disconnectMessage);
         } catch (Exception ex) {
-            try {
-                // Attempt again
-                TemporaryPlayerFactory.getInjectorFromPlayer(event.getPlayer()).disconnect(disconnectMessage);
-            } catch (Exception ex2) {
-                // Log
-                plugin.getLogger().log(Level.SEVERE, "Failed to disconnect a player! Shutting down...", ex);
-                // The 2nd exception
-                StringWriter writer = new StringWriter();
-                ex2.printStackTrace(new PrintWriter(writer));
-                plugin.getLogger().log(Level.SEVERE, writer.toString());
-                // Shutdown
-                Bukkit.shutdown();
-            }
+            // Log
+            plugin.getLogger().log(Level.SEVERE, "Failed to disconnect a player! Shutting down...", ex);
+            // Shutdown
+            Bukkit.shutdown();
         }
     }
 
