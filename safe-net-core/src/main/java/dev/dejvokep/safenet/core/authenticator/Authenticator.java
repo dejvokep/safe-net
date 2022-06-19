@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -87,11 +86,6 @@ public class Authenticator {
      */
     private static final Type PROPERTY_LIST_TYPE = new TypeToken<ArrayList<Property>>() {
     }.getType();
-
-    /**
-     * Passphrase characters (90 chars) used to generate the passphrase.
-     */
-    private static final String PASSPHRASE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=[];,./~!@#$%^&*()_+{}|:<>?";
 
     // Passphrase
     private String passphrase;
@@ -247,25 +241,17 @@ public class Authenticator {
     }
 
     /**
-     * Generates a new passphrase of the specified length and it into the configuration file.
+     * Generates a new passphrase of the specified length and sets it into the configuration file.
      *
      * @param length the desired length of the new passphrase (<code>length > 0</code>)
      */
-    public void generatePassphrase(int length) throws IOException {
+    public final void generatePassphrase(int length) throws IOException {
         // If the length is less than 1
         if (length < 1)
             return;
 
-        // Secure random
-        SecureRandom random = new SecureRandom();
-        // String builder
-        StringBuilder stringBuilder = new StringBuilder();
-        // Build the passphrase
-        for (int count = 0; count < length; count++)
-            // Append a new character
-            stringBuilder.append(PASSPHRASE_CHARS.charAt(random.nextInt(PASSPHRASE_CHARS.length())));
         // Set into the config
-        config.set("passphrase", stringBuilder.toString());
+        config.set("passphrase", KeyGenerator.generate(length));
         // Save
         config.save();
     }
