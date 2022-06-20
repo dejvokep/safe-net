@@ -63,7 +63,7 @@ public enum AuthenticationResult {
     /**
      * Session authentication failed due to reflection components being unavailable.
      */
-    SESSION_REFLECTION_UNAVAILABLE(false, "reflection components are unavailable.", 7),
+    SESSION_REFLECTION_UNAVAILABLE(false, "reflection components are unavailable. Look for any errors during server startup.", 7),
     /**
      * Session authentication failed because there is no game profile.
      */

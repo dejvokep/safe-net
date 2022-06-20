@@ -37,7 +37,7 @@ public class SessionListener implements Listener {
     /**
      * Message logged when a connection was denied.
      */
-    private static final String MESSAGE_DENIED = "DENIED (code B%d): Failed to authenticate session \"%s\" (%s).";
+    private static final String MESSAGE_DENIED = "DENIED (code B%d): Failed to authenticate session \"%s\" (%s): %s";
 
     /**
      * Message logged when a connection was accepted.
@@ -68,12 +68,14 @@ public class SessionListener implements Listener {
         // Authenticate
         AuthenticationResult result = plugin.getAuthenticator().session(player);
 
-        // Log
-        plugin.getLogger().info(String.format(result.isSuccess() ? MESSAGE_ACCEPTED : MESSAGE_DENIED, result.getCode(), player.getName(), player.getUniqueId()));
         // If is accepted
-        if (result.isSuccess())
+        if (result.isSuccess()) {
+            plugin.getLogger().info(String.format(MESSAGE_ACCEPTED, result.getCode(), player.getName(), player.getUniqueId()));
             return;
+        }
 
+        // Log
+        plugin.getLogger().info(String.format(MESSAGE_DENIED, result.getCode(), player.getName(), player.getUniqueId(), result.getMessage()));
 
         // Disconnect
         try {

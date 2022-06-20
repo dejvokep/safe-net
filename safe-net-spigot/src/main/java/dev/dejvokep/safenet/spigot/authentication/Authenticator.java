@@ -56,7 +56,7 @@ public class Authenticator {
     /**
      * Host data delimiter.
      */
-    private static final String HOST_DELIMITER = Pattern.quote("\00");
+    private static final String HOST_DELIMITER = "\00";
     /**
      * Start of the JSON containing all the properties.
      */
@@ -89,8 +89,7 @@ public class Authenticator {
 
     // Session key used to protect against uncaught handshakes
     private final String sessionKey = KeyGenerator.generate(SESSION_KEY_LENGTH);
-    // Class and method necessary for profile manipulation
-    private Class<?> craftPlayerClass = null;
+    // Method necessary for profile manipulation
     private Method profileMethod = null;
 
     /**
@@ -231,12 +230,12 @@ public class Authenticator {
      */
     public AuthenticationResult session(@NotNull Player player) {
         // Check fields
-        if (profileMethod == null || craftPlayerClass == null)
+        if (profileMethod == null || DisconnectHandler.CRAFT_PLAYER_CLASS == null)
             return AuthenticationResult.SESSION_REFLECTION_UNAVAILABLE;
 
         try {
             // Profile
-            GameProfile profile = (GameProfile) profileMethod.invoke(craftPlayerClass.cast(player));
+            GameProfile profile = (GameProfile) profileMethod.invoke(DisconnectHandler.CRAFT_PLAYER_CLASS.cast(player));
             if (profile == null)
                 return AuthenticationResult.SESSION_NO_GAME_PROFILE;
 

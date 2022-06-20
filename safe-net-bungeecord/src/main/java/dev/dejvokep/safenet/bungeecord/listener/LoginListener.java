@@ -18,7 +18,6 @@ package dev.dejvokep.safenet.bungeecord.listener;
 import dev.dejvokep.safenet.bungeecord.SafeNetBungeeCord;
 import dev.dejvokep.safenet.bungeecord.ipwhitelist.AddressHolder;
 import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
@@ -90,11 +89,6 @@ public class LoginListener implements Listener {
      * Reason for denying a connection because no passphrase is configured.
      */
     private static final String REASON_PASSPHRASE_NOT_CONFIGURED = "passphrase is not configured.";
-
-    /**
-     * If the cancel reason is set using a string - if using server version <code>1.7</code>.
-     */
-    private static final boolean OLD_CANCEL_REASON = ProxyServer.getInstance().getVersion().contains("1.7");
 
     // Login result field
     private Field loginResultField;
@@ -198,11 +192,7 @@ public class LoginListener implements Listener {
     private void cancel(@NotNull LoginEvent event) {
         // Cancel the event
         event.setCancelled(true);
-
         // Set the message
-        if (OLD_CANCEL_REASON)
-            event.setCancelReason(disconnectMessage.getText());
-        else
-            event.setCancelReason(disconnectMessage);
+        event.setCancelReason(disconnectMessage);
     }
 }
