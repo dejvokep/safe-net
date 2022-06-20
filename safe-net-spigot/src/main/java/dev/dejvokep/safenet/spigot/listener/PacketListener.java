@@ -29,6 +29,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.logging.Level;
 
 /**
@@ -88,7 +90,7 @@ public class PacketListener {
                     // If failed
                     if (!request.getResult().isSuccess()) {
                         // Log
-                        plugin.getLogger().info(String.format(MESSAGE_DENIED, request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), request.getHost()));
+                        plugin.getLogger().info(String.format(MESSAGE_DENIED, request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), Base64.getEncoder().encodeToString(request.getHost().getBytes(StandardCharsets.UTF_8))));
                         disconnect(event);
                         return;
                     }
