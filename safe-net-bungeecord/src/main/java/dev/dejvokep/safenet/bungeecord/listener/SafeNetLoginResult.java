@@ -34,7 +34,7 @@ import java.util.Arrays;
  * returned properties are (if not called by methods mentioned above) always an empty array, as during the testing
  * phase, a lot of problems were found when using some plugins if the value was <code>null</code>.
  */
-public class CustomLoginResult extends LoginResult {
+public class SafeNetLoginResult extends LoginResult {
 
     /**
      * Server connector class.
@@ -65,7 +65,7 @@ public class CustomLoginResult extends LoginResult {
      * @param fromLogin       the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}
      * @param passphraseStore the store providing the secret passphrase and other needed data
      */
-    CustomLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseStore passphraseStore) {
+    SafeNetLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseStore passphraseStore) {
         // Call as in offline mode
         super(null, null, new Property[0]);
         // Set

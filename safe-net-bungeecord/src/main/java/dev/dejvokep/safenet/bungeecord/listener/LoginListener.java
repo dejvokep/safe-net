@@ -22,7 +22,6 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
 import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.connection.LoginResult;
@@ -35,14 +34,6 @@ import java.util.logging.Level;
 
 /**
  * Class handling {@link LoginEvent} and {@link PostLoginEvent} events.
- * <ul>
- *     <li>{@link LoginEvent} processes the connection and inserts a special login result into the connection. This event
- *     was chosen because if the network is in online-mode, the player's textures (with the login profile) are set into the
- *     {@link InitialHandler}'s field just before the event fires - the old profile, which would be set before, if any of
- *     earlier events were used (e.g. {@link PreLoginEvent} for this task, would be overwritten.
- *     Therefore, this event is the first event that is suitable.</li>
- *     <li>{@link PostLoginEvent} sends players with the updater permission an updater message.</li>
- * </ul>
  */
 public class LoginListener implements Listener {
 
@@ -173,7 +164,7 @@ public class LoginListener implements Listener {
 
         try {
             // Set
-            loginResultField.set(pendingConnection, new CustomLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getAuthenticator()));
+            loginResultField.set(pendingConnection, new SafeNetLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getAuthenticator()));
         } catch (Exception ex) {
             // Log
             plugin.getLogger().log(Level.SEVERE, "An error occurred while setting the custom login result into the connection!", ex);

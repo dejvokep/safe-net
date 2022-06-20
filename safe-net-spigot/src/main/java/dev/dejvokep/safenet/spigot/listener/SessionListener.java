@@ -15,8 +15,8 @@
  */
 package dev.dejvokep.safenet.spigot.listener;
 
-import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
+import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -33,7 +33,6 @@ import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 
 /**
  * Session listener responsible for authenticating sessions.

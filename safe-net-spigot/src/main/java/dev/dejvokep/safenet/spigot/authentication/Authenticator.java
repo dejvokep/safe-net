@@ -25,7 +25,6 @@ import dev.dejvokep.safenet.core.PassphraseStore;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * A class used to authenticate handshakes and sessions (to protect against uncaught handshakes during startup).
@@ -246,7 +244,7 @@ public class Authenticator {
 
             // Exactly one property required
             Collection<com.mojang.authlib.properties.Property> properties = propertyMap.get(SESSION_PROPERTY_NAME);
-            if (properties == null || properties.size() == 0)
+            if (properties.size() == 0)
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Delete possible properties with the passphrase
