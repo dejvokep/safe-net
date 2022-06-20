@@ -21,13 +21,19 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.plugin.RegisteredListener;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Session listener responsible for authenticating sessions.
@@ -59,6 +65,7 @@ public class SessionListener implements Listener {
         this.plugin = plugin;
         // Register
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        pushListener();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -97,6 +104,42 @@ public class SessionListener implements Listener {
         // Revoke cancellation just in case
         if (pendingKick.remove(event.getPlayer()))
             event.setCancelled(false);
+    }
+
+    /**
+     * Pushes this listener to the first handler place for {@link PlayerJoinEvent}, so passphrase and session will be
+     * cleared before it reaches other listeners.
+     */
+    private void pushListener() {
+        try {
+            // Handlers field (no need to cache, one-time use only)
+            Field handlersField = HandlerList.class.getDeclaredField("handlerslots");
+            handlersField.setAccessible(true);
+
+            // Listeners on the lowest priority
+            @SuppressWarnings("unchecked")
+            ArrayList<RegisteredListener> listeners = ((EnumMap<EventPriority, ArrayList<RegisteredListener>>) handlersField.get(PlayerJoinEvent.getHandlerList())).get(EventPriority.LOWEST);
+
+            // Find the index of this listener
+            int target = 0;
+            for (; target < listeners.size(); target++) {
+                if (listeners.get(target).getListener() == this)
+                    break;
+            }
+
+            // Nothing to do
+            if (target == 0)
+                return;
+
+            // Move all listeners one place behind
+            RegisteredListener push = listeners.get(target);
+            while (--target >= 0)
+                listeners.set(target + 1, listeners.get(target));
+            // Set this listener as first
+            listeners.set(0, push);
+        } catch (ReflectiveOperationException ex) {
+            plugin.getLogger().log(Level.SEVERE, "An error occurred while pushing the session listener to the first place! This might cause passphrase leaks if another plugins handle the exposed data incorrectly!", ex);
+        }
     }
 
 }
