@@ -24,6 +24,7 @@ import dev.dejvokep.safenet.core.KeyGenerator;
 import dev.dejvokep.safenet.core.PassphraseStore;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
+import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -104,11 +105,10 @@ public class Authenticator {
         this.logger = logger;
 
         try {
-            craftPlayerClass = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".entity.CraftPlayer");
-            profileMethod = craftPlayerClass.getDeclaredMethod("getProfile");
+            profileMethod = DisconnectHandler.CRAFT_PLAYER_CLASS.getDeclaredMethod("getProfile");
             profileMethod.setAccessible(true);
         } catch (ReflectiveOperationException ex) {
-            logger.log(Level.SEVERE, "An error occurred while obtaining server classes. Are you using a supported version?", ex);
+            logger.log(Level.SEVERE, "An error occurred while utilizing server classes!", ex);
         }
     }
 

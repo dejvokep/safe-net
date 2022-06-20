@@ -69,8 +69,8 @@ public class SafeNetSpigot extends JavaPlugin {
 
         // Initialize
         passphraseStore = new PassphraseStore(config, getLogger());
-        authenticator = new Authenticator(passphraseStore, getLogger());
         disconnectHandler = new DisconnectHandler(this);
+        authenticator = new Authenticator(passphraseStore, getLogger());
         // Register commands
         Bukkit.getPluginCommand("safenet").setExecutor(new PluginCommand(this));
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
