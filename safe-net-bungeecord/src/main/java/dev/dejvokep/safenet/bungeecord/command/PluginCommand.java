@@ -18,7 +18,7 @@ package dev.dejvokep.safenet.bungeecord.command;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.safenet.bungeecord.SafeNetBungeeCord;
 import dev.dejvokep.safenet.bungeecord.message.Messenger;
-import dev.dejvokep.safenet.core.authenticator.Authenticator;
+import dev.dejvokep.safenet.core.PassphraseStore;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Command;
@@ -29,15 +29,15 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 /**
- * Command executor for the main plugin command, which can reload the plugin or generate a new passphrase.
+ * Command executor for the main plugin command.
  */
 public class PluginCommand extends Command {
 
-    // The config
+    // Config
     private final YamlDocument config;
-    // The messenger
+    // Messenger
     private final Messenger messenger;
-    // The plugin instance
+    // Plugin instance
     private final SafeNetBungeeCord plugin;
 
     /**
@@ -78,7 +78,7 @@ public class PluginCommand extends Command {
                     try {
                         config.reload();
                     } catch (IOException ex) {
-                        plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config! If you believe this is not caused by improper configuration, please report it.", ex);
+                        plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config!", ex);
                         return;
                     }
                     // Authenticator
@@ -107,7 +107,7 @@ public class PluginCommand extends Command {
         if (args.length <= 2 && args[0].equalsIgnoreCase("generate")) {
             try {
                 // Generate
-                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? Authenticator.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? PassphraseStore.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
             } catch (IOException ex) {
                 plugin.getLogger().log(Level.SEVERE, "An error occurred while saving the config!", ex);
                 return;

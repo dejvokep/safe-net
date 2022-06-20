@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 
 /**
- * Command executor for the main plugin command, which reloads the plugin.
+ * Command executor for the main plugin command.
  */
 public class PluginCommand implements CommandExecutor {
 
@@ -37,9 +37,9 @@ public class PluginCommand implements CommandExecutor {
     private final SafeNetSpigot plugin;
 
     /**
-     * Initializes the internals.
+     * Initializes the command executor.
      *
-     * @param plugin the plugin instance
+     * @param plugin the plugin
      */
     public PluginCommand(@NotNull SafeNetSpigot plugin) {
         // Set
@@ -73,22 +73,22 @@ public class PluginCommand implements CommandExecutor {
                 try {
                     config.reload();
                 } catch (IOException ex) {
-                    plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config! If you believe this is not caused by improper configuration, please report it.", ex);
+                    plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config!", ex);
                     return true;
                 }
 
-                // Authenticator
-                plugin.getAuthenticator().reload();
-                // Packet handler
-                plugin.getPacketHandler().reload();
-
+                // Reload all
+                plugin.getPacketListener().reload();
+                plugin.getPassphraseStore().reload();
+                plugin.getDisconnectHandler().reload();
+                
                 // Reloaded
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         config.getString("command.reload")));
                 return true;
             case "diagnostics":
                 sender.sendMessage("Plugin: " + plugin.getDescription().getName() + " v" + plugin.getDescription().getVersion());
-                sender.sendMessage("Passphrase: " + plugin.getAuthenticator().getPassphraseStatus() + " (" + plugin.getAuthenticator().getPassphrase().length() + " chars)");
+                sender.sendMessage("Passphrase: " + plugin.getPassphraseStore().getPassphraseStatus() + " (" + plugin.getPassphraseStore().getPassphrase().length() + " chars)");
                 sender.sendMessage("Server: " + Bukkit.getName() + " " + Bukkit.getVersion() + " " + Bukkit.getBukkitVersion());
                 sender.sendMessage("Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
                 sender.sendMessage("Java VM: " + System.getProperty("java.vm.name") + System.getProperty("java.vm.version") + " (" + System.getProperty("java.vm.version") + "), " + System.getProperty("java.vm.info"));

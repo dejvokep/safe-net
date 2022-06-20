@@ -13,15 +13,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dejvokep.safenet.core.authenticator;
+package dev.dejvokep.safenet.spigot.authentication;
+
+import org.jetbrains.annotations.NotNull;
 
 /**
- * Property class used to parse a JSON property array into an array of instances of this class.
+ * Property class used to parse a JSON property array.
  */
 public class Property {
 
     // Name, value and signature
     private String name, value, signature;
+
+    /**
+     * Plain constructor, to be used by GSON.
+     */
+    public Property() {
+    }
+
+    /**
+     * Constructs a property with the given data.
+     * <p>
+     * <b>It is unknown if the server also accepts properties with <code>null</code> data, such usage is therefore
+     * deprecated.</b>
+     *
+     * @param name      the name
+     * @param value     the value
+     * @param signature the signature
+     */
+    public Property(@NotNull String name, @NotNull String value, @NotNull String signature) {
+        this.name = name;
+        this.value = value;
+        this.signature = signature;
+    }
 
     /**
      * Returns the name of the property.
@@ -42,7 +66,7 @@ public class Property {
     }
 
     /**
-     * Returns the signature passed with the property.
+     * Returns the signature of the property.
      *
      * @return the signature
      */

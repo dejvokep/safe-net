@@ -15,18 +15,19 @@
  */
 package dev.dejvokep.safenet.spigot;
 
-import com.comphenix.protocol.ProtocolLibrary;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.boostedyaml.dvs.versioning.BasicVersioning;
 import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
+import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.command.PluginCommand;
-import dev.dejvokep.safenet.core.authenticator.Authenticator;
-import dev.dejvokep.safenet.spigot.packet.PacketHandler;
+import dev.dejvokep.safenet.spigot.listener.PacketListener;
+import dev.dejvokep.safenet.spigot.listener.SessionListener;
+import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -39,22 +40,21 @@ import java.util.logging.Level;
  */
 public class SafeNetSpigot extends JavaPlugin {
 
-    // Plugin
-    private Plugin plugin;
-
     // Config
     private YamlDocument config;
 
+    // Passphrase store
+    private PassphraseStore passphraseStore;
+    // Packet listener
+    private PacketListener packetListener;
+    // Protocol disconnect
+    private DisconnectHandler disconnectHandler;
+
     // Authenticator
     private Authenticator authenticator;
-    // Packet handler
-    private PacketHandler packetHandler;
 
     @Override
     public void onEnable() {
-        // Set the plugin instance
-        plugin = this;
-
         // Thank you message
         getLogger().info("Thank you for downloading SafeNET!");
 
@@ -68,30 +68,15 @@ public class SafeNetSpigot extends JavaPlugin {
         }
 
         // Initialize
-        authenticator = new Authenticator(config, getLogger());
+        passphraseStore = new PassphraseStore(config, getLogger());
+        authenticator = new Authenticator(passphraseStore, getLogger());
+        disconnectHandler = new DisconnectHandler(this);
         // Register commands
         Bukkit.getPluginCommand("safenet").setExecutor(new PluginCommand(this));
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
         // Register
-        packetHandler = new PacketHandler(ProtocolLibrary.getProtocolManager(), this);
-    }
-
-    /**
-     * Returns the plugin instance.
-     *
-     * @return the plugin instance
-     */
-    public Plugin getPlugin() {
-        return plugin;
-    }
-
-    /**
-     * Returns the configuration file representation.
-     *
-     * @return the configuration file.
-     */
-    public YamlDocument getConfiguration() {
-        return config;
+        packetListener = new PacketListener(this);
+        new SessionListener(this);
     }
 
     /**
@@ -104,12 +89,39 @@ public class SafeNetSpigot extends JavaPlugin {
     }
 
     /**
-     * Returns the packet handler.
+     * Returns the passphrase store.
      *
-     * @return the packet handler
+     * @return the passphrase store
      */
-    public PacketHandler getPacketHandler() {
-        return packetHandler;
+    public PassphraseStore getPassphraseStore() {
+        return passphraseStore;
+    }
+
+    /**
+     * Returns the packet listener.
+     *
+     * @return the packet listener
+     */
+    public PacketListener getPacketListener() {
+        return packetListener;
+    }
+
+    /**
+     * Returns the disconnect handler.
+     *
+     * @return the disconnect handler
+     */
+    public DisconnectHandler getDisconnectHandler() {
+        return disconnectHandler;
+    }
+
+    /**
+     * Returns the configuration file representation.
+     *
+     * @return the configuration file.
+     */
+    public YamlDocument getConfiguration() {
+        return config;
     }
 
 }

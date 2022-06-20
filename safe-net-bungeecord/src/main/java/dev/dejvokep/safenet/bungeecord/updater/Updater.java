@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Updater class which checks for updates of the plugin by using a website API ({@link #URL}). If enabled, checks for
- * updates as per the set delay.
+ * updates per the set delay.
  */
 public class Updater {
 

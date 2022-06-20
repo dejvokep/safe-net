@@ -26,7 +26,7 @@ import dev.dejvokep.safenet.bungeecord.ipwhitelist.AddressWhitelist;
 import dev.dejvokep.safenet.bungeecord.listener.LoginListener;
 import dev.dejvokep.safenet.bungeecord.message.Messenger;
 import dev.dejvokep.safenet.bungeecord.updater.Updater;
-import dev.dejvokep.safenet.core.authenticator.Authenticator;
+import dev.dejvokep.safenet.core.PassphraseStore;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
@@ -49,7 +49,7 @@ public class SafeNetBungeeCord extends Plugin {
     // Config
     private YamlDocument config;
     // Authenticator
-    private Authenticator authenticator;
+    private PassphraseStore passphraseStore;
     // Address whitelist
     private AddressWhitelist addressWhitelist;
     // Login listener
@@ -72,10 +72,9 @@ public class SafeNetBungeeCord extends Plugin {
         }
 
         // Initialize
-        authenticator = new Authenticator(config, getLogger());
-
-        // Initialize
+        passphraseStore = new PassphraseStore(config, getLogger());
         addressWhitelist = new AddressWhitelist(this);
+        Updater.watch(this);
 
         // Plugin manager
         PluginManager pluginManager = ProxyServer.getInstance().getPluginManager();
@@ -84,9 +83,6 @@ public class SafeNetBungeeCord extends Plugin {
         // Register commands
         pluginManager.registerCommand(this, new PluginCommand(this, "safenet"));
         pluginManager.registerCommand(this, new PluginCommand(this, "sn"));
-
-        // Initialize
-        Updater.watch(this);
 
         // If enabled
         if (config.getBoolean("metrics")) {
@@ -121,8 +117,8 @@ public class SafeNetBungeeCord extends Plugin {
      *
      * @return the authenticator
      */
-    public Authenticator getAuthenticator() {
-        return authenticator;
+    public PassphraseStore getAuthenticator() {
+        return passphraseStore;
     }
 
     /**
