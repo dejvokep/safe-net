@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * A class used to authenticate handshakes and sessions (to protect against uncaught handshakes during startup).
@@ -54,7 +55,7 @@ public class Authenticator {
     /**
      * Host data delimiter.
      */
-    private static final String HOST_DELIMITER = "\00";
+    private static final String HOST_DELIMITER = Pattern.quote("\00");
     /**
      * Start of the JSON containing all the properties.
      */
@@ -69,7 +70,6 @@ public class Authenticator {
      * Replacement for unknown data.
      */
     public static final String UNKNOWN_DATA = "<unknown>";
-
 
     /**
      * GSON instance.
