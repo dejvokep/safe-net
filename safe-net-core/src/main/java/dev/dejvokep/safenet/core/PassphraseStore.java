@@ -99,7 +99,14 @@ public class PassphraseStore {
     public void reload() {
         // Passphrase
         passphrase = config.getString("passphrase", "");
+        // Print status
+        printStatus();
+    }
 
+    /**
+     * Prints the passphrase status.
+     */
+    public void printStatus() {
         // Log the warning
         if (passphrase.length() == 0)
             logger.severe("No passphrase configured (length is 0)! The plugin will disconnect all incoming connections. Please generate one as soon as possible from the proxy console with \"/sn generate\".");

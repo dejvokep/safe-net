@@ -41,9 +41,6 @@ import java.util.logging.Level;
  */
 public class SafeNetBungeeCord extends Plugin {
 
-    // Plugin
-    private Plugin plugin;
-
     // Message sender
     private final Messenger messenger = new Messenger();
     // Config
@@ -57,8 +54,6 @@ public class SafeNetBungeeCord extends Plugin {
 
     @Override
     public void onEnable() {
-        // Set the plugin instance
-        plugin = this;
         // Thank you message
         getLogger().info("Thank you for downloading SafeNET!");
 
@@ -92,15 +87,6 @@ public class SafeNetBungeeCord extends Plugin {
             new Metrics(this, 6479);
         }
 
-    }
-
-    /**
-     * Returns the plugin instance.
-     *
-     * @return the plugin instance
-     */
-    public Plugin getPlugin() {
-        return plugin;
     }
 
     /**

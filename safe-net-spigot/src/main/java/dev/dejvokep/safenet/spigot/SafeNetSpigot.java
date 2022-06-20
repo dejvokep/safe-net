@@ -24,9 +24,9 @@ import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
 import dev.dejvokep.safenet.core.PassphraseStore;
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.command.PluginCommand;
+import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
 import dev.dejvokep.safenet.spigot.listener.PacketListener;
 import dev.dejvokep.safenet.spigot.listener.SessionListener;
-import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -55,9 +55,6 @@ public class SafeNetSpigot extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        // Thank you message
-        getLogger().info("Thank you for downloading SafeNET!");
-
         try {
             // Create the config file
             config = YamlDocument.create(new File(getDataFolder(), "config.yml"), Objects.requireNonNull(getResource("spigot-config.yml")), GeneralSettings.DEFAULT, LoaderSettings.builder().setAutoUpdate(true).build(), DumperSettings.DEFAULT, UpdaterSettings.builder().setVersioning(new BasicVersioning("config-version")).build());
@@ -77,6 +74,14 @@ public class SafeNetSpigot extends JavaPlugin {
         // Register
         packetListener = new PacketListener(this);
         new SessionListener(this);
+
+        // Postpone messages
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            // Thank you message
+            getLogger().info("Thank you for downloading SafeNET!");
+            // Print
+            passphraseStore.printStatus();
+        }, 1);
     }
 
     /**

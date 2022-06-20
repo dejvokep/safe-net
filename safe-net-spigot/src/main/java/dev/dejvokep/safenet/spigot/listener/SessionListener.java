@@ -55,6 +55,15 @@ public class SessionListener implements Listener {
     private final Set<Player> pendingKick = new HashSet<>();
 
     /**
+     * Server version.
+     */
+    private static final String SERVER_VERSION = Bukkit.getBukkitVersion();
+    /**
+     * If to use legacy (server internal) player kick.
+     */
+    public static final boolean LEGACY_KICK = SERVER_VERSION.contains("1.8") || SERVER_VERSION.contains("1.9") || SERVER_VERSION.contains("1.10") || SERVER_VERSION.contains("1.11") || SERVER_VERSION.contains("1.12") || SERVER_VERSION.contains("1.13") || SERVER_VERSION.contains("1.14") || SERVER_VERSION.contains("1.15") || SERVER_VERSION.contains("1.16");
+
+    /**
      * Registers the session listener.
      *
      * @param plugin the plugin
@@ -65,6 +74,9 @@ public class SessionListener implements Listener {
         // Register
         Bukkit.getPluginManager().registerEvents(this, plugin);
         pushListener();
+
+        // Log
+        plugin.getLogger().log(LEGACY_KICK ? Level.INFO : Level.WARNING, String.format("Using %s to disconnect players with invalid sessions.", LEGACY_KICK ? "server internals (NMS)" : "the API (beware of malicious plugins!)"));
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -83,6 +95,14 @@ public class SessionListener implements Listener {
         // Log
         plugin.getLogger().info(String.format(MESSAGE_DENIED, result.getCode(), player.getName(), player.getUniqueId(), result.getMessage()));
 
+        // If not to use legacy
+        if (!LEGACY_KICK) {
+            // Kick
+            pendingKick.add(player);
+            player.kickPlayer(plugin.getDisconnectHandler().getMessage());
+            return;
+        }
+
         // Disconnect
         try {
             plugin.getDisconnectHandler().play(player);
@@ -100,9 +120,16 @@ public class SessionListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onKick(PlayerKickEvent event) {
+        // If not to kick
+        if (!pendingKick.remove(event.getPlayer()))
+            return;
+
+        // If was cancelled
+        if (event.isCancelled())
+            plugin.getLogger().log(Level.WARNING, "Some plugin attempted to cancel the kick event. Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer.");
+
         // Revoke cancellation just in case
-        if (pendingKick.remove(event.getPlayer()))
-            event.setCancelled(false);
+        event.setCancelled(false);
     }
 
     /**
