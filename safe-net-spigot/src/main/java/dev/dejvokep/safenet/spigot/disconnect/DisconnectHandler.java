@@ -71,7 +71,7 @@ public class DisconnectHandler {
     /**
      * Fields used to disconnect players using server internals.
      */
-    public static Field ENTITY_PLAYER_CONNECTION_FIELD, PLAYER_CONNECTION_MANAGER_FIELD, PLAYER_CONNECTION_SERVER_FIELD;
+    public static Field ENTITY_PLAYER_CONNECTION_FIELD, PLAYER_CONNECTION_MANAGER_FIELD, PLAYER_CONNECTION_SERVER_FIELD, NETWORK_MANAGER_DISCONNECTION_HANDLED_FIELD;
 
     // Disconnect message
     private String message;
@@ -138,12 +138,17 @@ public class DisconnectHandler {
         PLAYER_CONNECTION_CALL_DISCONNECT.invoke(playerConnection, chatComponentMessage);
         NETWORK_MANAGER_STOP_READING.invoke(networkManager);
 
+        // If handled by the server
+        if ((boolean) NETWORK_MANAGER_DISCONNECTION_HANDLED_FIELD.get(networkManager))
+            // Do not invoke called twice warning
+            return;
+
         // Call the server
         SERVER_POST_TO_MAIN_THREAD_METHOD.invoke(server, (Runnable) () -> {
             try {
                 NETWORK_MANAGER_HANDLE_DISCONNECTION.invoke(networkManager);
             } catch (Exception ex) {
-                plugin.getLogger().log(Level.SEVERE, String.format("Server could not handle disconnection of \"%s\" (%s)!", player.getName(), player.getUniqueId()), ex);
+                plugin.getLogger().log(Level.SEVERE, String.format("An error occurred during handling server disconnection of \"%s\" (%s)!", player.getName(), player.getUniqueId()), ex);
             }
         });
     }
@@ -194,6 +199,7 @@ public class DisconnectHandler {
             ENTITY_PLAYER_CONNECTION_FIELD = ENTITY_PLAYER_CLASS.getField("playerConnection");
             PLAYER_CONNECTION_MANAGER_FIELD = PLAYER_CONNECTION_CLASS.getField("networkManager");
             PLAYER_CONNECTION_SERVER_FIELD = PLAYER_CONNECTION_CLASS.getDeclaredField("minecraftServer");
+            NETWORK_MANAGER_DISCONNECTION_HANDLED_FIELD = NETWORK_MANAGER_CLASS.getDeclaredField("p");
 
             PLAYER_CONNECTION_MANAGER_FIELD.setAccessible(true);
             PLAYER_CONNECTION_SERVER_FIELD.setAccessible(true);
