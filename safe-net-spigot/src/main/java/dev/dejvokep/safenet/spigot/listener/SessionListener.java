@@ -35,7 +35,7 @@ import java.util.EnumMap;
 import java.util.logging.Level;
 
 /**
- * Session listener responsible for authenticating sessions.
+ * Session listener responsible for authenticating sessions and appropriately disconnecting unauthorized connections.
  */
 public class SessionListener implements Listener {
 
