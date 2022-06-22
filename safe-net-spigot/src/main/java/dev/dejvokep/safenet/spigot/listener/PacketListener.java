@@ -71,7 +71,7 @@ public class PacketListener {
                     // If malformed
                     if (event.getPacket().getProtocols().size() == 0 || event.getPacket().getStrings().size() == 0) {
                         // Log
-                        plugin.getLogger().info(String.format(MESSAGE_DENIED, AuthenticationResult.HANDSHAKE_MALFORMED_DATA.getCode(), Authenticator.UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA.getMessage(), Authenticator.UNKNOWN_DATA));
+                        plugin.getLogger().warning(String.format(MESSAGE_DENIED, AuthenticationResult.HANDSHAKE_MALFORMED_DATA.getCode(), Authenticator.UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA.getMessage(), Authenticator.UNKNOWN_DATA));
                         disconnect(event);
                         return;
                     }
@@ -90,7 +90,7 @@ public class PacketListener {
                     // If failed
                     if (!request.getResult().isSuccess()) {
                         // Log
-                        plugin.getLogger().info(String.format(MESSAGE_DENIED, request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), Base64.getEncoder().encodeToString(request.getHost().getBytes(StandardCharsets.UTF_8))));
+                        plugin.getLogger().warning(String.format(MESSAGE_DENIED, request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), Base64.getEncoder().encodeToString(request.getHost().getBytes(StandardCharsets.UTF_8))));
                         disconnect(event);
                         return;
                     }

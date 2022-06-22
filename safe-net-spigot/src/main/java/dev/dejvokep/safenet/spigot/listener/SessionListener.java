@@ -95,7 +95,7 @@ public class SessionListener implements Listener {
         }
 
         // Log
-        plugin.getLogger().info(String.format(MESSAGE_DENIED, result.getCode(), player.getName(), player.getUniqueId(), result.getMessage()));
+        plugin.getLogger().warning(String.format(MESSAGE_DENIED, result.getCode(), player.getName(), player.getUniqueId(), result.getMessage()));
 
         // Kick
         kicked = player;

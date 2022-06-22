@@ -124,7 +124,7 @@ public class LoginListener implements Listener {
         // If not passed
         if (!plugin.getAddressWhitelist().verifyAddress(connection.getVirtualHost())) {
             // Rejected
-            plugin.getLogger().info(String.format(MESSAGE_DENIED, CODE_DENIED_ADDRESS_WHITELIST, name, String.format(REASON_ADDRESS_WHITELIST, virtualHost)));
+            plugin.getLogger().warning(String.format(MESSAGE_DENIED, CODE_DENIED_ADDRESS_WHITELIST, name, String.format(REASON_ADDRESS_WHITELIST, virtualHost)));
             cancel(event);
             return;
         }
@@ -137,7 +137,7 @@ public class LoginListener implements Listener {
             plugin.getLogger().info(String.format(MESSAGE_ACCEPTED, CODE_ACCEPTED, name));
         } else {
             // Rejected
-            plugin.getLogger().info(String.format(MESSAGE_DENIED, validPassphrase ? CODE_DENIED_UNKNOWN_ERROR : CODE_DENIED_PASSPHRASE_NOT_CONFIGURED, name, validPassphrase ? REASON_UNKNOWN_ERROR : REASON_PASSPHRASE_NOT_CONFIGURED));
+            plugin.getLogger().warning(String.format(MESSAGE_DENIED, validPassphrase ? CODE_DENIED_UNKNOWN_ERROR : CODE_DENIED_PASSPHRASE_NOT_CONFIGURED, name, validPassphrase ? REASON_UNKNOWN_ERROR : REASON_PASSPHRASE_NOT_CONFIGURED));
             cancel(event);
         }
     }
