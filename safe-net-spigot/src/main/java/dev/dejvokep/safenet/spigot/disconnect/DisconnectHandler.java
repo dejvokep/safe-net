@@ -21,21 +21,12 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
-import dev.dejvokep.safenet.spigot.listener.SessionListener;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.logging.Level;
 
 /**
  * Class responsible for handling player disconnection.
@@ -47,36 +38,8 @@ public class DisconnectHandler {
      */
     private static final String DEFAULT_DISCONNECT_MESSAGE = "Disconnected";
 
-    /**
-     * CraftBukkit package name.
-     */
-    private static final String PACKAGE_CRAFT_BUKKIT = Bukkit.getServer().getClass().getPackage().getName();
-
-    /**
-     * Vanilla server package name.
-     */
-    private static final String PACKAGE_GAME_SERVER = PACKAGE_CRAFT_BUKKIT.replace("org.bukkit.craftbukkit", "net.minecraft.server");
-
-    /**
-     * Classes used to disconnect players using server internals.
-     */
-    public static Class<?> CRAFT_PLAYER_CLASS, ENTITY_PLAYER_CLASS, KICK_PACKET_CLASS, CHAT_COMPONENT_TEXT_CLASS, CHAT_BASE_COMPONENT_CLASS, PACKET_CLASS, PLAYER_CONNECTION_CLASS, NETWORK_MANAGER_CLASS, SERVER_CLASS;
-    /**
-     * Constructors used to disconnect players using server internals.
-     */
-    public static Constructor<?> KICK_PACKET_CONSTRUCTOR, CHAT_COMPONENT_TEXT_CONSTRUCTOR;
-    /**
-     * Methods used to disconnect players using server internals.
-     */
-    public static Method CRAFT_PLAYER_HANDLE_METHOD, NETWORK_MANAGER_SEND_PACKET_METHOD, NETWORK_MANAGER_CLOSE_METHOD, NETWORK_MANAGER_STOP_READING, NETWORK_MANAGER_HANDLE_DISCONNECTION, PLAYER_CONNECTION_CALL_DISCONNECT, SERVER_POST_TO_MAIN_THREAD_METHOD;
-    /**
-     * Fields used to disconnect players using server internals.
-     */
-    public static Field ENTITY_PLAYER_CONNECTION_FIELD, PLAYER_CONNECTION_MANAGER_FIELD, PLAYER_CONNECTION_SERVER_FIELD, NETWORK_MANAGER_DISCONNECTION_HANDLED_FIELD;
-
     // Disconnect message
     private String message;
-    private Object chatComponentMessage;
     // Plugin
     private final SafeNetSpigot plugin;
 
@@ -118,45 +81,13 @@ public class DisconnectHandler {
     }
 
     /**
-     * Disconnects the given player immediately via server internals, without calling any events.
-     * <p>
-     * <b>To be used only during the play phase and only with server version 1.16 or older. This method is not
-     * exception-safe.</b>
+     * Disconnects the given player using the server API. If the result of the kicking the player is important, the
+     * caller must watch the call chain using server events.
      *
      * @param player the player to disconnect
-     * @throws ReflectiveOperationException a reflection exception
-     * @throws NullPointerException         a null pointer exception, usually thrown due to uninitialized reflection
-     *                                      components (see startup log)
      */
-    public void play(Player player) throws ReflectiveOperationException, NullPointerException {
-        // Check version
-        if (!SessionListener.LEGACY_KICK)
-            return;
-
-        // Internals
-        Object playerConnection = ENTITY_PLAYER_CONNECTION_FIELD.get(CRAFT_PLAYER_HANDLE_METHOD.invoke(CRAFT_PLAYER_CLASS.cast(player)));
-        Object networkManager = PLAYER_CONNECTION_MANAGER_FIELD.get(playerConnection);
-        Object server = PLAYER_CONNECTION_SERVER_FIELD.get(playerConnection);
-
-        // Disconnect
-        NETWORK_MANAGER_SEND_PACKET_METHOD.invoke(networkManager, KICK_PACKET_CONSTRUCTOR.newInstance(chatComponentMessage),
-                (GenericFutureListener<Future<?>>) future -> NETWORK_MANAGER_CLOSE_METHOD.invoke(networkManager, chatComponentMessage), new GenericFutureListener[0]);
-        PLAYER_CONNECTION_CALL_DISCONNECT.invoke(playerConnection, chatComponentMessage);
-        NETWORK_MANAGER_STOP_READING.invoke(networkManager);
-
-        // If handled by the server
-        if ((boolean) NETWORK_MANAGER_DISCONNECTION_HANDLED_FIELD.get(networkManager))
-            // Do not invoke called twice warning
-            return;
-
-        // Call the server
-        SERVER_POST_TO_MAIN_THREAD_METHOD.invoke(server, (Runnable) () -> {
-            try {
-                NETWORK_MANAGER_HANDLE_DISCONNECTION.invoke(networkManager);
-            } catch (Exception ex) {
-                plugin.getLogger().log(Level.SEVERE, String.format("An error occurred during handling server disconnection of \"%s\" (%s)!", player.getName(), player.getUniqueId()), ex);
-            }
-        });
+    public void play(Player player) {
+        player.kickPlayer(message);
     }
 
     /**
@@ -165,17 +96,6 @@ public class DisconnectHandler {
     public void reload() {
         // Message
         message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE));
-
-        // Check version
-        if (!SessionListener.LEGACY_KICK)
-            return;
-
-        // Create chat component
-        try {
-            chatComponentMessage = CHAT_COMPONENT_TEXT_CONSTRUCTOR.newInstance(message);
-        } catch (ReflectiveOperationException ex) {
-            plugin.getLogger().log(Level.SEVERE, "Failed to initialize internal server classes to utilize the disconnect message!", ex);
-        }
     }
 
     /**
@@ -185,42 +105,6 @@ public class DisconnectHandler {
      */
     public String getMessage() {
         return message;
-    }
-
-    static {
-        try {
-            CRAFT_PLAYER_CLASS = Class.forName(PACKAGE_CRAFT_BUKKIT + ".entity.CraftPlayer");
-
-            // Check version
-            if (SessionListener.LEGACY_KICK) {
-                ENTITY_PLAYER_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".EntityPlayer");
-                KICK_PACKET_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".PacketPlayOutKickDisconnect");
-                CHAT_COMPONENT_TEXT_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".ChatComponentText");
-                CHAT_BASE_COMPONENT_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".IChatBaseComponent");
-                PACKET_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".Packet");
-                PLAYER_CONNECTION_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".PlayerConnection");
-                NETWORK_MANAGER_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".NetworkManager");
-                SERVER_CLASS = Class.forName(PACKAGE_GAME_SERVER + ".MinecraftServer");
-                KICK_PACKET_CONSTRUCTOR = KICK_PACKET_CLASS.getConstructor(CHAT_BASE_COMPONENT_CLASS);
-                CHAT_COMPONENT_TEXT_CONSTRUCTOR = CHAT_COMPONENT_TEXT_CLASS.getConstructor(String.class);
-                CRAFT_PLAYER_HANDLE_METHOD = CRAFT_PLAYER_CLASS.getDeclaredMethod("getHandle");
-                NETWORK_MANAGER_SEND_PACKET_METHOD = NETWORK_MANAGER_CLASS.getDeclaredMethod("a", PACKET_CLASS, GenericFutureListener.class, GenericFutureListener[].class);
-                NETWORK_MANAGER_CLOSE_METHOD = NETWORK_MANAGER_CLASS.getMethod("close", CHAT_BASE_COMPONENT_CLASS);
-                NETWORK_MANAGER_STOP_READING = NETWORK_MANAGER_CLASS.getDeclaredMethod("k");
-                NETWORK_MANAGER_HANDLE_DISCONNECTION = NETWORK_MANAGER_CLASS.getDeclaredMethod("l");
-                PLAYER_CONNECTION_CALL_DISCONNECT = PLAYER_CONNECTION_CLASS.getMethod("a", CHAT_BASE_COMPONENT_CLASS);
-                SERVER_POST_TO_MAIN_THREAD_METHOD = SERVER_CLASS.getMethod("postToMainThread", Runnable.class);
-                ENTITY_PLAYER_CONNECTION_FIELD = ENTITY_PLAYER_CLASS.getField("playerConnection");
-                PLAYER_CONNECTION_MANAGER_FIELD = PLAYER_CONNECTION_CLASS.getField("networkManager");
-                PLAYER_CONNECTION_SERVER_FIELD = PLAYER_CONNECTION_CLASS.getDeclaredField("minecraftServer");
-                NETWORK_MANAGER_DISCONNECTION_HANDLED_FIELD = NETWORK_MANAGER_CLASS.getDeclaredField("p");
-
-                PLAYER_CONNECTION_MANAGER_FIELD.setAccessible(true);
-                PLAYER_CONNECTION_SERVER_FIELD.setAccessible(true);
-            }
-        } catch (ReflectiveOperationException ex) {
-            ex.printStackTrace();
-        }
     }
 
 }

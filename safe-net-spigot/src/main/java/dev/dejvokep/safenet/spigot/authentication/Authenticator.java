@@ -24,7 +24,7 @@ import dev.dejvokep.safenet.core.KeyGenerator;
 import dev.dejvokep.safenet.core.PassphraseStore;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
-import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +87,8 @@ public class Authenticator {
 
     // Session key used to protect against uncaught handshakes
     private final String sessionKey = KeyGenerator.generate(SESSION_KEY_LENGTH);
-    // Method necessary for profile manipulation
+    // Class and method necessary for profile manipulation
+    private Class<?> craftPlayerClass = null;
     private Method profileMethod = null;
 
     /**
@@ -102,7 +103,8 @@ public class Authenticator {
         this.logger = logger;
 
         try {
-            profileMethod = DisconnectHandler.CRAFT_PLAYER_CLASS.getDeclaredMethod("getProfile");
+            craftPlayerClass = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".entity.CraftPlayer");
+            profileMethod = craftPlayerClass.getDeclaredMethod("getProfile");
             profileMethod.setAccessible(true);
         } catch (ReflectiveOperationException ex) {
             logger.log(Level.SEVERE, "An error occurred while utilizing server classes!", ex);
@@ -228,12 +230,12 @@ public class Authenticator {
      */
     public AuthenticationResult session(@NotNull Player player) {
         // Check fields
-        if (profileMethod == null || DisconnectHandler.CRAFT_PLAYER_CLASS == null)
+        if (profileMethod == null || craftPlayerClass == null)
             return AuthenticationResult.SESSION_REFLECTION_UNAVAILABLE;
 
         try {
             // Profile
-            GameProfile profile = (GameProfile) profileMethod.invoke(DisconnectHandler.CRAFT_PLAYER_CLASS.cast(player));
+            GameProfile profile = (GameProfile) profileMethod.invoke(craftPlayerClass.cast(player));
             if (profile == null)
                 return AuthenticationResult.SESSION_NO_GAME_PROFILE;
 
@@ -283,7 +285,7 @@ public class Authenticator {
      * @param end   last index (exclusive)
      * @return the joined elements
      */
-    private String join(String[] array, int start, int end) {
+    private String join(@NotNull String[] array, int start, int end) {
         // Builder
         StringBuilder builder = new StringBuilder();
         // Append
