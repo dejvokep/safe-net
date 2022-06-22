@@ -1,6 +1,0 @@
-# Plugin info:
-name: ${parent.name}
-version: ${parent.version}
-author: dejvokep
-main: dev.dejvokep.securednetwork.bungeecord.SecuredNetworkBungeeCord
-description: ${parent.description}
