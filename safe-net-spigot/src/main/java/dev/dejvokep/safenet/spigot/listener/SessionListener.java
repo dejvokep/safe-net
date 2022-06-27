@@ -105,7 +105,7 @@ public class SessionListener implements Listener {
             return;
 
         // Log
-        plugin.getLogger().log(Level.SEVERE, "Failed to disconnect player \"%s\" (%s), because a plugin cancelled the kick event on MONITOR priority! Plugins should restrain from such behaviour due to several security reasons and API principles; report such usage to the developer. Shutting down...");
+        plugin.getLogger().log(Level.SEVERE, String.format("Failed to disconnect player \"%s\" (%s), because a plugin cancelled the kick event on MONITOR priority! Plugins should restrain from such behaviour due to several security reasons and API principles; report such usage to the developer. Shutting down...", player.getName(), player.getUniqueId()));
         Bukkit.shutdown();
     }
 
