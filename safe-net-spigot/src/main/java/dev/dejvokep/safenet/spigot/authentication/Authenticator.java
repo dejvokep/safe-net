@@ -138,6 +138,10 @@ public class Authenticator {
 
         // The player's UUID
         String uuid = data.length <= 4 ? data[2] : null;
+        // Validate
+        if (uuid != null && uuid.length() != 32)
+            return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
+
         // The properties index
         int propertiesIndex = -1;
 
@@ -154,6 +158,10 @@ public class Authenticator {
                 // If is the UUID (length is 32)
                 uuid = data[i];
         }
+
+        // Index out of bounds
+        if (propertiesIndex < 0)
+            return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
 
         // Properties
         ArrayList<Property> properties;
