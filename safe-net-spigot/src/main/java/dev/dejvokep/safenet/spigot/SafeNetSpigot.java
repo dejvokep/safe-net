@@ -85,7 +85,7 @@ public class SafeNetSpigot extends JavaPlugin {
             // Paper message
             try {
                 Class.forName("com.destroystokyo.paper.PaperConfig");
-                getLogger().warning("Paper server detected. For SafeNET to correctly authenticate sessions without any problems, make sure to appropriately set settings.bungee-online-mode inside paper.yml to true/false according to the mode your BungeeCord server is running in.");
+                getLogger().warning("Paper (or forked) server detected. For SafeNET to correctly authenticate sessions without any problems, make sure to appropriately set settings.bungee-online-mode inside paper.yml to true/false according to the mode your BungeeCord server is running in. If you're also running a GeyserMC server with Floodgate, you might need to set it to false.");
             } catch (ClassNotFoundException ignored) {}
         }, 1);
     }
