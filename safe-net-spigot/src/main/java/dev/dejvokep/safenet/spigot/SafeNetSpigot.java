@@ -97,7 +97,7 @@ public class SafeNetSpigot extends JavaPlugin {
             // ProtocolLib plugin
             Plugin protocolLib = Bukkit.getPluginManager().getPlugin("ProtocolLib");
             // If ProtocolLib is not installed or is not a supported version
-            if (!Bukkit.getPluginManager().isPluginEnabled(protocolLib) || Integer.parseInt(protocolLib.getDescription().getVersion().replace(".", "")) < Integer.parseInt(PROTOCOL_LIB_MIN_VERSION.replace(".", ""))) {
+            if (!Bukkit.getPluginManager().isPluginEnabled(protocolLib) || Integer.parseInt(protocolLib.getDescription().getVersion().substring(0, protocolLib.getDescription().getVersion().indexOf('-')).replace(".", "")) < Integer.parseInt(PROTOCOL_LIB_MIN_VERSION.replace(".", ""))) {
                 getLogger().severe(String.format("This version of SafeNET requires ProtocolLib %s (or newer) to run! Shutting down...", PROTOCOL_LIB_MIN_VERSION));
                 Bukkit.shutdown();
                 return;

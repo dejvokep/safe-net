@@ -37,7 +37,7 @@ public class PluginCommand extends Command {
     private final YamlDocument config;
     // Messenger
     private final Messenger messenger;
-    // Plugin instance
+    // Plugin
     private final SafeNetBungeeCord plugin;
 
     /**
@@ -46,7 +46,6 @@ public class PluginCommand extends Command {
      * @param command the command name to register
      */
     public PluginCommand(@NotNull SafeNetBungeeCord plugin, @NotNull String command) {
-        // Call the superclass constructor
         super(command);
         // Set
         this.plugin = plugin;

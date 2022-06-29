@@ -54,6 +54,7 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         } catch (ReflectiveOperationException ex) {
             plugin.getLogger().log(Level.SEVERE, "An error occurred whilst obtaining reflection components to replace handshake data! This might cause passphrase leaks if another plugins handle the exposed data incorrectly! Shutting down...");
             Bukkit.shutdown();
+            return;
         }
 
         // Register
@@ -75,7 +76,6 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
             // If failed
             if (!result.getResult().isSuccess())
                 cancel(event);
-
         } catch (Exception ex) {
             // Log and cancel
             logAuthException(ex);
@@ -86,11 +86,11 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
     @EventHandler(priority = EventPriority.MONITOR)
     public void onHandshakeCancel(PlayerHandshakeEvent event) {
         // If not to cancel
-        if (cancelled != null && !cancelled.equals(event.getOriginalHandshake()))
+        if (cancelled == null || !cancelled.equals(event.getOriginalHandshake()))
             return;
 
         // If the cancellation is revoked
-        if (!event.isCancelled()) {
+        if (!event.isCancelled() || !event.isFailed()) {
             getPlugin().getLogger().warning("A plugin revoked cancellation of the handshake event! Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer. Shutting down...");
             Bukkit.shutdown();
             return;
@@ -98,6 +98,7 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
 
         // Cancel just in case
         event.setCancelled(true);
+        event.setFailed(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -127,9 +128,12 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
      *
      * @param event the event to cancel
      */
+    @SuppressWarnings("deprecation")
     private void cancel(@NotNull PlayerHandshakeEvent event) {
         // Cancel
         event.setCancelled(true);
+        event.setFailed(true);
+        event.setFailMessage(getPlugin().getDisconnectHandler().getMessage());
         cancelled = event.getOriginalHandshake();
     }
 

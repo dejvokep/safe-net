@@ -62,8 +62,11 @@ public class NativeHandshakeListener extends AbstractHandshakeListener {
                     }
 
                     // If pinging and it is allowed
-                    if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS && !isBlockPings())
+                    if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS) {
+                        if (isBlockPings())
+                            disconnect(event);
                         return;
+                    }
 
                     // Data
                     StructureModifier<String> strings = event.getPacket().getStrings();
@@ -98,9 +101,7 @@ public class NativeHandshakeListener extends AbstractHandshakeListener {
         try {
             getPlugin().getDisconnectHandler().login(event.getPlayer());
         } catch (Exception ex) {
-            // Log
             getPlugin().getLogger().log(Level.SEVERE, "Failed to disconnect a player! Shutting down...", ex);
-            // Shutdown
             Bukkit.shutdown();
         }
     }

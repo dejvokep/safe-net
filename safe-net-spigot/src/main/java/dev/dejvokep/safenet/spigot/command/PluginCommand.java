@@ -33,7 +33,7 @@ import java.util.logging.Level;
  */
 public class PluginCommand implements CommandExecutor {
 
-    // The plugin instance
+    // Plugin
     private final SafeNetSpigot plugin;
 
     /**

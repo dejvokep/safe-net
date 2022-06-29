@@ -55,7 +55,7 @@ public abstract class AbstractHandshakeListener {
 
         // Warn
         if (blockPings)
-            plugin.getLogger().info("Server pinging is blocked. Please note that this may break functionality of plugins that rely on pings to obtain server information.");
+            plugin.getLogger().warning("Server pinging is blocked. Please note that this may break functionality of plugins that rely on pings to obtain server information.");
     }
 
     /**

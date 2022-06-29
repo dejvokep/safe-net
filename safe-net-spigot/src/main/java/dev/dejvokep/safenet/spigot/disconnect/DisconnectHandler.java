@@ -60,6 +60,7 @@ public class DisconnectHandler {
      *
      * @param player the player to disconnect
      */
+    @SuppressWarnings("deprecation")
     public void login(@NotNull Player player) {
         try {
             // Create the disconnect packet
@@ -96,6 +97,15 @@ public class DisconnectHandler {
     public void reload() {
         // Message
         message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE));
+    }
+
+    /**
+     * Returns the disconnect message.
+     *
+     * @return the message
+     */
+    public String getMessage() {
+        return message;
     }
 
 }
