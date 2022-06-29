@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dejvokep.safenet.spigot.listener;
+package dev.dejvokep.safenet.spigot.listener.handshake;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -29,35 +29,21 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.logging.Level;
 
 /**
  * Listens for the {@link PacketType.Handshake.Client#SET_PROTOCOL} packet. This packet is the first one sent from the
  * client and is then used to read the <code>host</code> string and extract the properties.
  */
-public class PacketListener {
+public class NativeHandshakeListener extends AbstractHandshakeListener {
 
     /**
-     * Message logged when a connection was denied.
-     */
-    private static final String MESSAGE_DENIED = "DENIED (code B%d): Failed to authenticate handshake \"%s\": %s Data: %s";
-
-    // The plugin instance
-    private final SafeNetSpigot plugin;
-
-    // If to block pings
-    private boolean blockPings;
-
-    /**
-     * Registers the packet listener and handles the incoming connections.
+     * Registers the handshake packet listener and handles the incoming connections.
      *
      * @param plugin the plugin
      */
-    public PacketListener(@NotNull SafeNetSpigot plugin) {
-        // Set
-        this.plugin = plugin;
+    public NativeHandshakeListener(@NotNull SafeNetSpigot plugin) {
+        super(plugin);
         // Reload
         reload();
         // Authenticator
@@ -70,36 +56,35 @@ public class PacketListener {
                 try {
                     // If malformed
                     if (event.getPacket().getProtocols().size() == 0 || event.getPacket().getStrings().size() == 0) {
-                        // Log
-                        plugin.getLogger().warning(String.format(MESSAGE_DENIED, AuthenticationResult.HANDSHAKE_MALFORMED_DATA.getCode(), Authenticator.UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA.getMessage(), Authenticator.UNKNOWN_DATA));
+                        logAuthResult(new HandshakeAuthenticationResult(Authenticator.UNKNOWN_DATA, Authenticator.UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA));
                         disconnect(event);
                         return;
                     }
 
                     // If pinging and it is allowed
-                    if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS && !blockPings)
+                    if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS) {
+                        if (isBlockPings())
+                            disconnect(event);
                         return;
+                    }
 
-                    // The strings
+                    // Data
                     StructureModifier<String> strings = event.getPacket().getStrings();
-                    // Host
-                    String host = strings.readSafely(0);
+                    String data = strings.readSafely(0);
                     // Authenticate
-                    HandshakeAuthenticationResult request = authenticator.handshake(host);
+                    HandshakeAuthenticationResult result = authenticator.handshake(data);
 
                     // If failed
-                    if (!request.getResult().isSuccess()) {
-                        // Log
-                        plugin.getLogger().warning(String.format(MESSAGE_DENIED, request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), Base64.getEncoder().encodeToString(request.getHost().getBytes(StandardCharsets.UTF_8))));
+                    if (!result.getResult().isSuccess()) {
+                        logAuthResult(result);
                         disconnect(event);
                         return;
                     }
 
                     // Set the host
-                    strings.write(0, request.getHost());
+                    strings.write(0, result.getData());
                 } catch (Exception ex) {
-                    // Log
-                    plugin.getLogger().log(Level.SEVERE, "An error occurred while processing a packet!", ex);
+                    logAuthException(ex);
                     disconnect(event);
                 }
             }
@@ -112,23 +97,13 @@ public class PacketListener {
      * @param event the packet event
      * @see DisconnectHandler#login(Player)
      */
-    private void disconnect(PacketEvent event) {
+    private void disconnect(@NotNull PacketEvent event) {
         try {
-            plugin.getDisconnectHandler().login(event.getPlayer());
+            getPlugin().getDisconnectHandler().login(event.getPlayer());
         } catch (Exception ex) {
-            // Log
-            plugin.getLogger().log(Level.SEVERE, "Failed to disconnect a player! Shutting down...", ex);
-            // Shutdown
+            getPlugin().getLogger().log(Level.SEVERE, "Failed to disconnect a player! Shutting down...", ex);
             Bukkit.shutdown();
         }
-    }
-
-    /**
-     * Reloads the internal configuration.
-     */
-    public void reload() {
-        // If to block ping packets
-        blockPings = plugin.getConfiguration().getBoolean("block-pings");
     }
 
 }

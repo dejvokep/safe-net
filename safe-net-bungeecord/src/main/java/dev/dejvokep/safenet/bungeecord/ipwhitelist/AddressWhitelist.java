@@ -155,7 +155,7 @@ public class AddressWhitelist {
                     address.setAddress(address.getAddress().replace(IP_PLACEHOLDER, proxyIP));
             } catch (Exception ex) {
                 // Log the error
-                plugin.getLogger().log(Level.SEVERE, "An error occurred while getting the IP of the server for the {ip} placeholder! Is the server address correct?", ex);
+                plugin.getLogger().log(Level.SEVERE, "An error occurred whilst getting the IP of the server for the {ip} placeholder! Is the server address correct?", ex);
             }
         });
     }

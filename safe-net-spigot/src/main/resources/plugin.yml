@@ -7,7 +7,7 @@ description: ${parent.description}
 api-version: 1.13
 load: STARTUP
 # Dependencies:
-depend:
+softdepend:
   - ProtocolLib
 # Commands:
 commands:

@@ -60,6 +60,7 @@ public class DisconnectHandler {
      *
      * @param player the player to disconnect
      */
+    @SuppressWarnings("deprecation")
     public void login(@NotNull Player player) {
         try {
             // Create the disconnect packet
@@ -86,7 +87,7 @@ public class DisconnectHandler {
      *
      * @param player the player to disconnect
      */
-    public void play(Player player) {
+    public void play(@NotNull Player player) {
         player.kickPlayer(message);
     }
 

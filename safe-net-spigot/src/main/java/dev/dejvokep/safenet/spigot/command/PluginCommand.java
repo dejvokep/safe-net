@@ -33,7 +33,7 @@ import java.util.logging.Level;
  */
 public class PluginCommand implements CommandExecutor {
 
-    // The plugin instance
+    // Plugin
     private final SafeNetSpigot plugin;
 
     /**
@@ -73,15 +73,15 @@ public class PluginCommand implements CommandExecutor {
                 try {
                     config.reload();
                 } catch (IOException ex) {
-                    plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config!", ex);
+                    plugin.getLogger().log(Level.SEVERE, "An error occurred whilst loading the config!", ex);
                     return true;
                 }
 
                 // Reload all
-                plugin.getPacketListener().reload();
+                plugin.getHandshakeListener().reload();
                 plugin.getPassphraseStore().reload();
                 plugin.getDisconnectHandler().reload();
-                
+
                 // Reloaded
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
                         config.getString("command.reload")));

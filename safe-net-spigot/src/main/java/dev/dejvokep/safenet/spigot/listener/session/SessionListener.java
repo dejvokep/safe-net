@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dejvokep.safenet.spigot.listener;
+package dev.dejvokep.safenet.spigot.listener.session;
 
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
@@ -26,12 +26,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.RegisteredListener;
-import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.logging.Level;
 
 /**
@@ -48,14 +43,11 @@ public class SessionListener implements Listener {
      * Message logged when a connection was accepted.
      */
     private static final String MESSAGE_ACCEPTED = "ACCEPTED (code B%d): Authenticated \"%s\" (%s).";
-
-    // Handlers field
-    private Field handlersField;
     
     // Plugin
     private final SafeNetSpigot plugin;
-    // Player that is kicked
-    private Player kicked;
+    // Kicked player
+    private Player kicked = null;
 
     /**
      * Registers the session listener.
@@ -66,19 +58,10 @@ public class SessionListener implements Listener {
         // Set
         this.plugin = plugin;
         
-        // Obtain the field
-        try {
-            handlersField = HandlerList.class.getDeclaredField("handlerslots");
-            handlersField.setAccessible(true);
-        } catch (ReflectiveOperationException ex) {
-            plugin.getLogger().log(Level.SEVERE, "An error occurred while obtaining reflection components to push the session listener to the first place! This might cause passphrase leaks if another plugins handle the exposed data incorrectly! Shutting down...");
-            Bukkit.shutdown();
-        }
-        
         // Register
         Bukkit.getPluginManager().registerEvents(this, plugin);
-        pushListener(PlayerJoinEvent.getHandlerList(), EventPriority.LOWEST);
-        pushListener(PlayerKickEvent.getHandlerList(), EventPriority.MONITOR);
+        plugin.getEventPusher().push(PlayerJoinEvent.getHandlerList(), EventPriority.LOWEST, this);
+        plugin.getEventPusher().push(PlayerKickEvent.getHandlerList(), EventPriority.MONITOR, this);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -105,7 +88,7 @@ public class SessionListener implements Listener {
             return;
 
         // Log
-        plugin.getLogger().log(Level.SEVERE, "Failed to disconnect player \"%s\" (%s), because a plugin cancelled the kick event on MONITOR priority! Plugins should restrain from such behaviour due to several security reasons and API principles; report such usage to the developer. Shutting down...");
+        plugin.getLogger().log(Level.SEVERE, String.format("Failed to disconnect player \"%s\" (%s), because a plugin cancelled the kick event on MONITOR priority! Plugins should restrain from such behaviour due to several security reasons and API principles; report such usage to the developer. Shutting down...", player.getName(), player.getUniqueId()));
         Bukkit.shutdown();
     }
 
@@ -124,39 +107,6 @@ public class SessionListener implements Listener {
         // Disconnected
         if (kicked == event.getPlayer())
             kicked = null;
-    }
-
-    /**
-     * Pushes this listener to the first handler place for {@link PlayerJoinEvent}, so passphrase and session will be
-     * cleared before it reaches other listeners.
-     */
-    private void pushListener(@NotNull HandlerList list, @NotNull EventPriority priority) {
-        try {
-            // Listeners on the lowest priority
-            @SuppressWarnings("unchecked")
-            ArrayList<RegisteredListener> listeners = ((EnumMap<EventPriority, ArrayList<RegisteredListener>>) handlersField.get(list)).get(priority);
-
-            // Find the index of this listener
-            int target = 0;
-            for (; target < listeners.size(); target++) {
-                if (listeners.get(target).getListener() == this)
-                    break;
-            }
-
-            // Nothing to do
-            if (target == 0)
-                return;
-
-            // Move all listeners one place behind
-            RegisteredListener push = listeners.get(target);
-            while (--target >= 0)
-                listeners.set(target + 1, listeners.get(target));
-            // Set this listener as first
-            listeners.set(0, push);
-        } catch (ReflectiveOperationException ex) {
-            plugin.getLogger().log(Level.SEVERE, "An error occurred while pushing the session listener to the first place! This might cause passphrase leaks if another plugins handle the exposed data incorrectly! Shutting down...", ex);
-            Bukkit.shutdown();
-        }
     }
 
 }

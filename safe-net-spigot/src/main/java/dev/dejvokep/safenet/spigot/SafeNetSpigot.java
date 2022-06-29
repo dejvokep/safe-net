@@ -25,10 +25,15 @@ import dev.dejvokep.safenet.core.PassphraseStore;
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.command.PluginCommand;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
-import dev.dejvokep.safenet.spigot.listener.PacketListener;
-import dev.dejvokep.safenet.spigot.listener.SessionListener;
+import dev.dejvokep.safenet.spigot.listener.*;
+import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.NativeHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.PaperHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.session.SessionListener;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,18 +45,24 @@ import java.util.logging.Level;
  */
 public class SafeNetSpigot extends JavaPlugin {
 
+    /**
+     * Min supported version of the ProtocolLib plugin.
+     */
+    private static final String PROTOCOL_LIB_MIN_VERSION = "5.0.0";
+
     // Config
     private YamlDocument config;
 
-    // Passphrase store
+    // Internals
     private PassphraseStore passphraseStore;
-    // Packet listener
-    private PacketListener packetListener;
-    // Protocol disconnect
+    private AbstractHandshakeListener handshakeListener;
     private DisconnectHandler disconnectHandler;
+    private ListenerPusher listenerPusher;
 
     // Authenticator
     private Authenticator authenticator;
+    // Paper
+    private boolean paperServer;
 
     @Override
     public void onEnable() {
@@ -67,13 +78,38 @@ public class SafeNetSpigot extends JavaPlugin {
         // Initialize
         passphraseStore = new PassphraseStore(config, getLogger());
         disconnectHandler = new DisconnectHandler(this);
-        authenticator = new Authenticator(passphraseStore, getLogger());
+        authenticator = new Authenticator(this);
+        listenerPusher = new ListenerPusher(this);
         // Register commands
         Bukkit.getPluginCommand("safenet").setExecutor(new PluginCommand(this));
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
-        // Register
-        packetListener = new PacketListener(this);
-        new SessionListener(this);
+
+        // Paper server
+        try {
+            Class.forName("com.destroystokyo.paper.PaperConfig");
+            paperServer = true;
+        } catch (ClassNotFoundException ignored) {
+            paperServer = false;
+        }
+
+        // If not a paper server
+        if (!paperServer) {
+            // ProtocolLib plugin
+            Plugin protocolLib = Bukkit.getPluginManager().getPlugin("ProtocolLib");
+            // If ProtocolLib is not installed or is not a supported version
+            if (!Bukkit.getPluginManager().isPluginEnabled(protocolLib) || Integer.parseInt(protocolLib.getDescription().getVersion().substring(0, protocolLib.getDescription().getVersion().indexOf('-')).replace(".", "")) < Integer.parseInt(PROTOCOL_LIB_MIN_VERSION.replace(".", ""))) {
+                getLogger().severe(String.format("This version of SafeNET requires ProtocolLib %s (or newer) to run! Shutting down...", PROTOCOL_LIB_MIN_VERSION));
+                Bukkit.shutdown();
+                return;
+            }
+
+            handshakeListener = new NativeHandshakeListener(this);
+            new SessionListener(this);
+        } else {
+            // All packets are held until all plugins are initialized, so the listener is guaranteed to always be registered
+            getLogger().info("Paper (or forked) server detected; handshakes will be handled via the API and sessions will not be validated.");
+            handshakeListener = new PaperHandshakeListener(this);
+        }
 
         // Postpone messages
         Bukkit.getScheduler().runTaskLater(this, () -> {
@@ -89,6 +125,7 @@ public class SafeNetSpigot extends JavaPlugin {
      *
      * @return the authenticator
      */
+    @NotNull
     public Authenticator getAuthenticator() {
         return authenticator;
     }
@@ -98,17 +135,19 @@ public class SafeNetSpigot extends JavaPlugin {
      *
      * @return the passphrase store
      */
+    @NotNull
     public PassphraseStore getPassphraseStore() {
         return passphraseStore;
     }
 
     /**
-     * Returns the packet listener.
+     * Returns the handshake listener.
      *
-     * @return the packet listener
+     * @return the handshake listener
      */
-    public PacketListener getPacketListener() {
-        return packetListener;
+    @NotNull
+    public AbstractHandshakeListener getHandshakeListener() {
+        return handshakeListener;
     }
 
     /**
@@ -116,8 +155,19 @@ public class SafeNetSpigot extends JavaPlugin {
      *
      * @return the disconnect handler
      */
+    @NotNull
     public DisconnectHandler getDisconnectHandler() {
         return disconnectHandler;
+    }
+
+    /**
+     * Returns the event pusher.
+     *
+     * @return the event pusher
+     */
+    @NotNull
+    public ListenerPusher getEventPusher() {
+        return listenerPusher;
     }
 
     /**
@@ -129,4 +179,12 @@ public class SafeNetSpigot extends JavaPlugin {
         return config;
     }
 
+    /**
+     * Returns whether this is a Paper (or forked) server.
+     *
+     * @return if this is a Paper based server
+     */
+    public boolean isPaperServer() {
+        return paperServer;
+    }
 }

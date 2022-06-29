@@ -16,6 +16,7 @@
 package dev.dejvokep.safenet.spigot.authentication.result;
 
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * An enum representing all authentication results produced by {@link Authenticator}.
@@ -59,6 +60,7 @@ public enum AuthenticationResult {
      * Handshake authentication failed due to malformed data.
      */
     HANDSHAKE_MALFORMED_DATA(false, "data is malformed.", 6),
+
 
     /**
      * Session authentication failed due to reflection components being unavailable.
@@ -106,7 +108,7 @@ public enum AuthenticationResult {
      * @param message message suffix to display
      * @param code    unique result code
      */
-    AuthenticationResult(boolean success, String message, int code) {
+    AuthenticationResult(boolean success, @NotNull String message, int code) {
         this.success = success;
         this.message = message;
         this.code = code;
@@ -126,6 +128,7 @@ public enum AuthenticationResult {
      *
      * @return the message
      */
+    @NotNull
     public String getMessage() {
         return message;
     }
