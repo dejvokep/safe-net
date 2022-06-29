@@ -32,13 +32,13 @@ use the IP-whitelist, this is the way to go. The plugin also supports [GeyserMC]
 including [Floodgate](https://github.com/GeyserMC/Floodgate/)), which other plugins do not. Logs everything to the
 console for easy verification and control over connection flow.
 
-The plugin has been downloaded 13K+ times, and (on average) is active on 300+ networks managing over 1500 backend
+The plugin has been downloaded 14K+ times, and (on average) is active on 300+ networks managing over 1500 backend
 servers.
 
 # 🔧 Setup and support
 
 Download the latest release from the panel on the right. **BungeeCord 1.19 and ProtocolLib 5.0.0 or newer are
-required.** Alternatively, use version 3.6-LEGACY, which allows for use of older ProtocolLib releases. If you're still
+required (if running [Paper servers](https://papermc.io/), ProtocolLib installation is not needed).** Alternatively, use version 3.6-LEGACY, which allows for use of older ProtocolLib releases. If you're still
 using version 3.5 or older, **immediately upgrade** to at least 3.6.
 
 | SafeNET | BungeeCord | ProtocolLib | Game |
