@@ -41,6 +41,11 @@ import java.util.logging.Level;
  */
 public class SafeNetBungeeCord extends Plugin {
 
+    /**
+     * Min supported build of the BungeeCord server.
+     */
+    private static final int BUNGEE_CORD_MIN_BUILD = 1637;
+
     // Message sender
     private final Messenger messenger = new Messenger();
     // Config
@@ -54,6 +59,13 @@ public class SafeNetBungeeCord extends Plugin {
 
     @Override
     public void onEnable() {
+        // If BungeeCord is not a support version
+        if (Integer.parseInt(ProxyServer.getInstance().getVersion().substring(ProxyServer.getInstance().getVersion().lastIndexOf(':') + 1)) < BUNGEE_CORD_MIN_BUILD) {
+            getLogger().severe(String.format("This version of SafeNET requires BungeeCord build %d (or newer) to run! Shutting down...", BUNGEE_CORD_MIN_BUILD));
+            ProxyServer.getInstance().stop();
+            return;
+        }
+
         // Thank you message
         getLogger().info("Thank you for downloading SafeNET!");
 
