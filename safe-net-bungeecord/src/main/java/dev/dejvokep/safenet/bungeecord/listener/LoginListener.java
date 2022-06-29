@@ -167,7 +167,7 @@ public class LoginListener implements Listener {
             loginResultField.set(pendingConnection, new SafeNetLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getAuthenticator()));
         } catch (Exception ex) {
             // Log
-            plugin.getLogger().log(Level.SEVERE, "An error occurred while setting the custom login result into the connection!", ex);
+            plugin.getLogger().log(Level.SEVERE, "An error occurred whilst setting the custom login result into the connection!", ex);
             return false;
         }
 

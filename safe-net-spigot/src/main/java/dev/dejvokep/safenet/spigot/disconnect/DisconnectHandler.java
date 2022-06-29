@@ -86,7 +86,7 @@ public class DisconnectHandler {
      *
      * @param player the player to disconnect
      */
-    public void play(Player player) {
+    public void play(@NotNull Player player) {
         player.kickPlayer(message);
     }
 
@@ -96,15 +96,6 @@ public class DisconnectHandler {
     public void reload() {
         // Message
         message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE));
-    }
-
-    /**
-     * Returns the disconnect message.
-     *
-     * @return the message
-     */
-    public String getMessage() {
-        return message;
     }
 
 }

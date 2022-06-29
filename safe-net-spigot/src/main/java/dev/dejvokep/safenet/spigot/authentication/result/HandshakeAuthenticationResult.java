@@ -36,7 +36,7 @@ public class HandshakeAuthenticationResult {
      * @param playerId the player's {@link java.util.UUID UUID}, or {@link Authenticator#UNKNOWN_DATA} if unknown
      * @param result   the result
      */
-    public HandshakeAuthenticationResult(@NotNull String host, @Nullable String playerId, @NotNull AuthenticationResult result) {
+    public HandshakeAuthenticationResult(@NotNull String host, @NotNull String playerId, @NotNull AuthenticationResult result) {
         this.host = host;
         this.result = result;
         this.playerId = playerId;
@@ -47,6 +47,7 @@ public class HandshakeAuthenticationResult {
      *
      * @return the host string that excludes the passphrase property
      */
+    @NotNull
     public String getHost() {
         return host;
     }
@@ -56,6 +57,7 @@ public class HandshakeAuthenticationResult {
      *
      * @return the result
      */
+    @NotNull
     public AuthenticationResult getResult() {
         return result;
     }
@@ -66,6 +68,7 @@ public class HandshakeAuthenticationResult {
      *
      * @return the unique ID of the player who initiated the authentication
      */
+    @NotNull
     public String getPlayerId() {
         return playerId;
     }

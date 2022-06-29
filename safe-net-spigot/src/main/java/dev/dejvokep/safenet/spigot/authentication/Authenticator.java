@@ -103,72 +103,76 @@ public class Authenticator {
             profileMethod = craftPlayerClass.getDeclaredMethod("getProfile");
             profileMethod.setAccessible(true);
         } catch (ReflectiveOperationException ex) {
-            plugin.getLogger().log(Level.SEVERE, "An error occurred while utilizing server classes!", ex);
+            plugin.getLogger().log(Level.SEVERE, "An error occurred whilst utilizing server classes!", ex);
         }
     }
 
     /**
      * Authenticates handshake by the given host string obtained from the handshake packet.
      *
-     * @param host the host string
+     * @param data the host string
      * @return the result
      */
-    public HandshakeAuthenticationResult handshake(@Nullable String host) {
+    public HandshakeAuthenticationResult handshake(@Nullable String data) {
         // Passphrase
         String passphrase = plugin.getPassphraseStore().getPassphrase();
         // If null
-        if (host == null)
+        if (data == null)
             return new HandshakeAuthenticationResult(UNKNOWN_DATA, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
         // No passphrase configured
         if (passphrase == null || passphrase.length() == 0)
-            return new HandshakeAuthenticationResult(host, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_PASSPHRASE_NOT_CONFIGURED);
+            return new HandshakeAuthenticationResult(data, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_PASSPHRASE_NOT_CONFIGURED);
 
         // Replaced host
-        String replacedHost = host.replace(passphrase, "<passphrase>");
+        String replaced = data.replace(passphrase, "<passphrase>");
         // Split the host value
-        String[] data = host.split(HOST_DELIMITER);
+        String[] split = data.split(HOST_DELIMITER);
 
         // If the length is less than 3 or greater than 7 (GeyserMC compatibility)
-        if (data.length < 3 || data.length > 7)
-            return new HandshakeAuthenticationResult(replacedHost, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_INSUFFICIENT_DATA_LENGTH);
+        if (split.length < 3 || split.length > 7)
+            return new HandshakeAuthenticationResult(replaced, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_INSUFFICIENT_DATA_LENGTH);
 
         // The player's UUID
-        String uuid = data.length <= 4 ? data[2] : null;
+        String uuid = split.length <= 4 ? split[2] : null;
         // Validate
         if (uuid != null && uuid.length() != 32)
-            return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
+            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
 
         // The properties index
         int propertiesIndex = -1;
 
         // Go through all indexes (excluding 0, as there can not be anything useful)
-        for (int i = 1; i < data.length; i++) {
+        for (int i = 1; i < split.length; i++) {
             // If it is the Geyser Floodgate ID string
-            if (data[i].equals(GEYSER_FLOODGATE_ID))
+            if (split[i].equals(GEYSER_FLOODGATE_ID))
                 // Skip the next index
                 i++;
-            else if (data[i].startsWith(PROPERTIES_START))
+            else if (split[i].startsWith(PROPERTIES_START))
                 // Set the properties index
                 propertiesIndex = i;
-            else if (uuid == null && data[i].length() == 32)
+            else if (uuid == null && split[i].length() == 32)
                 // If is the UUID (length is 32)
-                uuid = data[i];
+                uuid = split[i];
         }
+
+        // No UUID
+        if (uuid == null)
+            return new HandshakeAuthenticationResult(replaced, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
 
         // Index out of bounds
         if (propertiesIndex < 0)
-            return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
+            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
 
         // Properties
         ArrayList<Property> properties;
         // Parse properties from the last index
         try {
-            properties = GSON.fromJson(data[propertiesIndex], PROPERTY_LIST_TYPE);
+            properties = GSON.fromJson(split[propertiesIndex], PROPERTY_LIST_TYPE);
             //If null
             if (properties == null)
-                return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
+                return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
         } catch (JsonSyntaxException ignored) {
-            return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
+            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
         }
 
         try {
@@ -197,13 +201,13 @@ public class Authenticator {
                     }
 
                     // Return
-                    return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_INVALID_PASSPHRASE);
+                    return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_INVALID_PASSPHRASE);
                 }
             }
 
             // Property not found
             if (!authenticated)
-                return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_PROPERTY_NOT_FOUND);
+                return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_PROPERTY_NOT_FOUND);
 
             // Add verification property
             if (!plugin.isPaperServer())
@@ -212,7 +216,7 @@ public class Authenticator {
             String json = GSON.toJson(properties);
 
             // Start and end
-            String start = join(data, 0, propertiesIndex), end = join(data, propertiesIndex + 1, data.length);
+            String start = join(split, 0, propertiesIndex), end = join(split, propertiesIndex + 1, split.length);
             // Append delimiters
             if (start.length() > 0)
                 start += HOST_DELIMITER;
@@ -223,7 +227,7 @@ public class Authenticator {
             return new HandshakeAuthenticationResult(start + json + end, uuid, AuthenticationResult.SUCCESS);
         } catch (Exception ex) {
             plugin.getLogger().log(Level.SEVERE, "An error occurred during handshake authentication!", ex);
-            return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.UNKNOWN_ERROR);
+            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.UNKNOWN_ERROR);
         }
     }
 

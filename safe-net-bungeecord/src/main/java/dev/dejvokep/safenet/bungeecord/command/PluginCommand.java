@@ -78,7 +78,7 @@ public class PluginCommand extends Command {
                     try {
                         config.reload();
                     } catch (IOException ex) {
-                        plugin.getLogger().log(Level.SEVERE, "An error occurred while loading the config!", ex);
+                        plugin.getLogger().log(Level.SEVERE, "An error occurred whilst loading the config!", ex);
                         return;
                     }
                     // Authenticator
@@ -109,7 +109,7 @@ public class PluginCommand extends Command {
                 // Generate
                 plugin.getAuthenticator().generatePassphrase(args.length == 1 ? PassphraseStore.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
             } catch (IOException ex) {
-                plugin.getLogger().log(Level.SEVERE, "An error occurred while saving the config!", ex);
+                plugin.getLogger().log(Level.SEVERE, "An error occurred whilst saving the config!", ex);
                 return;
             }
             // Generated
