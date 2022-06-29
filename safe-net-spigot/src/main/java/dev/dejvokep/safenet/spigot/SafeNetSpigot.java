@@ -25,7 +25,7 @@ import dev.dejvokep.safenet.core.PassphraseStore;
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.command.PluginCommand;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
-import dev.dejvokep.safenet.spigot.listener.PacketListener;
+import dev.dejvokep.safenet.spigot.listener.HandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.SessionListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -45,13 +45,15 @@ public class SafeNetSpigot extends JavaPlugin {
 
     // Passphrase store
     private PassphraseStore passphraseStore;
-    // Packet listener
-    private PacketListener packetListener;
+    // Handshake listener
+    private HandshakeListener handshakeListener;
     // Protocol disconnect
     private DisconnectHandler disconnectHandler;
 
     // Authenticator
     private Authenticator authenticator;
+    // Paper
+    private boolean paperServer;
 
     @Override
     public void onEnable() {
@@ -67,13 +69,27 @@ public class SafeNetSpigot extends JavaPlugin {
         // Initialize
         passphraseStore = new PassphraseStore(config, getLogger());
         disconnectHandler = new DisconnectHandler(this);
-        authenticator = new Authenticator(passphraseStore, getLogger());
+        authenticator = new Authenticator(this);
         // Register commands
         Bukkit.getPluginCommand("safenet").setExecutor(new PluginCommand(this));
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
         // Register
-        packetListener = new PacketListener(this);
-        new SessionListener(this);
+        handshakeListener = new HandshakeListener(this);
+
+        // Paper server
+        try {
+            Class.forName("com.destroystokyo.paper.PaperConfig");
+            paperServer = true;
+        } catch (ClassNotFoundException ignored) {
+            paperServer = false;
+        }
+
+        // If not a paper server
+        if (!paperServer)
+            // All packets are held until all plugins are initialized, so the listener is guaranteed to always be registered
+            new SessionListener(this);
+        else
+            getLogger().info("Paper (or forked) server detected; sessions will not be validated.");
 
         // Postpone messages
         Bukkit.getScheduler().runTaskLater(this, () -> {
@@ -81,12 +97,6 @@ public class SafeNetSpigot extends JavaPlugin {
             getLogger().info("Thank you for downloading SafeNET!");
             // Print
             passphraseStore.printStatus();
-
-            // Paper message
-            try {
-                Class.forName("com.destroystokyo.paper.PaperConfig");
-                getLogger().warning("Paper (or forked) server detected. For SafeNET to correctly authenticate sessions without any problems, make sure to appropriately set settings.bungee-online-mode inside paper.yml to true/false according to the mode your BungeeCord server is running in. If you're also running a GeyserMC server with Floodgate, you might need to set it to false.");
-            } catch (ClassNotFoundException ignored) {}
         }, 1);
     }
 
@@ -109,12 +119,12 @@ public class SafeNetSpigot extends JavaPlugin {
     }
 
     /**
-     * Returns the packet listener.
+     * Returns the handshake listener.
      *
-     * @return the packet listener
+     * @return the handshake listener
      */
-    public PacketListener getPacketListener() {
-        return packetListener;
+    public HandshakeListener getHandshakeListener() {
+        return handshakeListener;
     }
 
     /**
@@ -135,4 +145,12 @@ public class SafeNetSpigot extends JavaPlugin {
         return config;
     }
 
+    /**
+     * Returns whether this is a Paper (or forked) server.
+     *
+     * @return if this is a Paper based server
+     */
+    public boolean isPaperServer() {
+        return paperServer;
+    }
 }

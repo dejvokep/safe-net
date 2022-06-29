@@ -22,6 +22,7 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import dev.dejvokep.safenet.core.KeyGenerator;
 import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
 import org.bukkit.Bukkit;
@@ -34,7 +35,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A class used to authenticate handshakes and sessions (to protect against uncaught handshakes during startup).
@@ -80,10 +80,8 @@ public class Authenticator {
     private static final Type PROPERTY_LIST_TYPE = new TypeToken<ArrayList<Property>>() {
     }.getType();
 
-    // The logger
-    private final Logger logger;
-    // Passphrase store
-    private final PassphraseStore passphraseStore;
+    // Plugin
+    private final SafeNetSpigot plugin;
 
     // Session key used to protect against uncaught handshakes
     private final String sessionKey = KeyGenerator.generate(SESSION_KEY_LENGTH);
@@ -94,20 +92,18 @@ public class Authenticator {
     /**
      * Initializes the authenticator.
      *
-     * @param passphraseStore passphrase store used to verify handshakes
-     * @param logger          the logger
+     * @param plugin the plugin
      */
-    public Authenticator(@NotNull PassphraseStore passphraseStore, @NotNull Logger logger) {
+    public Authenticator(@NotNull SafeNetSpigot plugin) {
         // Set
-        this.passphraseStore = passphraseStore;
-        this.logger = logger;
+        this.plugin = plugin;
 
         try {
             craftPlayerClass = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".entity.CraftPlayer");
             profileMethod = craftPlayerClass.getDeclaredMethod("getProfile");
             profileMethod.setAccessible(true);
         } catch (ReflectiveOperationException ex) {
-            logger.log(Level.SEVERE, "An error occurred while utilizing server classes!", ex);
+            plugin.getLogger().log(Level.SEVERE, "An error occurred while utilizing server classes!", ex);
         }
     }
 
@@ -119,7 +115,7 @@ public class Authenticator {
      */
     public HandshakeAuthenticationResult handshake(@Nullable String host) {
         // Passphrase
-        String passphrase = passphraseStore.getPassphrase();
+        String passphrase = plugin.getPassphraseStore().getPassphrase();
         // If null
         if (host == null)
             return new HandshakeAuthenticationResult(UNKNOWN_DATA, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
@@ -210,7 +206,8 @@ public class Authenticator {
                 return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.HANDSHAKE_PROPERTY_NOT_FOUND);
 
             // Add verification property
-            properties.add(new Property(SESSION_PROPERTY_NAME, sessionKey, ""));
+            if (!plugin.isPaperServer())
+                properties.add(new Property(SESSION_PROPERTY_NAME, sessionKey, ""));
             // JSON
             String json = GSON.toJson(properties);
 
@@ -225,7 +222,7 @@ public class Authenticator {
             // Return
             return new HandshakeAuthenticationResult(start + json + end, uuid, AuthenticationResult.SUCCESS);
         } catch (Exception ex) {
-            logger.log(Level.SEVERE, "An error occurred during handshake authentication!", ex);
+            plugin.getLogger().log(Level.SEVERE, "An error occurred during handshake authentication!", ex);
             return new HandshakeAuthenticationResult(replacedHost, uuid, AuthenticationResult.UNKNOWN_ERROR);
         }
     }
@@ -280,7 +277,7 @@ public class Authenticator {
             // Passed
             return AuthenticationResult.SUCCESS;
         } catch (Exception ex) {
-            logger.log(Level.SEVERE, "An error occurred during session authentication!", ex);
+            plugin.getLogger().log(Level.SEVERE, "An error occurred during session authentication!", ex);
             return AuthenticationResult.UNKNOWN_ERROR;
         }
     }

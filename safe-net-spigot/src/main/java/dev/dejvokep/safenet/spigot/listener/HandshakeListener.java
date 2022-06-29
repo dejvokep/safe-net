@@ -37,12 +37,18 @@ import java.util.logging.Level;
  * Listens for the {@link PacketType.Handshake.Client#SET_PROTOCOL} packet. This packet is the first one sent from the
  * client and is then used to read the <code>host</code> string and extract the properties.
  */
-public class PacketListener {
+public class HandshakeListener {
 
     /**
      * Message logged when a connection was denied.
      */
     private static final String MESSAGE_DENIED = "DENIED (code B%d): Failed to authenticate handshake \"%s\": %s Data: %s";
+
+    /**
+     * Message logged when a connection was accepted (only if sessions are not verified - if {@link
+     * SafeNetSpigot#isPaperServer() not running on a Paper server}).
+     */
+    private static final String MESSAGE_ACCEPTED = "ACCEPTED (code B%d): Authenticated \"%s\".";
 
     // The plugin instance
     private final SafeNetSpigot plugin;
@@ -51,11 +57,11 @@ public class PacketListener {
     private boolean blockPings;
 
     /**
-     * Registers the packet listener and handles the incoming connections.
+     * Registers the handshake packet listener and handles the incoming connections.
      *
      * @param plugin the plugin
      */
-    public PacketListener(@NotNull SafeNetSpigot plugin) {
+    public HandshakeListener(@NotNull SafeNetSpigot plugin) {
         // Set
         this.plugin = plugin;
         // Reload
@@ -85,18 +91,21 @@ public class PacketListener {
                     // Host
                     String host = strings.readSafely(0);
                     // Authenticate
-                    HandshakeAuthenticationResult request = authenticator.handshake(host);
+                    HandshakeAuthenticationResult result = authenticator.handshake(host);
 
                     // If failed
-                    if (!request.getResult().isSuccess()) {
+                    if (!result.getResult().isSuccess()) {
                         // Log
-                        plugin.getLogger().warning(String.format(MESSAGE_DENIED, request.getResult().getCode(), request.getPlayerId(), request.getResult().getMessage(), Base64.getEncoder().encodeToString(request.getHost().getBytes(StandardCharsets.UTF_8))));
+                        plugin.getLogger().warning(String.format(MESSAGE_DENIED, result.getResult().getCode(), result.getPlayerId(), result.getResult().getMessage(), Base64.getEncoder().encodeToString(result.getHost().getBytes(StandardCharsets.UTF_8))));
                         disconnect(event);
                         return;
                     }
 
                     // Set the host
-                    strings.write(0, request.getHost());
+                    strings.write(0, result.getHost());
+                    // Log if Paper
+                    if (HandshakeListener.this.plugin.isPaperServer())
+                        plugin.getLogger().info(String.format(MESSAGE_ACCEPTED, result.getResult().getCode(), result.getPlayerId()));
                 } catch (Exception ex) {
                     // Log
                     plugin.getLogger().log(Level.SEVERE, "An error occurred while processing a packet!", ex);

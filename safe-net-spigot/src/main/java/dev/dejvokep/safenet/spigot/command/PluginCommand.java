@@ -78,7 +78,7 @@ public class PluginCommand implements CommandExecutor {
                 }
 
                 // Reload all
-                plugin.getPacketListener().reload();
+                plugin.getHandshakeListener().reload();
                 plugin.getPassphraseStore().reload();
                 plugin.getDisconnectHandler().reload();
                 
