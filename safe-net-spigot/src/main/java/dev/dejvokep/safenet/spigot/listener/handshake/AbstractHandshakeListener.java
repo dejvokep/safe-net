@@ -67,7 +67,7 @@ public abstract class AbstractHandshakeListener {
         if (result.getResult().isSuccess())
             plugin.getLogger().info(String.format(MESSAGE_ACCEPTED, result.getResult().getCode(), result.getPlayerId()));
         else
-            plugin.getLogger().warning(String.format(MESSAGE_DENIED, result.getResult().getCode(), result.getPlayerId(), result.getResult().getMessage(), Base64.getEncoder().encodeToString(result.getHost().getBytes(StandardCharsets.UTF_8))));
+            plugin.getLogger().warning(String.format(MESSAGE_DENIED, result.getResult().getCode(), result.getPlayerId(), result.getResult().getMessage(), Base64.getEncoder().encodeToString(result.getData().getBytes(StandardCharsets.UTF_8))));
     }
 
     /**

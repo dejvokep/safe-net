@@ -69,7 +69,7 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
             // Authenticate
             HandshakeAuthenticationResult result = getPlugin().getAuthenticator().handshake(event.getOriginalHandshake());
             // Replace
-            replaceHandshake(event, result.getHost());
+            originalHandshakeField.set(event, result.getData());
             // Log
             logAuthResult(result);
 
@@ -90,37 +90,22 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
             return;
 
         // If the cancellation is revoked
-        if (!event.isCancelled() || !event.isFailed()) {
-            getPlugin().getLogger().warning("A plugin revoked cancellation of the handshake event! Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer. Shutting down...");
+        if (event.isCancelled() || !event.isFailed()) {
+            getPlugin().getLogger().warning("A plugin revoked failure or uncancelled the handshake event! Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer. Shutting down...");
             Bukkit.shutdown();
             return;
         }
 
         // Cancel just in case
-        event.setCancelled(true);
+        event.setCancelled(false);
         event.setFailed(true);
+        cancelled = null;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onServerPing(PaperServerListPingEvent event) {
         if (isBlockPings())
             event.setCancelled(true);
-    }
-
-    /**
-     * Replaces the given event's handshake.
-     *
-     * @param event     event whose handshake to replace
-     * @param handshake the new handshake
-     */
-    private void replaceHandshake(@NotNull PlayerHandshakeEvent event, @NotNull String handshake) {
-        try {
-            // Replace
-            originalHandshakeField.set(event, handshake);
-        } catch (ReflectiveOperationException ex) {
-            getPlugin().getLogger().log(Level.SEVERE, "An error occurred whilst replacing handshake data!", ex);
-            cancel(event);
-        }
     }
 
     /**
@@ -131,7 +116,7 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
     @SuppressWarnings("deprecation")
     private void cancel(@NotNull PlayerHandshakeEvent event) {
         // Cancel
-        event.setCancelled(true);
+        event.setCancelled(false);
         event.setFailed(true);
         event.setFailMessage(getPlugin().getDisconnectHandler().getMessage());
         cancelled = event.getOriginalHandshake();

@@ -17,27 +17,26 @@ package dev.dejvokep.safenet.spigot.authentication.result;
 
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Stores the authentication request created by {@link Authenticator}.
  */
 public class HandshakeAuthenticationResult {
 
-    // Host and UUID
-    private final String host, playerId;
+    // Data and UUID
+    private final String data, playerId;
     // Result
     private final AuthenticationResult result;
 
     /**
      * Initializes the authentication result with the given data.
      *
-     * @param host     the host string that excludes the passphrase property (to be set back to the packet)
+     * @param data     the host string that excludes the passphrase property (to be set back to the packet)
      * @param playerId the player's {@link java.util.UUID UUID}, or {@link Authenticator#UNKNOWN_DATA} if unknown
      * @param result   the result
      */
-    public HandshakeAuthenticationResult(@NotNull String host, @NotNull String playerId, @NotNull AuthenticationResult result) {
-        this.host = host;
+    public HandshakeAuthenticationResult(@NotNull String data, @NotNull String playerId, @NotNull AuthenticationResult result) {
+        this.data = data;
         this.result = result;
         this.playerId = playerId;
     }
@@ -48,8 +47,8 @@ public class HandshakeAuthenticationResult {
      * @return the host string that excludes the passphrase property
      */
     @NotNull
-    public String getHost() {
-        return host;
+    public String getData() {
+        return data;
     }
 
     /**

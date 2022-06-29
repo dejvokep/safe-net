@@ -82,7 +82,7 @@ public class NativeHandshakeListener extends AbstractHandshakeListener {
                     }
 
                     // Set the host
-                    strings.write(0, result.getHost());
+                    strings.write(0, result.getData());
                 } catch (Exception ex) {
                     logAuthException(ex);
                     disconnect(event);
