@@ -56,7 +56,7 @@ public class NativeHandshakeListener extends AbstractHandshakeListener {
                 try {
                     // If malformed
                     if (event.getPacket().getProtocols().size() == 0 || event.getPacket().getStrings().size() == 0) {
-                        logAuthResult(new HandshakeAuthenticationResult(Authenticator.UNKNOWN_DATA, Authenticator.UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA));
+                        logAuthResult(new HandshakeAuthenticationResult(AuthenticationResult.HANDSHAKE_MALFORMED_DATA));
                         disconnect(event);
                         return;
                     }
