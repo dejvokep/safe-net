@@ -42,9 +42,9 @@ import java.util.logging.Level;
 public class SafeNetBungeeCord extends Plugin {
 
     /**
-     * Min supported build of the BungeeCord server.
+     * Supported version of the BungeeCord server.
      */
-    private static final int BUNGEE_CORD_MIN_BUILD = 1637;
+    private static final String BUNGEE_CORD_VERSION = "build 1637 (1.19 update) or newer";
 
     // Message sender
     private final Messenger messenger = new Messenger();
@@ -59,9 +59,9 @@ public class SafeNetBungeeCord extends Plugin {
 
     @Override
     public void onEnable() {
-        // If BungeeCord is not a support version
-        if (Integer.parseInt(ProxyServer.getInstance().getVersion().substring(ProxyServer.getInstance().getVersion().lastIndexOf(':') + 1)) < BUNGEE_CORD_MIN_BUILD) {
-            getLogger().severe(String.format("This version of SafeNET requires BungeeCord build %d (or newer) to run! Shutting down...", BUNGEE_CORD_MIN_BUILD));
+        // If BungeeCord is not of a support version
+        if (isUnsupportedBungeeCord()) {
+            getLogger().severe(String.format("This version of SafeNET requires BungeeCord %s to run! Shutting down...", BUNGEE_CORD_VERSION));
             ProxyServer.getInstance().stop();
             return;
         }
@@ -98,7 +98,20 @@ public class SafeNetBungeeCord extends Plugin {
             // Initialize Metrics
             new Metrics(this, 6479);
         }
+    }
 
+    /**
+     * Returns whether BungeeCord is of an unsupported version.
+     *
+     * @return whether BungeeCord is of an unsupported version
+     */
+    private boolean isUnsupportedBungeeCord() {
+        try {
+            Class.forName("net.md_5.bungee.protocol.Property");
+            return false;
+        } catch (ClassNotFoundException ex) {
+            return true;
+        }
     }
 
     /**
