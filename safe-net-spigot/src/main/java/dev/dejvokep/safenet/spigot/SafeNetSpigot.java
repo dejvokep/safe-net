@@ -46,9 +46,9 @@ import java.util.logging.Level;
 public class SafeNetSpigot extends JavaPlugin {
 
     /**
-     * Min supported version of the ProtocolLib plugin.
+     * Supported version of the ProtocolLib plugin.
      */
-    private static final String PROTOCOL_LIB_MIN_VERSION = "5.0.0";
+    private static final String PROTOCOL_LIB_VERSION = "5.0.0 or newer";
 
     // Config
     private YamlDocument config;
@@ -97,8 +97,8 @@ public class SafeNetSpigot extends JavaPlugin {
             // ProtocolLib plugin
             Plugin protocolLib = Bukkit.getPluginManager().getPlugin("ProtocolLib");
             // If ProtocolLib is not installed or is not a supported version
-            if (!Bukkit.getPluginManager().isPluginEnabled(protocolLib) || Integer.parseInt(protocolLib.getDescription().getVersion().substring(0, protocolLib.getDescription().getVersion().indexOf('-')).replace(".", "")) < Integer.parseInt(PROTOCOL_LIB_MIN_VERSION.replace(".", ""))) {
-                getLogger().severe(String.format("This version of SafeNET requires ProtocolLib %s (or newer) to run! Shutting down...", PROTOCOL_LIB_MIN_VERSION));
+            if (protocolLib == null || !Bukkit.getPluginManager().isPluginEnabled(protocolLib) || isUnsupportedProtocolLib()) {
+                getLogger().severe(String.format("This version of SafeNET requires ProtocolLib %s to run! Shutting down...", PROTOCOL_LIB_VERSION));
                 Bukkit.shutdown();
                 return;
             }
@@ -118,6 +118,20 @@ public class SafeNetSpigot extends JavaPlugin {
             // Print
             passphraseStore.printStatus();
         }, 1);
+    }
+
+    /**
+     * Returns whether ProtocolLib is of an unsupported version.
+     *
+     * @return whether ProtocolLib is of an unsupported version
+     */
+    private boolean isUnsupportedProtocolLib() {
+        try {
+            Class.forName("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory");
+            return false;
+        } catch (ClassNotFoundException ex) {
+            return true;
+        }
     }
 
     /**

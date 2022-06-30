@@ -26,6 +26,7 @@ import org.bukkit.event.Listener;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
+import java.util.Objects;
 import java.util.logging.Level;
 
 /**
@@ -36,8 +37,8 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
 
     // Handshake field
     private Field originalHandshakeField;
-    // Cancelled handshake
-    private String cancelled = null;
+    // Failed handshake
+    private String failed = null;
 
     /**
      * Registers the handshake listener.
@@ -74,32 +75,40 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
             logAuthResult(result);
 
             // If failed
-            if (!result.getResult().isSuccess())
-                cancel(event);
+            if (!result.getResult().isSuccess()) {
+                fail(event);
+                return;
+            }
+
+            // Set
+            event.setServerHostname(result.getServerHostname());
+            event.setSocketAddressHostname(result.getSocketAddressHostname());
+            event.setUniqueId(Objects.requireNonNull(result.getUniqueId()));
+            event.setPropertiesJson(result.getProperties());
+            event.setCancelled(false);
         } catch (Exception ex) {
             // Log and cancel
             logAuthException(ex);
-            cancel(event);
+            fail(event);
         }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onHandshakeCancel(PlayerHandshakeEvent event) {
-        // If not to cancel
-        if (cancelled == null || !cancelled.equals(event.getOriginalHandshake()))
-            return;
-
         // If the cancellation is revoked
-        if (event.isCancelled() || !event.isFailed()) {
-            getPlugin().getLogger().warning("A plugin revoked failure or uncancelled the handshake event! Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer. Shutting down...");
+        if (event.isCancelled()) {
+            getPlugin().getLogger().warning("A plugin cancelled the handshake event, bypassing SafeNET logic! Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer. Shutting down...");
             Bukkit.shutdown();
             return;
         }
 
-        // Cancel just in case
-        event.setCancelled(false);
+        // If not to fail
+        if (failed == null || !failed.equals(event.getOriginalHandshake()))
+            return;
+
+        // Fail just in case
         event.setFailed(true);
-        cancelled = null;
+        failed = null;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -109,17 +118,17 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
     }
 
     /**
-     * Cancels the given event and monitors it.
+     * Fails the given event and monitors it.
      *
-     * @param event the event to cancel
+     * @param event the event to fail
      */
     @SuppressWarnings("deprecation")
-    private void cancel(@NotNull PlayerHandshakeEvent event) {
-        // Cancel
+    private void fail(@NotNull PlayerHandshakeEvent event) {
+        // Fail
         event.setCancelled(false);
         event.setFailed(true);
         event.setFailMessage(getPlugin().getDisconnectHandler().getMessage());
-        cancelled = event.getOriginalHandshake();
+        failed = event.getOriginalHandshake();
     }
 
 }

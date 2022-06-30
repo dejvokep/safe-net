@@ -34,7 +34,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 /**
  * A class used to authenticate handshakes and sessions (to protect against uncaught handshakes during startup).
@@ -56,10 +58,6 @@ public class Authenticator {
      */
     private static final String HOST_DELIMITER = "\00";
     /**
-     * Start of the JSON containing all the properties.
-     */
-    private static final String PROPERTIES_START = "[{\"";
-    /**
      * String found in the hostname if the player connected through GeyserMC server. Surrounded by a string from both
      * sides (in the hostname).
      */
@@ -69,6 +67,15 @@ public class Authenticator {
      * Replacement for unknown data.
      */
     public static final String UNKNOWN_DATA = "<unknown>";
+
+    /**
+     * Pattern used to validate socket address hostname.
+     */
+    public static final Pattern SOCKET_ADDRESS_HOSTNAME_PATTERN = Pattern.compile("[0-9a-f.:]{0,45}");
+    /**
+     * Pattern for matching and converting to UUID with dashes.
+     */
+    private static final Pattern UUID_DASH_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
 
     /**
      * GSON instance.
@@ -118,10 +125,10 @@ public class Authenticator {
         String passphrase = plugin.getPassphraseStore().getPassphrase();
         // If null
         if (data == null)
-            return new HandshakeAuthenticationResult(UNKNOWN_DATA, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
+            return new HandshakeAuthenticationResult(AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
         // No passphrase configured
         if (passphrase == null || passphrase.length() == 0)
-            return new HandshakeAuthenticationResult(data, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_PASSPHRASE_NOT_CONFIGURED);
+            return new HandshakeAuthenticationResult(data, AuthenticationResult.HANDSHAKE_PASSPHRASE_NOT_CONFIGURED);
 
         // Replaced host
         String replaced = data.replace(passphrase, "<passphrase>");
@@ -130,38 +137,45 @@ public class Authenticator {
 
         // If the length is less than 3 or greater than 7 (GeyserMC compatibility)
         if (split.length < 3 || split.length > 7)
-            return new HandshakeAuthenticationResult(replaced, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_INSUFFICIENT_DATA_LENGTH);
+            return new HandshakeAuthenticationResult(replaced, AuthenticationResult.HANDSHAKE_INSUFFICIENT_DATA_LENGTH);
 
-        // The player's UUID
-        String uuid = split.length <= 4 ? split[2] : null;
-        // Validate
-        if (uuid != null && uuid.length() != 32)
-            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
-
-        // The properties index
+        // Properties index
         int propertiesIndex = -1;
+        // Data
+        String serverHostname = null, socketAddressHostname = null;
+        UUID uuid = null;
 
-        // Go through all indexes (excluding 0, as there can not be anything useful)
-        for (int i = 1; i < split.length; i++) {
+        // Go through all indexes
+        for (int i = 0; i < split.length; i++) {
             // If it is the Geyser Floodgate ID string
-            if (split[i].equals(GEYSER_FLOODGATE_ID))
+            if (split[i].equals(GEYSER_FLOODGATE_ID)) {
                 // Skip the next index
                 i++;
-            else if (split[i].startsWith(PROPERTIES_START))
-                // Set the properties index
+                continue;
+            }
+
+            // Set
+            if (serverHostname == null) {
+                serverHostname = split[i];
+            } else if (socketAddressHostname == null) {
+                socketAddressHostname = split[i];
+            } else if (uuid == null) {
+                try {
+                    uuid = UUID.fromString(split[i].contains("-") ? split[i] : UUID_DASH_PATTERN.matcher(split[i]).replaceAll("$1-$2-$3-$4-$5"));
+                } catch (IllegalArgumentException ex) {
+                    return new HandshakeAuthenticationResult(replaced, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
+                }
+            } else if (propertiesIndex == -1) {
                 propertiesIndex = i;
-            else if (uuid == null && split[i].length() == 32)
-                // If is the UUID (length is 32)
-                uuid = split[i];
+            }
         }
 
-        // No UUID
-        if (uuid == null)
-            return new HandshakeAuthenticationResult(replaced, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
-
-        // Index out of bounds
-        if (propertiesIndex < 0)
-            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
+        // No hostname, socket address and uuid, or they are invalid
+        if (uuid == null || !SOCKET_ADDRESS_HOSTNAME_PATTERN.matcher(socketAddressHostname).matches())
+            return new HandshakeAuthenticationResult(replaced, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
+        // No properties
+        if (propertiesIndex == -1)
+            return new HandshakeAuthenticationResult(replaced, serverHostname, socketAddressHostname, uuid, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
 
         // Properties
         ArrayList<Property> properties;
@@ -170,9 +184,9 @@ public class Authenticator {
             properties = GSON.fromJson(split[propertiesIndex], PROPERTY_LIST_TYPE);
             //If null
             if (properties == null)
-                return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
+                return new HandshakeAuthenticationResult(replaced, serverHostname, socketAddressHostname, uuid, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
         } catch (JsonSyntaxException ignored) {
-            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
+            return new HandshakeAuthenticationResult(replaced, serverHostname, socketAddressHostname, uuid, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
         }
 
         try {
@@ -201,13 +215,13 @@ public class Authenticator {
                     }
 
                     // Return
-                    return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_INVALID_PASSPHRASE);
+                    return new HandshakeAuthenticationResult(replaced, serverHostname, socketAddressHostname, uuid, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_INVALID_PASSPHRASE);
                 }
             }
 
             // Property not found
             if (!authenticated)
-                return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.HANDSHAKE_PROPERTY_NOT_FOUND);
+                return new HandshakeAuthenticationResult(replaced, serverHostname, socketAddressHostname, uuid, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_PROPERTY_NOT_FOUND);
 
             // Add verification property
             if (!plugin.isPaperServer())
@@ -224,10 +238,10 @@ public class Authenticator {
                 end = HOST_DELIMITER + end;
 
             // Return
-            return new HandshakeAuthenticationResult(start + json + end, uuid, AuthenticationResult.SUCCESS);
+            return new HandshakeAuthenticationResult(start + json + end, serverHostname, socketAddressHostname, uuid, json, AuthenticationResult.SUCCESS);
         } catch (Exception ex) {
             plugin.getLogger().log(Level.SEVERE, "An error occurred during handshake authentication!", ex);
-            return new HandshakeAuthenticationResult(replaced, uuid, AuthenticationResult.UNKNOWN_ERROR);
+            return new HandshakeAuthenticationResult(replaced, serverHostname, socketAddressHostname, uuid, UNKNOWN_DATA, AuthenticationResult.UNKNOWN_ERROR);
         }
     }
 

@@ -17,28 +17,58 @@ package dev.dejvokep.safenet.spigot.authentication.result;
 
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 /**
  * Stores the authentication request created by {@link Authenticator}.
  */
 public class HandshakeAuthenticationResult {
 
-    // Data and UUID
-    private final String data, playerId;
+    // Data
+    private final String data, serverHostname, socketAddressHostname, properties;
+    private final UUID uniqueId;
     // Result
     private final AuthenticationResult result;
 
     /**
+     * Initializes the authentication result. All data will be set to {@link Authenticator#UNKNOWN_DATA}.
+     *
+     * @param result the result
+     */
+    public HandshakeAuthenticationResult(@NotNull AuthenticationResult result) {
+        this(Authenticator.UNKNOWN_DATA, result);
+    }
+
+    /**
      * Initializes the authentication result with the given data.
      *
-     * @param data     the host string that excludes the passphrase property (to be set back to the packet)
-     * @param playerId the player's {@link java.util.UUID UUID}, or {@link Authenticator#UNKNOWN_DATA} if unknown
-     * @param result   the result
+     * @param data   the host string that excludes the passphrase property (to be set back to the packet)
+     * @param result the result
      */
-    public HandshakeAuthenticationResult(@NotNull String data, @NotNull String playerId, @NotNull AuthenticationResult result) {
+    public HandshakeAuthenticationResult(@NotNull String data, @NotNull AuthenticationResult result) {
+        this(data, Authenticator.UNKNOWN_DATA, Authenticator.UNKNOWN_DATA, null, Authenticator.UNKNOWN_DATA, result);
+    }
+
+    /**
+     * Initializes the authentication result with the given data. No parameter can be unknown when the result is {@link
+     * AuthenticationResult#SUCCESS success}.
+     *
+     * @param data                  host string that excludes the passphrase property (to be set back to the packet)
+     * @param serverHostname        server hostname (or {@link Authenticator#UNKNOWN_DATA unknown})
+     * @param socketAddressHostname socket address hostname (or {@link Authenticator#UNKNOWN_DATA unknown})
+     * @param uniqueId              player's unique ID (or <code>null</code> if unknown)
+     * @param properties            properties (or {@link Authenticator#UNKNOWN_DATA unknown})
+     * @param result                the result
+     */
+    public HandshakeAuthenticationResult(@NotNull String data, @NotNull String serverHostname, @NotNull String socketAddressHostname, @Nullable UUID uniqueId, @NotNull String properties, @NotNull AuthenticationResult result) {
         this.data = data;
+        this.serverHostname = serverHostname;
+        this.socketAddressHostname = socketAddressHostname;
+        this.uniqueId = uniqueId;
+        this.properties = properties;
         this.result = result;
-        this.playerId = playerId;
     }
 
     /**
@@ -62,13 +92,57 @@ public class HandshakeAuthenticationResult {
     }
 
     /**
-     * Returns the {@link java.util.UUID UUID} of the player who initiated the authentication. If it is unknown, returns
-     * {@link Authenticator#UNKNOWN_DATA}.
+     * Returns the server hostname of the handshake, or {@link Authenticator#UNKNOWN_DATA unknown} (only if the {@link
+     * #getResult() result} is not {@link AuthenticationResult#SUCCESS success}).
      *
-     * @return the unique ID of the player who initiated the authentication
+     * @return the server hostname of the handshake
      */
     @NotNull
-    public String getPlayerId() {
-        return playerId;
+    public String getServerHostname() {
+        return serverHostname;
+    }
+
+    /**
+     * Returns the socket address hostname of the handshake, or {@link Authenticator#UNKNOWN_DATA unknown} (only if the
+     * {@link #getResult() result} is not {@link AuthenticationResult#SUCCESS success}).
+     *
+     * @return the socket address hostname of the handshake
+     */
+    @NotNull
+    public String getSocketAddressHostname() {
+        return socketAddressHostname;
+    }
+
+    /**
+     * Returns the {@link java.util.UUID UUID} of the handshake, or <code>null</code> if unknown (only if the {@link
+     * #getResult() result} is not {@link AuthenticationResult#SUCCESS success}).
+     *
+     * @return the unique ID of the handshake
+     */
+    @Nullable
+    public UUID getUniqueId() {
+        return uniqueId;
+    }
+
+    /**
+     * Returns the {@link java.util.UUID UUID} of the handshake, or {@link Authenticator#UNKNOWN_DATA unknown} (only if
+     * the {@link #getResult() result} is not {@link AuthenticationResult#SUCCESS success}).
+     *
+     * @return the unique ID of the handshake
+     */
+    @NotNull
+    public String getUniqueIdAsString() {
+        return uniqueId == null ? Authenticator.UNKNOWN_DATA : uniqueId.toString();
+    }
+
+    /**
+     * Returns the properties of the handshake, or {@link Authenticator#UNKNOWN_DATA unknown} (only if the {@link
+     * #getResult() result} is not {@link AuthenticationResult#SUCCESS success}).
+     *
+     * @return the properties of the handshake
+     */
+    @NotNull
+    public String getProperties() {
+        return properties;
     }
 }
