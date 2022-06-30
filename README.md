@@ -38,13 +38,14 @@ servers.
 # 🔧 Setup and support
 
 Download the latest release from the panel on the right. **BungeeCord 1.19 and ProtocolLib 5.0.0 or newer are
-required (if running [Paper servers](https://papermc.io/), ProtocolLib installation is not needed).** Alternatively, use version 3.6-LEGACY, which allows for use of older ProtocolLib releases. If you're still
-using version 3.5 or older, **immediately upgrade** to at least 3.6.
+required (if running [Paper servers](https://papermc.io/), ProtocolLib installation is not needed).** Alternatively,
+use LEGACY version, which allows for use of older ProtocolLib releases. If you're stillusing version 3.5 or older,
+**immediately upgrade** to at least 3.6.
 
-| SafeNET | BungeeCord | ProtocolLib | Game |
+| SafeNET | BungeeCord | ProtocolLib (not required if running [Paper servers](https://papermc.io/)) | Game |
 | ------- | ---------- | ----------- | ---- |
-| 3.6 | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 5.0.0 (or newer) | 1.8 - 1.19 |
-| 3.6-LEGACY | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 4.8.0 (or older) | 1.8 - 1.18 |
+| 3.7 | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 5.0.0 (or newer) | 1.8 - 1.19 |
+| 3.7-LEGACY | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 4.8.0 (or older) | 1.8 - 1.18 |
 | 3.5 (and older) | **VULNERABLE, DO NOT USE!** | - | - |
 
 You can view the setup instructions at [the wiki](https://dejvokep.gitbook.io/safenet/). If you need help with anything,
