@@ -94,8 +94,8 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onHandshakeCancel(PlayerHandshakeEvent event) {
-        // If the cancellation is revoked
+    public void onHandshakeManipulation(PlayerHandshakeEvent event) {
+        // If cancelled
         if (event.isCancelled()) {
             getPlugin().getLogger().warning("A plugin cancelled the handshake event, bypassing SafeNET logic! Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer. Shutting down...");
             Bukkit.shutdown();
@@ -105,6 +105,13 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         // If not to fail
         if (failed == null || !failed.equals(event.getOriginalHandshake()))
             return;
+
+        // If fail is revoked
+        if (!event.isFailed()) {
+            getPlugin().getLogger().warning("A plugin revoked fail of the handshake event! Plugins should restrain from such behaviour due to several security reasons; report such usage to the developer. Shutting down...");
+            Bukkit.shutdown();
+            return;
+        }
 
         // Fail just in case
         event.setFailed(true);
