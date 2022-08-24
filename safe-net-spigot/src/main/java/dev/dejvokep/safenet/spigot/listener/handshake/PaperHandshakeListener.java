@@ -16,7 +16,6 @@
 package dev.dejvokep.safenet.spigot.listener.handshake;
 
 import com.destroystokyo.paper.event.player.PlayerHandshakeEvent;
-import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
 import org.bukkit.Bukkit;
@@ -30,10 +29,16 @@ import java.util.Objects;
 import java.util.logging.Level;
 
 /**
- * Listens for Paper's {@link PlayerHandshakeEvent} without authenticating sessions, which aren't verified when running
- * on Paper servers.
+ * Listens for Paper's {@link PlayerHandshakeEvent} without authenticating sessions. On Paper servers, packets are held
+ * until all plugins are initialized, so the listener is guaranteed to always be registered and therefore no session
+ * validation is needed.
  */
 public class PaperHandshakeListener extends AbstractHandshakeListener implements Listener {
+
+    /**
+     * Paper's server list ping event class.
+     */
+    private static final String PAPER_SERVER_LIST_PING_EVENT = "com.destroystokyo.paper.event.server.PaperServerListPingEvent";
 
     // Handshake field
     private Field originalHandshakeField;
@@ -62,6 +67,12 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         Bukkit.getPluginManager().registerEvents(this, plugin);
         plugin.getEventPusher().push(PlayerHandshakeEvent.getHandlerList(), EventPriority.LOWEST, this);
         plugin.getEventPusher().push(PlayerHandshakeEvent.getHandlerList(), EventPriority.MONITOR, this);
+
+        // Register server list ping listener only if available
+        if (plugin.classExists(PAPER_SERVER_LIST_PING_EVENT))
+            new PaperServerListPingListener(plugin);
+        else
+            plugin.getLogger().warning("Failed to register server list ping listener; blocking server pings will be unavailable.");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -116,12 +127,6 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         // Fail just in case
         event.setFailed(true);
         failed = null;
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onServerPing(PaperServerListPingEvent event) {
-        if (isBlockPings())
-            event.setCancelled(true);
     }
 
     /**
