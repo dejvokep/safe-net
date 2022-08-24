@@ -50,6 +50,11 @@ public class SafeNetSpigot extends JavaPlugin {
      */
     private static final String PROTOCOL_LIB_VERSION = "5.0.0 or newer";
 
+    /**
+     * Paper's handshake event class.
+     */
+    private static final String PAPER_HANDSHAKE_EVENT = "com.destroystokyo.paper.event.player.PlayerHandshakeEvent";
+
     // Config
     private YamlDocument config;
 
@@ -85,26 +90,31 @@ public class SafeNetSpigot extends JavaPlugin {
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
 
         // Paper server
-        try {
-            Class.forName("com.destroystokyo.paper.PaperConfig");
-            paperServer = true;
-        } catch (ClassNotFoundException ignored) {
-            paperServer = false;
-        }
+        paperServer = classExists(PAPER_HANDSHAKE_EVENT);
 
         // If not a paper server
         if (!paperServer) {
             // ProtocolLib plugin
             Plugin protocolLib = Bukkit.getPluginManager().getPlugin("ProtocolLib");
             // If ProtocolLib is not installed or is not a supported version
-            if (protocolLib == null || !Bukkit.getPluginManager().isPluginEnabled(protocolLib) || isUnsupportedProtocolLib()) {
+            if (!Bukkit.getPluginManager().isPluginEnabled(protocolLib) || isUnsupportedProtocolLib()) {
                 getLogger().severe(String.format("This version of SafeNET requires ProtocolLib %s to run! Shutting down...", PROTOCOL_LIB_VERSION));
                 Bukkit.shutdown();
                 return;
             }
 
-            handshakeListener = new NativeHandshakeListener(this);
+            // Register handshake listener
+            try {
+                handshakeListener = new NativeHandshakeListener(this);
+            } catch (Exception ex) {
+                getLogger().log(Level.SEVERE, "An unknown error has occurred whilst registering the packet listener! Shutting down...", ex);
+                Bukkit.shutdown();
+                return;
+            }
+
+            // Register session listeners
             new SessionListener(this);
+            getLogger().info("Spigot native server detected; handshakes will be handled via the packet listener and sessions will be validated using the API.");
         } else {
             // All packets are held until all plugins are initialized, so the listener is guaranteed to always be registered
             getLogger().info("Paper (or forked) server detected; handshakes will be handled via the API and sessions will not be validated.");
@@ -121,17 +131,28 @@ public class SafeNetSpigot extends JavaPlugin {
     }
 
     /**
+     * Returns whether a class by the given name exists.
+     *
+     * @param name the name to check for
+     * @return whether a class by the given name exists
+     * @see Class#forName(String)
+     */
+    public boolean classExists(String name) {
+        try {
+            Class.forName(name);
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
+    }
+
+    /**
      * Returns whether ProtocolLib is of an unsupported version.
      *
      * @return whether ProtocolLib is of an unsupported version
      */
     private boolean isUnsupportedProtocolLib() {
-        try {
-            Class.forName("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory");
-            return false;
-        } catch (ClassNotFoundException ex) {
-            return true;
-        }
+        return !classExists("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory");
     }
 
     /**
