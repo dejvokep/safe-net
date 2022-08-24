@@ -13,11 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dejvokep.safenet.spigot.listener.handshake;
+package dev.dejvokep.safenet.spigot.listener.handshake.paper;
 
 import com.destroystokyo.paper.event.player.PlayerHandshakeEvent;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
+import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;

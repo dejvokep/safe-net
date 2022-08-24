@@ -27,8 +27,8 @@ import dev.dejvokep.safenet.spigot.command.PluginCommand;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
 import dev.dejvokep.safenet.spigot.listener.*;
 import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
-import dev.dejvokep.safenet.spigot.listener.handshake.NativeHandshakeListener;
-import dev.dejvokep.safenet.spigot.listener.handshake.PaperHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.spigot.SpigotHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.paper.PaperHandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.session.SessionListener;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
@@ -105,7 +105,7 @@ public class SafeNetSpigot extends JavaPlugin {
 
             // Register handshake listener
             try {
-                handshakeListener = new NativeHandshakeListener(this);
+                handshakeListener = new SpigotHandshakeListener(this);
             } catch (Exception ex) {
                 getLogger().log(Level.SEVERE, "An unknown error has occurred whilst registering the packet listener! Shutting down...", ex);
                 Bukkit.shutdown();

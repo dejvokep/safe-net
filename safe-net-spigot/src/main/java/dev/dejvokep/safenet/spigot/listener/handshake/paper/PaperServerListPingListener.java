@@ -1,4 +1,4 @@
-package dev.dejvokep.safenet.spigot.listener.handshake;
+package dev.dejvokep.safenet.spigot.listener.handshake.paper;
 
 import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
