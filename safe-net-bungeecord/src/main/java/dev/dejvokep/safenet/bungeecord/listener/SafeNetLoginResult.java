@@ -33,6 +33,8 @@ import java.util.Arrays;
  * returned values are <code>null</code> (replacing the <code>null</code> login profile), except the properties. The
  * returned properties are (if not called by methods mentioned above) always an empty array, as during the testing
  * phase, a lot of problems were found when using some plugins if the value was <code>null</code>.
+ * <p>
+ * <i>The use of custom login results to forward plugin data to backend servers was inspired by BungeeGuard.</i>
  */
 public class SafeNetLoginResult extends LoginResult {
 

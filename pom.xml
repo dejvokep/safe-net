@@ -33,7 +33,7 @@
         <module>safe-net-distribution</module>
     </modules>
     <name>SafeNET</name>
-    <description>A lightweight protection from IP-forward bypass exploit for your network.</description>
+    <description>A lightweight protection from IP-forward bypass exploit inspired by BungeeGuard and IP whitelist.</description>
 
     <!-- Developers -->
     <developers>
