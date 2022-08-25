@@ -87,7 +87,7 @@ public class AddressWhitelist {
                 return true;
         }
 
-        // Not found, return the default message
+        // Not found
         return false;
     }
 
