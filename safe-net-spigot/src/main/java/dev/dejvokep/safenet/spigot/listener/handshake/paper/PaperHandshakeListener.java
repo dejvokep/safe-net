@@ -52,7 +52,7 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
      * @param plugin the plugin
      */
     public PaperHandshakeListener(SafeNetSpigot plugin) {
-        super(plugin);
+        super(plugin, plugin.classExists(PAPER_SERVER_LIST_PING_EVENT));
 
         // Obtain the field
         try {
@@ -70,10 +70,8 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         plugin.getEventPusher().push(PlayerHandshakeEvent.getHandlerList(), EventPriority.MONITOR, this);
 
         // Register server list ping listener only if available
-        if (plugin.classExists(PAPER_SERVER_LIST_PING_EVENT))
+        if (isPingBlockingAvailable())
             new PaperServerListPingListener(plugin);
-        else
-            plugin.getLogger().warning("Failed to register server list ping listener; blocking server pings will be unavailable.");
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

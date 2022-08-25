@@ -44,7 +44,7 @@ public class SpigotHandshakeListener extends AbstractHandshakeListener {
      * @param plugin the plugin
      */
     public SpigotHandshakeListener(@NotNull SafeNetSpigot plugin) {
-        super(plugin);
+        super(plugin, true);
         // Reload
         reload();
         // Authenticator

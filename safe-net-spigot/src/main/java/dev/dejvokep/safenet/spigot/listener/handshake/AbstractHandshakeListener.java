@@ -39,11 +39,13 @@ public abstract class AbstractHandshakeListener {
 
     // Plugin
     private final SafeNetSpigot plugin;
-    // If to block pings
+    // If to block pings and it is available
     private boolean blockPings;
+    private final boolean pingBlockingAvailable;
 
-    public AbstractHandshakeListener(SafeNetSpigot plugin) {
+    public AbstractHandshakeListener(SafeNetSpigot plugin, boolean pingBlockingAvailable) {
         this.plugin = plugin;
+        this.pingBlockingAvailable = pingBlockingAvailable;
         reload();
     }
 
@@ -54,7 +56,9 @@ public abstract class AbstractHandshakeListener {
         this.blockPings = plugin.getConfiguration().getBoolean("block-pings");
 
         // Warn
-        if (blockPings)
+        if (blockPings && !pingBlockingAvailable)
+            plugin.getLogger().warning("This server implementation does not support server ping blocking. Disable blocking to remove this warning.");
+        if (blockPings && pingBlockingAvailable)
             plugin.getLogger().warning("Server pinging is blocked. Please note that this may break functionality of plugins that rely on pings to obtain server information.");
     }
 
@@ -95,5 +99,14 @@ public abstract class AbstractHandshakeListener {
      */
     public boolean isBlockPings() {
         return blockPings;
+    }
+
+    /**
+     * Returns whether ping blocking is available.
+     *
+     * @return whether ping blocking is available
+     */
+    public boolean isPingBlockingAvailable() {
+        return pingBlockingAvailable;
     }
 }
