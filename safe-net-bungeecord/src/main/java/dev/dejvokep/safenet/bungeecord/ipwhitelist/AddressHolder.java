@@ -80,7 +80,7 @@ public class AddressHolder {
     }
 
     /**
-     * Returns the address held by this instance of this class, including the case-sensitive indicator.
+     * Returns the address held, including the case-sensitive indicator, if needed.
      *
      * @return the address held
      */
