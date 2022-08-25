@@ -47,6 +47,11 @@ public class Updater {
     public static void watch(@NotNull SafeNetBungeeCord plugin) {
         // Version
         String version = plugin.getDescription().getVersion();
+        int dash = version.indexOf('-');
+        if (dash != -1)
+            version = version.substring(0, dash);
+        // ID
+        final int versionId = Integer.parseInt(version.replace(".", ""));
 
         // Schedule
         ProxyServer.getInstance().getScheduler().schedule(plugin, () -> {
@@ -60,8 +65,8 @@ public class Updater {
             }
 
             // New version available
-            if (Integer.parseInt(latest.replace(".", "")) > Integer.parseInt(version.replace(".", "")))
-                plugin.getLogger().warning("New version " + latest + " is available! Please update as soon as possible to receive the newest features and important security patches. You are using version " + version + ".");
+            if (Integer.parseInt(latest.replace(".", "")) > versionId)
+                plugin.getLogger().warning("New version " + latest + " is available! Please update as soon as possible to receive the newest features and important security patches. You are using version " + plugin.getDescription().getVersion() + ".");
         }, 0L, RECHECK_DELAY, TimeUnit.MINUTES);
     }
 
