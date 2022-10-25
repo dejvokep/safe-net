@@ -58,10 +58,15 @@ public class Authenticator {
      */
     private static final String HOST_DELIMITER = "\00";
     /**
-     * String found in the hostname if the player connected through GeyserMC server. Surrounded by a string from both
-     * sides (in the hostname).
+     * Element found in the hostname split if the player connected through GeyserMC server. Indicates that the next
+     * element is a chunk of Floodgate related data. <b>Applies to Floodgate V1 specification.</b>
      */
-    private static final String GEYSER_FLOODGATE_ID = "Geyser-Floodgate";
+    private static final String GEYSER_FLOODGATE_ID_V1 = "Geyser-Floodgate";
+    /**
+     * String prefixing Floodgate related data in an element in the hostname split, if the player connected through
+     * GeyserMC server. <b>Applies to Floodgate V2 specification.</b>
+     */
+    private static final String GEYSER_FLOODGATE_ID_V2 = "^Floodgate^";
 
     /**
      * Replacement for unknown data.
@@ -147,12 +152,15 @@ public class Authenticator {
 
         // Go through all indexes
         for (int i = 0; i < split.length; i++) {
-            // If it is the Geyser Floodgate ID string
-            if (split[i].equals(GEYSER_FLOODGATE_ID)) {
+            // Floodgate V1 ID checking
+            if (split[i].equals(GEYSER_FLOODGATE_ID_V1)) {
                 // Skip the next index
                 i++;
                 continue;
             }
+            // Floodgate V2 ID checking
+            if (split[i].startsWith(GEYSER_FLOODGATE_ID_V2))
+                continue;
 
             // Set
             if (serverHostname == null) {
