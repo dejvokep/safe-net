@@ -25,13 +25,12 @@ import dev.dejvokep.safenet.core.PassphraseStore;
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.command.PluginCommand;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
-import dev.dejvokep.safenet.spigot.listener.*;
+import dev.dejvokep.safenet.spigot.listener.ListenerPusher;
 import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
-import dev.dejvokep.safenet.spigot.listener.handshake.spigot.SpigotHandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.handshake.paper.PaperHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.spigot.SpigotHandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.session.SessionListener;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -94,10 +93,8 @@ public class SafeNetSpigot extends JavaPlugin {
 
         // If not a paper server
         if (!paperServer) {
-            // ProtocolLib plugin
-            Plugin protocolLib = Bukkit.getPluginManager().getPlugin("ProtocolLib");
             // If ProtocolLib is not installed or is not a supported version
-            if (!Bukkit.getPluginManager().isPluginEnabled(protocolLib) || isUnsupportedProtocolLib()) {
+            if (!Bukkit.getPluginManager().isPluginEnabled(Bukkit.getPluginManager().getPlugin("ProtocolLib")) || isUnsupportedProtocolLib()) {
                 getLogger().severe(String.format("This version of SafeNET requires ProtocolLib %s to run! Shutting down...", PROTOCOL_LIB_VERSION));
                 Bukkit.shutdown();
                 return;
@@ -114,10 +111,10 @@ public class SafeNetSpigot extends JavaPlugin {
 
             // Register session listeners
             new SessionListener(this);
-            getLogger().info("Spigot native server detected; handshakes will be handled via the packet listener and sessions will be validated using the API.");
+            getLogger().info("Spigot native server components available; handshakes will be handled via the packet listener and sessions will be validated using the API.");
         } else {
             // All packets are held until all plugins are initialized, so the listener is guaranteed to always be registered
-            getLogger().info("Paper (or forked) server detected; handshakes will be handled via the API and sessions will not be validated.");
+            getLogger().info("Paper server components available; handshakes will be handled via the API and sessions will not be validated.");
             handshakeListener = new PaperHandshakeListener(this);
         }
 
