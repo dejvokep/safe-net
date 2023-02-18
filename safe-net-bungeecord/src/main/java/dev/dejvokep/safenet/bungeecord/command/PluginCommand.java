@@ -81,7 +81,7 @@ public class PluginCommand extends Command {
                         return;
                     }
                     // Authenticator
-                    plugin.getAuthenticator().reload();
+                    plugin.getPassphraseVault().reload();
                     // Address whitelist
                     plugin.getAddressWhitelist().reload();
                     // Login listener
@@ -92,7 +92,7 @@ public class PluginCommand extends Command {
                     return;
                 case "diagnostics":
                     messenger.sendMessages(sender, String.format("Plugin: %s v%s", plugin.getDescription().getName(), plugin.getDescription().getVersion()),
-                            String.format("Passphrase: %s (%d chars)", plugin.getAuthenticator().getPassphraseStatus(), plugin.getAuthenticator().getPassphrase().length()),
+                            String.format("Passphrase: %s (%d chars)", plugin.getPassphraseVault().getPassphraseStatus(), plugin.getPassphraseVault().getPassphrase().length()),
                             String.format("Address whitelist: %s (%d entries)", (plugin.getAddressWhitelist().isEnabled() ? "enabled" : "disabled"), plugin.getAddressWhitelist().getAddresses().size()),
                             String.format("Server: %s %s", ProxyServer.getInstance().getName(), ProxyServer.getInstance().getVersion()),
                             String.format("Java: %s (%s)", System.getProperty("java.version"), System.getProperty("java.vendor")),
@@ -106,7 +106,7 @@ public class PluginCommand extends Command {
         if (args.length <= 2 && args[0].equalsIgnoreCase("generate")) {
             try {
                 // Generate
-                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? PassphraseVault.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+                plugin.getPassphraseVault().generatePassphrase(args.length == 1 ? PassphraseVault.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
             } catch (IOException ex) {
                 plugin.getLogger().log(Level.SEVERE, "An error occurred whilst saving the config!", ex);
                 return;

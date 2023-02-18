@@ -50,7 +50,7 @@ public class SafeNetBungeeCord extends Plugin {
     private final Messenger messenger = new Messenger();
     // Config
     private YamlDocument config;
-    // Authenticator
+    // Passphrase vault
     private PassphraseVault passphraseVault;
     // Address whitelist
     private AddressWhitelist addressWhitelist;
@@ -124,11 +124,11 @@ public class SafeNetBungeeCord extends Plugin {
     }
 
     /**
-     * Returns the authenticator.
+     * Returns the passphrase vault.
      *
-     * @return the authenticator
+     * @return the passphrase vault
      */
-    public PassphraseVault getAuthenticator() {
+    public PassphraseVault getPassphraseVault() {
         return passphraseVault;
     }
 
