@@ -15,7 +15,7 @@
  */
 package dev.dejvokep.safenet.bungeecord.listener;
 
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import net.md_5.bungee.connection.LoginResult;
 import net.md_5.bungee.protocol.Property;
 import org.jetbrains.annotations.NotNull;
@@ -57,21 +57,21 @@ public class SafeNetLoginResult extends LoginResult {
 
     // Property array with passphrase
     private Property[] withPassphrase;
-    // Store
-    private final PassphraseStore passphraseStore;
+    // Vault
+    private final PassphraseVault passphraseVault;
 
     /**
      * Copies references of variables from the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}.
      * If the given result is <code>null</code>, all variables used by the result are set to <code>null</code>.
      *
      * @param fromLogin       the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}
-     * @param passphraseStore the store providing the secret passphrase and other needed data
+     * @param passphraseVault the store providing the secret passphrase and other needed data
      */
-    SafeNetLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseStore passphraseStore) {
+    SafeNetLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseVault passphraseVault) {
         // Call as in offline mode
         super(null, null, new Property[0]);
         // Set
-        this.passphraseStore = passphraseStore;
+        this.passphraseVault = passphraseVault;
 
         // If the result from the event contains any data - online mode
         if (fromLogin != null) {
@@ -125,7 +125,7 @@ public class SafeNetLoginResult extends LoginResult {
         // Make a copy of the original properties, or create a new instance with a space for the passphrase
         withPassphrase = getProperties() == null ? new Property[1] : Arrays.copyOf(getProperties(), getProperties().length + 1);
         // Add the passphrase
-        withPassphrase[withPassphrase.length - 1] = new Property(PassphraseStore.PASSPHRASE_PROPERTY_NAME, passphraseStore.getPassphrase(), "");
+        withPassphrase[withPassphrase.length - 1] = new Property(PassphraseVault.PASSPHRASE_PROPERTY_NAME, passphraseVault.getPassphrase(), "");
     }
 
 }

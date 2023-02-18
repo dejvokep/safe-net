@@ -79,7 +79,7 @@ public class PluginCommand implements CommandExecutor {
 
                 // Reload all
                 plugin.getHandshakeListener().reload();
-                plugin.getPassphraseStore().reload();
+                plugin.getPassphraseVault().reload();
                 plugin.getDisconnectHandler().reload();
 
                 // Reloaded
@@ -88,7 +88,7 @@ public class PluginCommand implements CommandExecutor {
                 return true;
             case "diagnostics":
                 sender.sendMessage(String.format("Plugin: %s v%s", plugin.getDescription().getName(), plugin.getDescription().getVersion()),
-                        String.format("Passphrase: %s (%d chars)", plugin.getPassphraseStore().getPassphraseStatus(), plugin.getPassphraseStore().getPassphrase().length()),
+                        String.format("Passphrase: %s (%d chars)", plugin.getPassphraseVault().getPassphraseStatus(), plugin.getPassphraseVault().getPassphrase().length()),
                         String.format("Mode: %s", plugin.getHandshakeListener().getSignature()),
                         String.format("Server: %s %s %s", Bukkit.getName(), Bukkit.getVersion(), Bukkit.getBukkitVersion()),
                         String.format("Java: %s (%s)", System.getProperty("java.version"), System.getProperty("java.vendor")),

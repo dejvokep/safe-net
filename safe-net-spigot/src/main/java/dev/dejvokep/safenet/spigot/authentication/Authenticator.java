@@ -21,7 +21,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import dev.dejvokep.safenet.core.KeyGenerator;
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
@@ -127,7 +127,7 @@ public class Authenticator {
      */
     public HandshakeAuthenticationResult handshake(@Nullable String data) {
         // Passphrase
-        String passphrase = plugin.getPassphraseStore().getPassphrase();
+        String passphrase = plugin.getPassphraseVault().getPassphrase();
         // If null
         if (data == null)
             return new HandshakeAuthenticationResult(AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
@@ -212,7 +212,7 @@ public class Authenticator {
                     continue;
 
                 // If the names equal
-                if (property.getName().equals(PassphraseStore.PASSPHRASE_PROPERTY_NAME)) {
+                if (property.getName().equals(PassphraseVault.PASSPHRASE_PROPERTY_NAME)) {
                     // Remove the property
                     properties.remove(index);
 
@@ -281,7 +281,7 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Delete possible properties with the passphrase
-            propertyMap.removeAll(PassphraseStore.PASSPHRASE_PROPERTY_NAME);
+            propertyMap.removeAll(PassphraseVault.PASSPHRASE_PROPERTY_NAME);
 
             // If there are more entries
             if (properties.size() != 1)

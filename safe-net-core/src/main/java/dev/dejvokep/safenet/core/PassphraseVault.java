@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 /**
  * A class covering all needed functions related to passphrase.
  */
-public class PassphraseStore {
+public class PassphraseVault {
 
     /**
      * Passphrase property name.
@@ -55,7 +55,7 @@ public class PassphraseStore {
      * @param config the configuration file
      * @param logger the logger
      */
-    public PassphraseStore(@NotNull YamlDocument config, @NotNull Logger logger) {
+    public PassphraseVault(@NotNull YamlDocument config, @NotNull Logger logger) {
         // Set
         this.config = config;
         this.logger = logger;

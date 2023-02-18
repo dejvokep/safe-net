@@ -21,7 +21,7 @@ import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.command.PluginCommand;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
@@ -58,7 +58,7 @@ public class SafeNetSpigot extends JavaPlugin {
     private YamlDocument config;
 
     // Internals
-    private PassphraseStore passphraseStore;
+    private PassphraseVault passphraseVault;
     private AbstractHandshakeListener handshakeListener;
     private DisconnectHandler disconnectHandler;
     private ListenerPusher listenerPusher;
@@ -80,7 +80,7 @@ public class SafeNetSpigot extends JavaPlugin {
         }
 
         // Initialize
-        passphraseStore = new PassphraseStore(config, getLogger());
+        passphraseVault = new PassphraseVault(config, getLogger());
         disconnectHandler = new DisconnectHandler(this);
         authenticator = new Authenticator(this);
         listenerPusher = new ListenerPusher(this);
@@ -123,7 +123,7 @@ public class SafeNetSpigot extends JavaPlugin {
             // Thank you message
             getLogger().info("Thank you for downloading SafeNET!");
             // Print
-            passphraseStore.printStatus();
+            passphraseVault.printStatus();
         }, 1);
     }
 
@@ -163,13 +163,13 @@ public class SafeNetSpigot extends JavaPlugin {
     }
 
     /**
-     * Returns the passphrase store.
+     * Returns the passphrase vault.
      *
-     * @return the passphrase store
+     * @return the passphrase vault
      */
     @NotNull
-    public PassphraseStore getPassphraseStore() {
-        return passphraseStore;
+    public PassphraseVault getPassphraseVault() {
+        return passphraseVault;
     }
 
     /**

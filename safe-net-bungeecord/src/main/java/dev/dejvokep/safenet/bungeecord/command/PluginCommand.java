@@ -18,7 +18,7 @@ package dev.dejvokep.safenet.bungeecord.command;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.safenet.bungeecord.SafeNetBungeeCord;
 import dev.dejvokep.safenet.bungeecord.message.Messenger;
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Command;
@@ -106,7 +106,7 @@ public class PluginCommand extends Command {
         if (args.length <= 2 && args[0].equalsIgnoreCase("generate")) {
             try {
                 // Generate
-                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? PassphraseStore.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? PassphraseVault.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
             } catch (IOException ex) {
                 plugin.getLogger().log(Level.SEVERE, "An error occurred whilst saving the config!", ex);
                 return;
