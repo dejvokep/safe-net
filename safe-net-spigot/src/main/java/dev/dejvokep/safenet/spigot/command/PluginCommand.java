@@ -87,13 +87,13 @@ public class PluginCommand implements CommandExecutor {
                         config.getString("command.reload")));
                 return true;
             case "diagnostics":
-                sender.sendMessage("Plugin: " + plugin.getDescription().getName() + " v" + plugin.getDescription().getVersion());
-                sender.sendMessage("Passphrase: " + plugin.getPassphraseStore().getPassphraseStatus() + " (" + plugin.getPassphraseStore().getPassphrase().length() + " chars)");
-                sender.sendMessage("Mode: " + plugin.getHandshakeListener().getSignature());
-                sender.sendMessage("Server: " + Bukkit.getName() + " " + Bukkit.getVersion() + " " + Bukkit.getBukkitVersion());
-                sender.sendMessage("Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
-                sender.sendMessage("Java VM: " + System.getProperty("java.vm.name") + System.getProperty("java.vm.version") + " (" + System.getProperty("java.vm.version") + "), " + System.getProperty("java.vm.info"));
-                sender.sendMessage("OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " (" + System.getProperty("os.arch") + ")");
+                sender.sendMessage(String.format("Plugin: %s v%s", plugin.getDescription().getName(), plugin.getDescription().getVersion()),
+                        String.format("Passphrase: %s (%d chars)", plugin.getPassphraseStore().getPassphraseStatus(), plugin.getPassphraseStore().getPassphrase().length()),
+                        String.format("Mode: %s", plugin.getHandshakeListener().getSignature()),
+                        String.format("Server: %s %s %s", Bukkit.getName(), Bukkit.getVersion(), Bukkit.getBukkitVersion()),
+                        String.format("Java: %s (%s)", System.getProperty("java.version"), System.getProperty("java.vendor")),
+                        String.format("Java VM: %s (%s), %s", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info")),
+                        String.format("OS: %s %s (%s)", System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch")));
                 return true;
         }
 
