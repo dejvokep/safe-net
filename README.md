@@ -42,11 +42,11 @@ required (if running [Paper servers](https://papermc.io/), ProtocolLib installat
 use LEGACY version, which allows for use of older ProtocolLib releases. If you're stillusing version 3.5 or older,
 **immediately upgrade** to at least 3.6.
 
-| SafeNET | BungeeCord | ProtocolLib (not required if running [Paper servers](https://papermc.io/)) | Game |
-| ------- | ---------- | ----------- | ---- |
-| 3.7 | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 5.0.0 (or newer) | 1.8 - 1.19 |
-| 3.7-LEGACY | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 4.8.0 (or older) | 1.8 - 1.18 |
-| 3.5 (and older) | **VULNERABLE, DO NOT USE!** | - | - |
+| SafeNET         | BungeeCord                                                               | ProtocolLib (not required if running [Paper servers](https://papermc.io/)) | Game       |
+|-----------------|--------------------------------------------------------------------------|----------------------------------------------------------------------------|------------|
+| 3.8             | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 5.0.0 (or newer)                                                           | 1.8 - 1.19 |
+| 3.8-LEGACY      | Latest build ([1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer) | 4.8.0 (or older)                                                           | 1.8 - 1.18 |
+| 3.5 (and older) | **VULNERABLE, DO NOT USE!**                                              | -                                                                          | -          |
 
 You can view the setup instructions at [the wiki](https://dejvokep.gitbook.io/safenet/). If you need help with anything,
 feel free join the [Discord server](https://discord.gg/BbhADEy) (nonstop 24/7 🤖 support). Or, just to talk with us 👋
