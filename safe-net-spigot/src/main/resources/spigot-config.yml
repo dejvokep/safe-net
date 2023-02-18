@@ -17,6 +17,9 @@ config-version: 1
 # Passphrase (equal to what you set on the proxy):
 passphrase: ""
 # Block server pings for unauthenticated requests:
+# - IMPORTANT >> Might not be available on legacy versions of Paper servers, and it's forks. Check the console on early
+#                startup to see if this feature is supported on your server.
+#                Please note that this may break functionality of plugins that rely on pings to obtain server information.
 block-pings: false
 # Disconnect message sent to the player when the request is malformed or did not connect through the proxy server:
 # - "\n" can be used for a new line.

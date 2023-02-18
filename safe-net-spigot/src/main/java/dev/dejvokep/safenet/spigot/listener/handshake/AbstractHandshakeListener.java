@@ -39,11 +39,13 @@ public abstract class AbstractHandshakeListener {
 
     // Plugin
     private final SafeNetSpigot plugin;
-    // If to block pings
+    // If to block pings and it is available
     private boolean blockPings;
+    private final boolean pingBlockingAvailable;
 
-    public AbstractHandshakeListener(SafeNetSpigot plugin) {
+    public AbstractHandshakeListener(SafeNetSpigot plugin, boolean pingBlockingAvailable) {
         this.plugin = plugin;
+        this.pingBlockingAvailable = pingBlockingAvailable;
         reload();
     }
 
@@ -55,7 +57,7 @@ public abstract class AbstractHandshakeListener {
 
         // Warn
         if (blockPings)
-            plugin.getLogger().warning("Server pinging is blocked. Please note that this may break functionality of plugins that rely on pings to obtain server information.");
+            plugin.getLogger().warning(pingBlockingAvailable ? "Server pinging is blocked. Please note that this may break functionality of plugins that rely on pings to obtain server information." : "This server implementation does not support server ping blocking. Disable blocking to remove this warning.");
     }
 
     /**
@@ -80,6 +82,28 @@ public abstract class AbstractHandshakeListener {
     }
 
     /**
+     * Returns the listener signature. The returned signature is, depending on the
+     * {@link #isCombined() mode the listener is operating in}, equal to one of the following:
+     * <ul>
+     *     <li>combined: <code>combined (handshake+session)</code></li>
+     *     <li>single: <code>single (handshake)</code></li>
+     * </ul>
+     *
+     * @return the listener signature
+     */
+    public String getSignature() {
+        return isCombined() ? "combined (handshake+session)" : "single (handshake)";
+    }
+
+    /**
+     * Returns whether this listener is combined (has another listener validation sessions) or single (sessions are not
+     * validated).
+     *
+     * @return if this listener operates in combined mode
+     */
+    public abstract boolean isCombined();
+
+    /**
      * Returns the plugin instance.
      *
      * @return the plugin instance
@@ -95,5 +119,14 @@ public abstract class AbstractHandshakeListener {
      */
     public boolean isBlockPings() {
         return blockPings;
+    }
+
+    /**
+     * Returns whether ping blocking is available.
+     *
+     * @return whether ping blocking is available
+     */
+    public boolean isPingBlockingAvailable() {
+        return pingBlockingAvailable;
     }
 }

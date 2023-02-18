@@ -20,12 +20,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.regex.Pattern;
 
 /**
- * Stores a whitelisted IP (IPv4 format) and covers basic manipulation methods.
+ * Stores a whitelisted address (IPv4 / domain) and covers basic manipulation methods.
  */
 public class AddressHolder {
 
     /**
-     * IP (IPv4) address pattern.
+     * Address (IPv4 / domain) pattern.
      */
     private static final Pattern ADDRESS_PATTERN = Pattern.compile("!?(?:[^.]+\\.)+.+:[0-9]{1,5}");
 
@@ -40,9 +40,9 @@ public class AddressHolder {
     public static final char PORT_COLON = ':';
 
     // The address
-    private String address;
+    private String address = "";
     // If to compare case-sensitively
-    private boolean caseSensitive;
+    private boolean caseSensitive = false;
 
     /**
      * Compares the address held with the given one and returns whether they are the same.
@@ -80,7 +80,7 @@ public class AddressHolder {
     }
 
     /**
-     * Returns the address held by this instance of this class, including the case-sensitive indicator.
+     * Returns the address held, including the case-sensitive indicator, if needed.
      *
      * @return the address held
      */

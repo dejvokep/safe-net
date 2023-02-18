@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dejvokep.safenet.spigot.listener.handshake;
+package dev.dejvokep.safenet.spigot.listener.handshake.paper;
 
 import com.destroystokyo.paper.event.player.PlayerHandshakeEvent;
-import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
+import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -30,10 +30,16 @@ import java.util.Objects;
 import java.util.logging.Level;
 
 /**
- * Listens for Paper's {@link PlayerHandshakeEvent} without authenticating sessions, which aren't verified when running
- * on Paper servers.
+ * Listens for Paper's {@link PlayerHandshakeEvent} without authenticating sessions. On Paper servers, packets are held
+ * until all plugins are initialized, so the listener is guaranteed to always be registered and therefore no session
+ * validation is needed.
  */
 public class PaperHandshakeListener extends AbstractHandshakeListener implements Listener {
+
+    /**
+     * Paper's server list ping event class.
+     */
+    private static final String PAPER_SERVER_LIST_PING_EVENT = "com.destroystokyo.paper.event.server.PaperServerListPingEvent";
 
     // Handshake field
     private Field originalHandshakeField;
@@ -46,7 +52,7 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
      * @param plugin the plugin
      */
     public PaperHandshakeListener(SafeNetSpigot plugin) {
-        super(plugin);
+        super(plugin, plugin.classExists(PAPER_SERVER_LIST_PING_EVENT));
 
         // Obtain the field
         try {
@@ -62,6 +68,10 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         Bukkit.getPluginManager().registerEvents(this, plugin);
         plugin.getEventPusher().push(PlayerHandshakeEvent.getHandlerList(), EventPriority.LOWEST, this);
         plugin.getEventPusher().push(PlayerHandshakeEvent.getHandlerList(), EventPriority.MONITOR, this);
+
+        // Register server list ping listener only if available
+        if (isPingBlockingAvailable())
+            new PaperServerListPingListener(plugin);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
@@ -118,12 +128,6 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         failed = null;
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
-    public void onServerPing(PaperServerListPingEvent event) {
-        if (isBlockPings())
-            event.setCancelled(true);
-    }
-
     /**
      * Fails the given event and monitors it.
      *
@@ -138,4 +142,8 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         failed = event.getOriginalHandshake();
     }
 
+    @Override
+    public boolean isCombined() {
+        return false;
+    }
 }

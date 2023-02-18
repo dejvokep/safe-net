@@ -21,7 +21,7 @@ import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.PropertyMap;
 import dev.dejvokep.safenet.core.KeyGenerator;
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
@@ -58,10 +58,15 @@ public class Authenticator {
      */
     private static final String HOST_DELIMITER = "\00";
     /**
-     * String found in the hostname if the player connected through GeyserMC server. Surrounded by a string from both
-     * sides (in the hostname).
+     * Element found in the hostname split if the player connected through GeyserMC server. Indicates that the next
+     * element is a chunk of Floodgate related data. <b>Applies to Floodgate V1 specification.</b>
      */
-    private static final String GEYSER_FLOODGATE_ID = "Geyser-Floodgate";
+    private static final String GEYSER_FLOODGATE_ID_V1 = "Geyser-Floodgate";
+    /**
+     * String prefixing Floodgate related data in an element in the hostname split, if the player connected through
+     * GeyserMC server. <b>Applies to Floodgate V2 specification.</b>
+     */
+    private static final String GEYSER_FLOODGATE_ID_V2 = "^Floodgate^";
 
     /**
      * Replacement for unknown data.
@@ -122,7 +127,7 @@ public class Authenticator {
      */
     public HandshakeAuthenticationResult handshake(@Nullable String data) {
         // Passphrase
-        String passphrase = plugin.getPassphraseStore().getPassphrase();
+        String passphrase = plugin.getPassphraseVault().getPassphrase();
         // If null
         if (data == null)
             return new HandshakeAuthenticationResult(AuthenticationResult.HANDSHAKE_MALFORMED_DATA);
@@ -147,12 +152,15 @@ public class Authenticator {
 
         // Go through all indexes
         for (int i = 0; i < split.length; i++) {
-            // If it is the Geyser Floodgate ID string
-            if (split[i].equals(GEYSER_FLOODGATE_ID)) {
+            // Floodgate V1 ID checking
+            if (split[i].equals(GEYSER_FLOODGATE_ID_V1)) {
                 // Skip the next index
                 i++;
                 continue;
             }
+            // Floodgate V2 ID checking
+            if (split[i].startsWith(GEYSER_FLOODGATE_ID_V2))
+                continue;
 
             // Set
             if (serverHostname == null) {
@@ -204,7 +212,7 @@ public class Authenticator {
                     continue;
 
                 // If the names equal
-                if (property.getName().equals(PassphraseStore.PASSPHRASE_PROPERTY_NAME)) {
+                if (property.getName().equals(PassphraseVault.PASSPHRASE_PROPERTY_NAME)) {
                     // Remove the property
                     properties.remove(index);
 
@@ -273,7 +281,7 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Delete possible properties with the passphrase
-            propertyMap.removeAll(PassphraseStore.PASSPHRASE_PROPERTY_NAME);
+            propertyMap.removeAll(PassphraseVault.PASSPHRASE_PROPERTY_NAME);
 
             // If there are more entries
             if (properties.size() != 1)

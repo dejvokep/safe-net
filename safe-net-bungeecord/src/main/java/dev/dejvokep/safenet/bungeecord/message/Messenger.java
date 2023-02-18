@@ -20,8 +20,10 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Class used to send messages to a player.
@@ -38,21 +40,55 @@ public class Messenger {
     public static final Collection<Character> MODIFIER_CHARS = Arrays.asList('K', 'k', 'L', 'l', 'M', 'm', 'N', 'n', 'O', 'o', 'R', 'r');
 
     /**
+     * Sends multiple messages to a player.
+     *
+     * @param sender   the receiver
+     * @param messages the messages to send
+     */
+    public void sendMessages(@NotNull CommandSender sender, @NotNull String... messages) {
+        // List of components
+        List<TextComponent> components = new ArrayList<>(messages.length);
+
+        // Translate all
+        for (String message : messages) {
+            TextComponent translated = translate(message);
+            if (translated != null)
+                components.add(translated);
+        }
+
+        // Send
+        sender.sendMessage(components.toArray(new TextComponent[0]));
+    }
+
+    /**
      * Sends a message to a player.
      *
      * @param sender  the receiver
      * @param message the message to send
      */
     public void sendMessage(@NotNull CommandSender sender, @NotNull String message) {
+        TextComponent translated = translate(message);
+        if (translated != null)
+            sender.sendMessage(translated);
+    }
+
+    /**
+     * Translates the given message into a text component, while preserving color codes across line breaks.
+     *
+     * @param message the message to translate
+     * @return a text component containing the message
+     */
+    private TextComponent translate(String message) {
         // If the message is empty
-        if (message.equals("")) return;
+        if (message.equals(""))
+            return null;
 
         // The first space in the message (possible line break)
         int spaceIndex = message.indexOf(' ');
 
         // If the message is one-word
         if (spaceIndex == -1)
-            sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', message)));
+            return new TextComponent(ChatColor.translateAlternateColorCodes('&', message));
 
         // The final message, the currently processed word, the unprocessed part
         String finalMessage = "", word, rest = message;
@@ -94,14 +130,16 @@ public class Messenger {
         finalMessage = finalMessage + " " + getLastColor(finalMessage, rest) + rest;
 
         // Send the message
-        sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', finalMessage)));
+        return new TextComponent(ChatColor.translateAlternateColorCodes('&', finalMessage));
     }
 
     /**
-     * Returns the last color codes (combination of color and modifier char if available, see {@link #COLOR_CHARS} and {@link #MODIFIER_CHARS}) used in the given string. If not found, returns an empty string.
+     * Returns the last color codes (combination of color and modifier char if available, see {@link #COLOR_CHARS} and
+     * {@link #MODIFIER_CHARS}) used in the given string. If not found, returns an empty string.
      *
      * @param searched a string to be searched
-     * @param next     a string that goes after the searched one (to check if there's a color code that will override the effect)
+     * @param next     a string that goes after the searched one (to check if there's a color code that will override
+     *                 the effect)
      * @return the last color codes used in the given string, or an empty string if not found
      */
     private String getLastColor(@NotNull String searched, @NotNull String next) {

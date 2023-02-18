@@ -18,7 +18,7 @@ package dev.dejvokep.safenet.bungeecord.command;
 import dev.dejvokep.boostedyaml.YamlDocument;
 import dev.dejvokep.safenet.bungeecord.SafeNetBungeeCord;
 import dev.dejvokep.safenet.bungeecord.message.Messenger;
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Command;
@@ -81,7 +81,7 @@ public class PluginCommand extends Command {
                         return;
                     }
                     // Authenticator
-                    plugin.getAuthenticator().reload();
+                    plugin.getPassphraseVault().reload();
                     // Address whitelist
                     plugin.getAddressWhitelist().reload();
                     // Login listener
@@ -91,13 +91,13 @@ public class PluginCommand extends Command {
                     messenger.sendMessage(sender, config.getString("command.reload"));
                     return;
                 case "diagnostics":
-                    messenger.sendMessage(sender, "Plugin: " + plugin.getDescription().getName() + " v" + plugin.getDescription().getVersion());
-                    messenger.sendMessage(sender, "Passphrase: " + plugin.getAuthenticator().getPassphraseStatus() + " (" + plugin.getAuthenticator().getPassphrase().length() + " chars)");
-                    messenger.sendMessage(sender, "Address whitelist: " + (plugin.getAddressWhitelist().isEnabled() ? "enabled" : "disabled") + " (" + plugin.getAddressWhitelist().getAddresses().size() + " entries)");
-                    messenger.sendMessage(sender, "Server: " + ProxyServer.getInstance().getName() + " " + ProxyServer.getInstance().getVersion());
-                    messenger.sendMessage(sender, "Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
-                    messenger.sendMessage(sender, "Java VM: " + System.getProperty("java.vm.name") + System.getProperty("java.vm.version") + " (" + System.getProperty("java.vm.version") + "), " + System.getProperty("java.vm.info"));
-                    messenger.sendMessage(sender, "OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " (" + System.getProperty("os.arch") + ")");
+                    messenger.sendMessages(sender, String.format("Plugin: %s v%s", plugin.getDescription().getName(), plugin.getDescription().getVersion()),
+                            String.format("Passphrase: %s (%d chars)", plugin.getPassphraseVault().getPassphraseStatus(), plugin.getPassphraseVault().getPassphrase().length()),
+                            String.format("Address whitelist: %s (%d entries)", (plugin.getAddressWhitelist().isEnabled() ? "enabled" : "disabled"), plugin.getAddressWhitelist().getAddresses().size()),
+                            String.format("Server: %s %s", ProxyServer.getInstance().getName(), ProxyServer.getInstance().getVersion()),
+                            String.format("Java: %s (%s)", System.getProperty("java.version"), System.getProperty("java.vendor")),
+                            String.format("Java VM: %s (%s), %s", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info")),
+                            String.format("OS: %s %s (%s)", System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch")));
                     return;
             }
         }
@@ -106,7 +106,7 @@ public class PluginCommand extends Command {
         if (args.length <= 2 && args[0].equalsIgnoreCase("generate")) {
             try {
                 // Generate
-                plugin.getAuthenticator().generatePassphrase(args.length == 1 ? PassphraseStore.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
+                plugin.getPassphraseVault().generatePassphrase(args.length == 1 ? PassphraseVault.RECOMMENDED_PASSPHRASE_LENGTH : toPassphraseLength(args[1]));
             } catch (IOException ex) {
                 plugin.getLogger().log(Level.SEVERE, "An error occurred whilst saving the config!", ex);
                 return;

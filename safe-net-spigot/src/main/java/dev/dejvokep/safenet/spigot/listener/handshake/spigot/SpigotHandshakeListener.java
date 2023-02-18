@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dejvokep.safenet.spigot.listener.handshake;
+package dev.dejvokep.safenet.spigot.listener.handshake.spigot;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -25,6 +25,7 @@ import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
+import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -35,15 +36,15 @@ import java.util.logging.Level;
  * Listens for the {@link PacketType.Handshake.Client#SET_PROTOCOL} packet. This packet is the first one sent from the
  * client and is then used to read the <code>host</code> string and extract the properties.
  */
-public class NativeHandshakeListener extends AbstractHandshakeListener {
+public class SpigotHandshakeListener extends AbstractHandshakeListener {
 
     /**
      * Registers the handshake packet listener and handles the incoming connections.
      *
      * @param plugin the plugin
      */
-    public NativeHandshakeListener(@NotNull SafeNetSpigot plugin) {
-        super(plugin);
+    public SpigotHandshakeListener(@NotNull SafeNetSpigot plugin) {
+        super(plugin, true);
         // Reload
         reload();
         // Authenticator
@@ -106,4 +107,8 @@ public class NativeHandshakeListener extends AbstractHandshakeListener {
         }
     }
 
+    @Override
+    public boolean isCombined() {
+        return true;
+    }
 }

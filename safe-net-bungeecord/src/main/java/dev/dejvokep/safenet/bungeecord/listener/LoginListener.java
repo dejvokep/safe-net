@@ -130,7 +130,7 @@ public class LoginListener implements Listener {
         }
 
         // If the passphrase is valid
-        boolean validPassphrase = plugin.getAuthenticator().getPassphrase() != null && plugin.getAuthenticator().getPassphrase().length() > 0;
+        boolean validPassphrase = plugin.getPassphraseVault().getPassphrase() != null && plugin.getPassphraseVault().getPassphrase().length() > 0;
         // Insert the custom result
         if (validPassphrase && setResult(event.getConnection())) {
             // Accepted
@@ -164,7 +164,7 @@ public class LoginListener implements Listener {
 
         try {
             // Set
-            loginResultField.set(pendingConnection, new SafeNetLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getAuthenticator()));
+            loginResultField.set(pendingConnection, new SafeNetLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getPassphraseVault()));
         } catch (Exception ex) {
             // Log
             plugin.getLogger().log(Level.SEVERE, "An error occurred whilst setting the custom login result into the connection!", ex);

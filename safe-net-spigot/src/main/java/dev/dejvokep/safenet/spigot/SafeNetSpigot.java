@@ -21,17 +21,16 @@ import dev.dejvokep.boostedyaml.settings.dumper.DumperSettings;
 import dev.dejvokep.boostedyaml.settings.general.GeneralSettings;
 import dev.dejvokep.boostedyaml.settings.loader.LoaderSettings;
 import dev.dejvokep.boostedyaml.settings.updater.UpdaterSettings;
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.command.PluginCommand;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
-import dev.dejvokep.safenet.spigot.listener.*;
+import dev.dejvokep.safenet.spigot.listener.ListenerPusher;
 import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
-import dev.dejvokep.safenet.spigot.listener.handshake.NativeHandshakeListener;
-import dev.dejvokep.safenet.spigot.listener.handshake.PaperHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.paper.PaperHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.spigot.SpigotHandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.session.SessionListener;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,11 +49,16 @@ public class SafeNetSpigot extends JavaPlugin {
      */
     private static final String PROTOCOL_LIB_VERSION = "5.0.0 or newer";
 
+    /**
+     * Paper's handshake event class.
+     */
+    private static final String PAPER_HANDSHAKE_EVENT = "com.destroystokyo.paper.event.player.PlayerHandshakeEvent";
+
     // Config
     private YamlDocument config;
 
     // Internals
-    private PassphraseStore passphraseStore;
+    private PassphraseVault passphraseVault;
     private AbstractHandshakeListener handshakeListener;
     private DisconnectHandler disconnectHandler;
     private ListenerPusher listenerPusher;
@@ -76,7 +80,7 @@ public class SafeNetSpigot extends JavaPlugin {
         }
 
         // Initialize
-        passphraseStore = new PassphraseStore(config, getLogger());
+        passphraseVault = new PassphraseVault(config, getLogger());
         disconnectHandler = new DisconnectHandler(this);
         authenticator = new Authenticator(this);
         listenerPusher = new ListenerPusher(this);
@@ -85,29 +89,32 @@ public class SafeNetSpigot extends JavaPlugin {
         Bukkit.getPluginCommand("sn").setExecutor(new PluginCommand(this));
 
         // Paper server
-        try {
-            Class.forName("com.destroystokyo.paper.PaperConfig");
-            paperServer = true;
-        } catch (ClassNotFoundException ignored) {
-            paperServer = false;
-        }
+        paperServer = classExists(PAPER_HANDSHAKE_EVENT);
 
         // If not a paper server
         if (!paperServer) {
-            // ProtocolLib plugin
-            Plugin protocolLib = Bukkit.getPluginManager().getPlugin("ProtocolLib");
             // If ProtocolLib is not installed or is not a supported version
-            if (protocolLib == null || !Bukkit.getPluginManager().isPluginEnabled(protocolLib) || isUnsupportedProtocolLib()) {
+            if (!Bukkit.getPluginManager().isPluginEnabled(Bukkit.getPluginManager().getPlugin("ProtocolLib")) || isUnsupportedProtocolLib()) {
                 getLogger().severe(String.format("This version of SafeNET requires ProtocolLib %s to run! Shutting down...", PROTOCOL_LIB_VERSION));
                 Bukkit.shutdown();
                 return;
             }
 
-            handshakeListener = new NativeHandshakeListener(this);
+            // Register handshake listener
+            try {
+                handshakeListener = new SpigotHandshakeListener(this);
+            } catch (Exception ex) {
+                getLogger().log(Level.SEVERE, "An unknown error has occurred whilst registering the packet listener! Shutting down...", ex);
+                Bukkit.shutdown();
+                return;
+            }
+
+            // Register session listeners
             new SessionListener(this);
+            getLogger().info("Spigot native server components available; handshakes will be handled via the packet listener and sessions will be validated using the API.");
         } else {
             // All packets are held until all plugins are initialized, so the listener is guaranteed to always be registered
-            getLogger().info("Paper (or forked) server detected; handshakes will be handled via the API and sessions will not be validated.");
+            getLogger().info("Paper server components available; handshakes will be handled via the API and sessions will not be validated.");
             handshakeListener = new PaperHandshakeListener(this);
         }
 
@@ -116,8 +123,24 @@ public class SafeNetSpigot extends JavaPlugin {
             // Thank you message
             getLogger().info("Thank you for downloading SafeNET!");
             // Print
-            passphraseStore.printStatus();
+            passphraseVault.printStatus();
         }, 1);
+    }
+
+    /**
+     * Returns whether a class by the given name exists.
+     *
+     * @param name the name to check for
+     * @return whether a class by the given name exists
+     * @see Class#forName(String)
+     */
+    public boolean classExists(String name) {
+        try {
+            Class.forName(name);
+            return true;
+        } catch (ClassNotFoundException ex) {
+            return false;
+        }
     }
 
     /**
@@ -126,12 +149,7 @@ public class SafeNetSpigot extends JavaPlugin {
      * @return whether ProtocolLib is of an unsupported version
      */
     private boolean isUnsupportedProtocolLib() {
-        try {
-            Class.forName("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory");
-            return false;
-        } catch (ClassNotFoundException ex) {
-            return true;
-        }
+        return !classExists("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory");
     }
 
     /**
@@ -145,13 +163,13 @@ public class SafeNetSpigot extends JavaPlugin {
     }
 
     /**
-     * Returns the passphrase store.
+     * Returns the passphrase vault.
      *
-     * @return the passphrase store
+     * @return the passphrase vault
      */
     @NotNull
-    public PassphraseStore getPassphraseStore() {
-        return passphraseStore;
+    public PassphraseVault getPassphraseVault() {
+        return passphraseVault;
     }
 
     /**

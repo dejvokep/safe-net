@@ -26,7 +26,7 @@ import dev.dejvokep.safenet.bungeecord.ipwhitelist.AddressWhitelist;
 import dev.dejvokep.safenet.bungeecord.listener.LoginListener;
 import dev.dejvokep.safenet.bungeecord.message.Messenger;
 import dev.dejvokep.safenet.bungeecord.updater.Updater;
-import dev.dejvokep.safenet.core.PassphraseStore;
+import dev.dejvokep.safenet.core.PassphraseVault;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.api.plugin.PluginManager;
@@ -50,8 +50,8 @@ public class SafeNetBungeeCord extends Plugin {
     private final Messenger messenger = new Messenger();
     // Config
     private YamlDocument config;
-    // Authenticator
-    private PassphraseStore passphraseStore;
+    // Passphrase vault
+    private PassphraseVault passphraseVault;
     // Address whitelist
     private AddressWhitelist addressWhitelist;
     // Login listener
@@ -79,7 +79,7 @@ public class SafeNetBungeeCord extends Plugin {
         }
 
         // Initialize
-        passphraseStore = new PassphraseStore(config, getLogger());
+        passphraseVault = new PassphraseVault(config, getLogger());
         addressWhitelist = new AddressWhitelist(this);
         Updater.watch(this);
 
@@ -124,12 +124,12 @@ public class SafeNetBungeeCord extends Plugin {
     }
 
     /**
-     * Returns the authenticator.
+     * Returns the passphrase vault.
      *
-     * @return the authenticator
+     * @return the passphrase vault
      */
-    public PassphraseStore getAuthenticator() {
-        return passphraseStore;
+    public PassphraseVault getPassphraseVault() {
+        return passphraseVault;
     }
 
     /**
