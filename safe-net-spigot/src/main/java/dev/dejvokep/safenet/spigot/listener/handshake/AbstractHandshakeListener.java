@@ -56,10 +56,8 @@ public abstract class AbstractHandshakeListener {
         this.blockPings = plugin.getConfiguration().getBoolean("block-pings");
 
         // Warn
-        if (blockPings && !pingBlockingAvailable)
-            plugin.getLogger().warning("This server implementation does not support server ping blocking. Disable blocking to remove this warning.");
-        if (blockPings && pingBlockingAvailable)
-            plugin.getLogger().warning("Server pinging is blocked. Please note that this may break functionality of plugins that rely on pings to obtain server information.");
+        if (blockPings)
+            plugin.getLogger().warning(pingBlockingAvailable ? "Server pinging is blocked. Please note that this may break functionality of plugins that rely on pings to obtain server information." : "This server implementation does not support server ping blocking. Disable blocking to remove this warning.");
     }
 
     /**
@@ -82,6 +80,28 @@ public abstract class AbstractHandshakeListener {
     public void logAuthException(Exception ex) {
         plugin.getLogger().log(Level.SEVERE, "An error occurred whilst processing a handshake!", ex);
     }
+
+    /**
+     * Returns the listener signature. The returned signature is, depending on the
+     * {@link #isCombined() mode the listener is operating in}, equal to one of the following:
+     * <ul>
+     *     <li>combined: <code>combined (handshake+session)</code></li>
+     *     <li>single: <code>single (handshake)</code></li>
+     * </ul>
+     *
+     * @return the listener signature
+     */
+    public String getSignature() {
+        return isCombined() ? "combined (handshake+session)" : "single (handshake)";
+    }
+
+    /**
+     * Returns whether this listener is combined (has another listener validation sessions) or single (sessions are not
+     * validated).
+     *
+     * @return if this listener operates in combined mode
+     */
+    public abstract boolean isCombined();
 
     /**
      * Returns the plugin instance.

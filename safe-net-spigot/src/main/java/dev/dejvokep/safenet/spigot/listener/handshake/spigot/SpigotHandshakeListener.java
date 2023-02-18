@@ -107,4 +107,8 @@ public class SpigotHandshakeListener extends AbstractHandshakeListener {
         }
     }
 
+    @Override
+    public boolean isCombined() {
+        return true;
+    }
 }

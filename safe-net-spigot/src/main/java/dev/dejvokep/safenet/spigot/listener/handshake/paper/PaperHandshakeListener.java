@@ -142,4 +142,8 @@ public class PaperHandshakeListener extends AbstractHandshakeListener implements
         failed = event.getOriginalHandshake();
     }
 
+    @Override
+    public boolean isCombined() {
+        return false;
+    }
 }

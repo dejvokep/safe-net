@@ -89,6 +89,7 @@ public class PluginCommand implements CommandExecutor {
             case "diagnostics":
                 sender.sendMessage("Plugin: " + plugin.getDescription().getName() + " v" + plugin.getDescription().getVersion());
                 sender.sendMessage("Passphrase: " + plugin.getPassphraseStore().getPassphraseStatus() + " (" + plugin.getPassphraseStore().getPassphrase().length() + " chars)");
+                sender.sendMessage("Mode: " + plugin.getHandshakeListener().getSignature());
                 sender.sendMessage("Server: " + Bukkit.getName() + " " + Bukkit.getVersion() + " " + Bukkit.getBukkitVersion());
                 sender.sendMessage("Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
                 sender.sendMessage("Java VM: " + System.getProperty("java.vm.name") + System.getProperty("java.vm.version") + " (" + System.getProperty("java.vm.version") + "), " + System.getProperty("java.vm.info"));
