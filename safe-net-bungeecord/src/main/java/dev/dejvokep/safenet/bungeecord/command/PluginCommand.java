@@ -91,13 +91,13 @@ public class PluginCommand extends Command {
                     messenger.sendMessage(sender, config.getString("command.reload"));
                     return;
                 case "diagnostics":
-                    messenger.sendMessage(sender, "Plugin: " + plugin.getDescription().getName() + " v" + plugin.getDescription().getVersion());
-                    messenger.sendMessage(sender, "Passphrase: " + plugin.getAuthenticator().getPassphraseStatus() + " (" + plugin.getAuthenticator().getPassphrase().length() + " chars)");
-                    messenger.sendMessage(sender, "Address whitelist: " + (plugin.getAddressWhitelist().isEnabled() ? "enabled" : "disabled") + " (" + plugin.getAddressWhitelist().getAddresses().size() + " entries)");
-                    messenger.sendMessage(sender, "Server: " + ProxyServer.getInstance().getName() + " " + ProxyServer.getInstance().getVersion());
-                    messenger.sendMessage(sender, "Java: " + System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")");
-                    messenger.sendMessage(sender, "Java VM: " + System.getProperty("java.vm.name") + System.getProperty("java.vm.version") + " (" + System.getProperty("java.vm.version") + "), " + System.getProperty("java.vm.info"));
-                    messenger.sendMessage(sender, "OS: " + System.getProperty("os.name") + " " + System.getProperty("os.version") + " (" + System.getProperty("os.arch") + ")");
+                    messenger.sendMessages(sender, String.format("Plugin: %s v%s", plugin.getDescription().getName(), plugin.getDescription().getVersion()),
+                            String.format("Passphrase: %s (%d chars)", plugin.getAuthenticator().getPassphraseStatus(), plugin.getAuthenticator().getPassphrase().length()),
+                            String.format("Address whitelist: %s (%d entries)", (plugin.getAddressWhitelist().isEnabled() ? "enabled" : "disabled"), plugin.getAddressWhitelist().getAddresses().size()),
+                            String.format("Server: %s %s", ProxyServer.getInstance().getName(), ProxyServer.getInstance().getVersion()),
+                            String.format("Java: %s (%s)", System.getProperty("java.version"), System.getProperty("java.vendor")),
+                            String.format("Java VM: %s (%s), %s", System.getProperty("java.vm.name"), System.getProperty("java.vm.version"), System.getProperty("java.vm.info")),
+                            String.format("OS: %s %s (%s)", System.getProperty("os.name"), System.getProperty("os.version"), System.getProperty("os.arch")));
                     return;
             }
         }
