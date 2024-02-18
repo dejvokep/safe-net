@@ -125,7 +125,7 @@ public class SafeNetLoginResult extends LoginResult {
         // Make a copy of the original properties, or create a new instance with a space for the passphrase
         withPassphrase = getProperties() == null ? new Property[1] : Arrays.copyOf(getProperties(), getProperties().length + 1);
         // Add the passphrase
-        withPassphrase[withPassphrase.length - 1] = new Property(PassphraseVault.PASSPHRASE_PROPERTY_NAME, passphraseVault.getPassphrase(), "");
+        withPassphrase[withPassphrase.length - 1] = new Property(passphraseVault.getPropertyName(), passphraseVault.getPassphrase(), "");
     }
 
 }

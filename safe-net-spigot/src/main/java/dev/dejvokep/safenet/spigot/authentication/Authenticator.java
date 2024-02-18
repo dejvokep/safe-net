@@ -44,9 +44,9 @@ import java.util.regex.Pattern;
 public class Authenticator {
 
     /**
-     * Property name for session storage.
+     * Default property name for session storage.
      */
-    public static final String SESSION_PROPERTY_NAME = "safe_net_session";
+    public static final String DEFAULT_SESSION_PROPERTY_NAME = "safe_net_session";
     /**
      * Length of the generated session key. There is only one key generated per server cycle (start - stop), unless the
      * plugin is reloaded, what is strictly prohibited (makes the server vulnerable).
@@ -95,8 +95,9 @@ public class Authenticator {
     // Plugin
     private final SafeNetSpigot plugin;
 
-    // Session key used to protect against uncaught handshakes
+    // Session key used to protect against uncaught handshakes and property name
     private final String sessionKey = KeyGenerator.generate(SESSION_KEY_LENGTH);
+    private String sessionPropertyName;
     // Class and method necessary for profile manipulation
     private Class<?> craftPlayerClass = null;
     private Method profileMethod = null;
@@ -117,6 +118,8 @@ public class Authenticator {
         } catch (ReflectiveOperationException ex) {
             plugin.getLogger().log(Level.SEVERE, "An error occurred whilst utilizing server classes!", ex);
         }
+
+        reload();
     }
 
     /**
@@ -212,7 +215,7 @@ public class Authenticator {
                     continue;
 
                 // If the names equal
-                if (property.getName().equals(PassphraseVault.PASSPHRASE_PROPERTY_NAME)) {
+                if (property.getName().equals(plugin.getPassphraseVault().getPropertyName())) {
                     // Remove the property
                     properties.remove(index);
 
@@ -233,7 +236,7 @@ public class Authenticator {
 
             // Add verification property
             if (!plugin.isPaperServer())
-                properties.add(new Property(SESSION_PROPERTY_NAME, sessionKey, ""));
+                properties.add(new Property(sessionPropertyName, sessionKey, ""));
             // JSON
             String json = GSON.toJson(properties);
 
@@ -276,12 +279,12 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_NO_PROPERTIES;
 
             // Exactly one property required
-            Collection<com.mojang.authlib.properties.Property> properties = propertyMap.get(SESSION_PROPERTY_NAME);
+            Collection<com.mojang.authlib.properties.Property> properties = propertyMap.get(sessionPropertyName);
             if (properties.size() == 0)
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Delete possible properties with the passphrase
-            propertyMap.removeAll(PassphraseVault.PASSPHRASE_PROPERTY_NAME);
+            propertyMap.removeAll(plugin.getPassphraseVault().getPropertyName());
 
             // If there are more entries
             if (properties.size() != 1)
@@ -290,15 +293,15 @@ public class Authenticator {
             // Property
             com.mojang.authlib.properties.Property property = properties.iterator().next();
             // Is this needed?
-            if (property.getName() == null || !property.getName().equals(SESSION_PROPERTY_NAME))
+            if (property.getName() == null || !property.getName().equals(sessionPropertyName))
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Compare keys
             if (property.getValue() == null || !property.getValue().equals(sessionKey))
                 return AuthenticationResult.SESSION_INVALID;
 
-            // Past this point we don't really care about the exposure of the session key, we delete it just to save bandwidth
-            propertyMap.removeAll(SESSION_PROPERTY_NAME);
+            // Past this point we don't really care about the exposure of the session key
+            propertyMap.removeAll(sessionPropertyName);
 
             // Passed
             return AuthenticationResult.SUCCESS;
@@ -330,6 +333,13 @@ public class Authenticator {
 
         // Return
         return builder.toString();
+    }
+
+    /**
+     * Reloads the session components.
+     */
+    public void reload() {
+        this.sessionPropertyName = plugin.getConfiguration().getString("property-name.session", DEFAULT_SESSION_PROPERTY_NAME);
     }
 
 }

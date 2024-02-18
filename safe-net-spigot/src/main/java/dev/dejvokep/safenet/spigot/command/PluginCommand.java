@@ -81,6 +81,7 @@ public class PluginCommand implements CommandExecutor {
                 plugin.getHandshakeListener().reload();
                 plugin.getPassphraseVault().reload();
                 plugin.getDisconnectHandler().reload();
+                plugin.getAuthenticator().reload();
 
                 // Reloaded
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
