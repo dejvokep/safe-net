@@ -28,8 +28,8 @@ public class KeyGenerator {
     private static final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=[];,./~!@#$%^&*()_+{}|:<>?";
 
     /**
-     * Generates a random key of the specified length from {@link #CHARS}. If <code>length < 1</code>, returns
-     * <code>null</code>.
+     * Generates a random key of the specified length from {@link #CHARS}. If <code>length < 1</code>, throws an
+     * {@link IllegalArgumentException}.
      *
      * @param length length of the key to generate
      * @return the generated key
