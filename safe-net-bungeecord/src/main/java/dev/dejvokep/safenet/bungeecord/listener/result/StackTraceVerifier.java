@@ -30,12 +30,12 @@ import java.util.Map;
 public class StackTraceVerifier {
 
     /**
-     * Underlying server implementation used.
+     * The underlying server implementation used.
      */
     private enum Server {
         GENERIC("generic"), FLAMECORD("FlameCord");
 
-        private String name;
+        private final String name;
 
         /**
          * Constructs a server definition.
@@ -78,7 +78,7 @@ public class StackTraceVerifier {
     public StackTraceVerifier(SafeNetBungeeCord plugin) {
         for (Map.Entry<Server, StackTraceElement> entry : MIDDLEWARES.entrySet()) {
             if (entry.getValue() == null)
-                return;
+                continue;
 
             try {
                 Class.forName(entry.getValue().getClassName());
