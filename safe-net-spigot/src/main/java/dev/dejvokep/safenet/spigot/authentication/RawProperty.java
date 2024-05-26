@@ -18,9 +18,9 @@ package dev.dejvokep.safenet.spigot.authentication;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * Property class used to parse a JSON property array.
+ * A property record used to parse a JSON property array.
  */
-public class Property {
+public class RawProperty {
 
     // Name, value and signature
     private String name, value, signature;
@@ -28,7 +28,7 @@ public class Property {
     /**
      * Plain constructor, to be used by GSON.
      */
-    public Property() {
+    public RawProperty() {
     }
 
     /**
@@ -41,7 +41,7 @@ public class Property {
      * @param value     the value
      * @param signature the signature
      */
-    public Property(@NotNull String name, @NotNull String value, @NotNull String signature) {
+    public RawProperty(@NotNull String name, @NotNull String value, @NotNull String signature) {
         this.name = name;
         this.value = value;
         this.signature = signature;
