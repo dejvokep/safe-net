@@ -180,7 +180,7 @@ public class LoginListener implements Listener {
     }
 
     /**
-     * Cancels a event and sets a disconnect message.
+     * Cancels an event and sets a disconnect message.
      *
      * @param event the event to cancel
      */
