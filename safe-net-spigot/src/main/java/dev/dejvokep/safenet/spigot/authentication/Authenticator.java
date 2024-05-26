@@ -19,9 +19,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import dev.dejvokep.safenet.core.KeyGenerator;
-import dev.dejvokep.safenet.core.PassphraseVault;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
@@ -89,7 +89,7 @@ public class Authenticator {
     /**
      * Property list type used to parse the properties JSON.
      */
-    private static final Type PROPERTY_LIST_TYPE = new TypeToken<ArrayList<Property>>() {
+    private static final Type PROPERTY_LIST_TYPE = new TypeToken<ArrayList<RawProperty>>() {
     }.getType();
 
     // Plugin
@@ -101,6 +101,8 @@ public class Authenticator {
     // Class and method necessary for profile manipulation
     private Class<?> craftPlayerClass = null;
     private Method profileMethod = null;
+    // Property accessor
+    private final PropertyAccessor propertyAccessor = new PropertyAccessor();
 
     /**
      * Initializes the authenticator.
@@ -189,7 +191,7 @@ public class Authenticator {
             return new HandshakeAuthenticationResult(replaced, serverHostname, socketAddressHostname, uuid, UNKNOWN_DATA, AuthenticationResult.HANDSHAKE_NO_PROPERTIES);
 
         // Properties
-        ArrayList<Property> properties;
+        ArrayList<RawProperty> properties;
         // Parse properties from the last index
         try {
             properties = GSON.fromJson(split[propertiesIndex], PROPERTY_LIST_TYPE);
@@ -202,7 +204,7 @@ public class Authenticator {
 
         try {
             // The property
-            Property property;
+            RawProperty property;
 
             // Authenticated
             boolean authenticated = false;
@@ -236,7 +238,7 @@ public class Authenticator {
 
             // Add verification property
             if (!plugin.isPaperServer())
-                properties.add(new Property(sessionPropertyName, sessionKey, ""));
+                properties.add(new RawProperty(sessionPropertyName, sessionKey, ""));
             // JSON
             String json = GSON.toJson(properties);
 
@@ -279,7 +281,7 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_NO_PROPERTIES;
 
             // Exactly one property required
-            Collection<com.mojang.authlib.properties.Property> properties = propertyMap.get(sessionPropertyName);
+            Collection<Property> properties = propertyMap.get(sessionPropertyName);
             if (properties.size() == 0)
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
@@ -291,13 +293,14 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_UNEXPECTED_PROPERTIES;
 
             // Property
-            com.mojang.authlib.properties.Property property = properties.iterator().next();
+            Property property = properties.iterator().next();
+            String name = propertyAccessor.getName(property), value = propertyAccessor.getValue(property);
             // Is this needed?
-            if (property.getName() == null || !property.getName().equals(sessionPropertyName))
+            if (name == null || !name.equals(sessionPropertyName))
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Compare keys
-            if (property.getValue() == null || !property.getValue().equals(sessionKey))
+            if (value == null || !value.equals(sessionKey))
                 return AuthenticationResult.SESSION_INVALID;
 
             // Past this point we don't really care about the exposure of the session key
@@ -340,6 +343,54 @@ public class Authenticator {
      */
     public void reload() {
         this.sessionPropertyName = plugin.getConfiguration().getString("property-name.session", DEFAULT_SESSION_PROPERTY_NAME);
+    }
+
+    /**
+     * A utility class for {@link GameProfile} property access across server versions.
+     */
+    private static class PropertyAccessor {
+        private boolean legacy;
+        private Method nameGetter, valueGetter;
+
+        /**
+         * Looks up the necessary reflection components.
+         */
+        private PropertyAccessor() {
+            try {
+                nameGetter = Property.class.getMethod("getName");
+                valueGetter = Property.class.getMethod("getValue");
+
+                nameGetter.setAccessible(true);
+                valueGetter.setAccessible(true);
+
+                legacy = true;
+            } catch (NoSuchMethodException ex) {
+                legacy = false;
+            }
+        }
+
+        /**
+         * Returns the name of the property.
+         *
+         * @param property the property
+         * @return the name of the property
+         * @throws ReflectiveOperationException an invocation or access exception
+         */
+        private String getName(Property property) throws ReflectiveOperationException {
+            return legacy ? nameGetter.invoke(property).toString() : property.name();
+        }
+
+        /**
+         * Returns the value of the property.
+         *
+         * @param property the property
+         * @return the value of the property
+         * @throws ReflectiveOperationException an invocation or access exception
+         */
+        private String getValue(Property property) throws ReflectiveOperationException {
+            return legacy ? valueGetter.invoke(property).toString() : property.value();
+        }
+
     }
 
 }
