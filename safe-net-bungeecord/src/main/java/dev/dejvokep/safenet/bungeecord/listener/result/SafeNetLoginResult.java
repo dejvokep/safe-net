@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.dejvokep.safenet.bungeecord.listener;
+package dev.dejvokep.safenet.bungeecord.listener.result;
 
 import dev.dejvokep.safenet.core.PassphraseVault;
 import net.md_5.bungee.connection.LoginResult;
@@ -24,9 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 
 /**
- * Class extending {@link LoginResult} which securely passes the passphrase to server connector, if called by handler
- * boss (see {@link #SERVER_CONNECTOR_CLASS} and {@link #HANDLER_BOSS_CLASS}) and by respective methods of these classes
- * ({@link #SERVER_CONNECTOR_CONNECTED_METHOD} and {@link #HANDLER_BOSS_CHANNEL_ACTIVE_METHOD}).
+ * Class extending {@link LoginResult} which securely passes the passphrase to server connector.
  * <p>
  * If the server is in online-mode, values from the previous login result are used. If in offline-mode, the server does
  * not supply the login result. As this custom login result is there every time (not depending on the mode), the
@@ -34,44 +32,33 @@ import java.util.Arrays;
  * returned properties are (if not called by methods mentioned above) always an empty array, as during the testing
  * phase, a lot of problems were found when using some plugins if the value was <code>null</code>.
  * <p>
- * <i>The use of custom login results to forward plugin data to backend servers was inspired by BungeeGuard.</i>
+ * <i>The use of custom login results to forward plugin data to backend servers was inspired by BungeeGuard, although
+ * was perfected to properly handle edge cases and wide selection of server software implementations.</i>
  */
 public class SafeNetLoginResult extends LoginResult {
-
-    /**
-     * Server connector class.
-     */
-    public static final String SERVER_CONNECTOR_CLASS = "net.md_5.bungee.ServerConnector";
-    /**
-     * Connected method in server connector.
-     */
-    public static final String SERVER_CONNECTOR_CONNECTED_METHOD = "connected";
-    /**
-     * Handler boss class.
-     */
-    public static final String HANDLER_BOSS_CLASS = "net.md_5.bungee.netty.HandlerBoss";
-    /**
-     * Channel active method in handler boss.
-     */
-    public static final String HANDLER_BOSS_CHANNEL_ACTIVE_METHOD = "channelActive";
 
     // Property array with passphrase
     private Property[] withPassphrase;
     // Vault
     private final PassphraseVault passphraseVault;
+    // Verifier
+    private final StackTraceVerifier stackTraceVerifier;
 
     /**
-     * Copies references of variables from the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}.
-     * If the given result is <code>null</code>, all variables used by the result are set to <code>null</code>.
+     * Copies references of variables from the login result obtained from a
+     * {@link net.md_5.bungee.api.event.LoginEvent}. If the given result is <code>null</code>, all variables used by the
+     * result are set to <code>null</code>.
      *
-     * @param fromLogin       the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}
-     * @param passphraseVault the store providing the secret passphrase and other needed data
+     * @param fromLogin          the login result obtained from a {@link net.md_5.bungee.api.event.LoginEvent}
+     * @param passphraseVault    the store providing the secret passphrase and other needed data
+     * @param stackTraceVerifier the stack trace verifier
      */
-    SafeNetLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseVault passphraseVault) {
+    SafeNetLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseVault passphraseVault, @NotNull StackTraceVerifier stackTraceVerifier) {
         // Call as in offline mode
         super(null, null, new Property[0]);
         // Set
         this.passphraseVault = passphraseVault;
+        this.stackTraceVerifier = stackTraceVerifier;
 
         // If the result from the event contains any data - online mode
         if (fromLogin != null) {
@@ -89,25 +76,7 @@ public class SafeNetLoginResult extends LoginResult {
 
     @Override
     public Property[] getProperties() {
-        // The stack trace
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        // If unable to verify
-        if (stackTrace.length < 4)
-            return super.getProperties();
-
-        // Server connector caller
-        StackTraceElement serverConnector = stackTrace[2];
-        // Handler boss caller
-        StackTraceElement handlerBoss = stackTrace[3];
-
-        // Verify callers
-        if (serverConnector.getClassName().equals(SERVER_CONNECTOR_CLASS) && serverConnector.getMethodName().equals(SERVER_CONNECTOR_CONNECTED_METHOD)
-                && handlerBoss.getClassName().equals(HANDLER_BOSS_CLASS) && handlerBoss.getMethodName().equals(HANDLER_BOSS_CHANNEL_ACTIVE_METHOD))
-            // Return properties with the passphrase
-            return withPassphrase;
-        else
-            // Return normal properties
-            return super.getProperties();
+        return stackTraceVerifier.verify(Thread.currentThread().getStackTrace()) ? withPassphrase : super.getProperties();
     }
 
     @Override
