@@ -44,7 +44,7 @@ public class SafeNetBungeeCord extends Plugin {
     /**
      * Supported version of the BungeeCord server.
      */
-    private static final String BUNGEE_CORD_VERSION = "build 1637 (1.19 update) or newer";
+    private static final String BUNGEECORD_VERSION = "build 1637 (1.19 update) or newer";
 
     // Message sender
     private final Messenger messenger = new Messenger();
@@ -61,7 +61,7 @@ public class SafeNetBungeeCord extends Plugin {
     public void onEnable() {
         // If BungeeCord is not of a support version
         if (isUnsupportedBungeeCord()) {
-            getLogger().severe(String.format("This version of SafeNET requires BungeeCord %s to run! Shutting down...", BUNGEE_CORD_VERSION));
+            getLogger().severe(String.format("This version of SafeNET requires BungeeCord %s to run! Shutting down...", BUNGEECORD_VERSION));
             ProxyServer.getInstance().stop();
             return;
         }
