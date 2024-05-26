@@ -45,6 +45,15 @@ public class StackTraceVerifier {
         Server(String name) {
             this.name = name;
         }
+
+        /**
+         * Returns the human-readable server name.
+         *
+         * @return the human-readable server name
+         */
+        public String getName() {
+            return name;
+        }
     }
 
     /**
@@ -88,7 +97,7 @@ public class StackTraceVerifier {
             }
         }
 
-        plugin.getLogger().info(String.format("Detected %s server software. Accepting %s when validating secure profile properties request source.", server.name, server == Server.GENERIC ? "no middleware" : "middleware"));
+        plugin.getLogger().info(String.format("Detected %s server software. Accepting %s when validating secure profile properties request source.", server.getName(), server == Server.GENERIC ? "no middleware" : "middleware"));
     }
 
     /**
