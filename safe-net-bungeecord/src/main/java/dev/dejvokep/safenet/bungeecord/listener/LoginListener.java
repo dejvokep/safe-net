@@ -151,7 +151,6 @@ public class LoginListener implements Listener {
      * Reloads the internal data.
      */
     public void reload() {
-        // Set
         disconnectMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE)));
     }
 
