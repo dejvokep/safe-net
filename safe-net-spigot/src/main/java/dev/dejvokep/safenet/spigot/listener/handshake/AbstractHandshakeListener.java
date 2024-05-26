@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 https://dejvokep.dev/
+ * Copyright 2024 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ public abstract class AbstractHandshakeListener {
     /**
      * Message logged when a connection was denied.
      */
-    private static final String MESSAGE_DENIED = "DENIED (code B%d): Failed to authenticate handshake \"%s\": %s Data: %s";
+    private static final String MESSAGE_DENIED = "DENIED (code B%d): Failed to authenticate handshake \"%s\": %s%s";
 
     /**
      * Message logged when a connection was accepted.
@@ -40,7 +40,7 @@ public abstract class AbstractHandshakeListener {
     // Plugin
     private final SafeNetSpigot plugin;
     // If to block pings and it is available
-    private boolean blockPings;
+    private boolean blockPings, logConnectionData;
     private final boolean pingBlockingAvailable;
 
     public AbstractHandshakeListener(SafeNetSpigot plugin, boolean pingBlockingAvailable) {
@@ -54,6 +54,7 @@ public abstract class AbstractHandshakeListener {
      */
     public void reload() {
         this.blockPings = plugin.getConfiguration().getBoolean("block-pings");
+        this.logConnectionData = plugin.getConfiguration().getBoolean("log-connection-data");
 
         // Warn
         if (blockPings)
@@ -66,10 +67,12 @@ public abstract class AbstractHandshakeListener {
      * @param result the result
      */
     public void logAuthResult(HandshakeAuthenticationResult result) {
-        if (result.getResult().isSuccess())
+        if (result.getResult().isSuccess()) {
             plugin.getLogger().info(String.format(MESSAGE_ACCEPTED, result.getResult().getCode(), result.getUniqueIdAsString()));
-        else
-            plugin.getLogger().warning(String.format(MESSAGE_DENIED, result.getResult().getCode(), result.getUniqueIdAsString(), result.getResult().getMessage(), Base64.getEncoder().encodeToString(result.getData().getBytes(StandardCharsets.UTF_8))));
+            return;
+        }
+
+        plugin.getLogger().warning(String.format(MESSAGE_DENIED, result.getResult().getCode(), result.getUniqueIdAsString(), result.getResult().getMessage(), logConnectionData ? " Data: " + Base64.getEncoder().encodeToString(result.getData().getBytes(StandardCharsets.UTF_8)) : ""));
     }
 
     /**

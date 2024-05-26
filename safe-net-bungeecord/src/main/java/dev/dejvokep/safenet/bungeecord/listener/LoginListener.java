@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 https://dejvokep.dev/
+ * Copyright 2024 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@ package dev.dejvokep.safenet.bungeecord.listener;
 
 import dev.dejvokep.safenet.bungeecord.SafeNetBungeeCord;
 import dev.dejvokep.safenet.bungeecord.ipwhitelist.AddressHolder;
+import dev.dejvokep.safenet.bungeecord.listener.result.SafeNetLoginResult;
+import dev.dejvokep.safenet.bungeecord.listener.result.StackTraceVerifier;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.PendingConnection;
@@ -88,6 +90,8 @@ public class LoginListener implements Listener {
 
     // The passphrase error message
     private TextComponent disconnectMessage;
+    // Verifier
+    private final StackTraceVerifier stackTraceVerifier;
 
     /**
      * Utilizes the login result field of the {@link InitialHandler} class. Loads the passphrase error disconnect
@@ -98,6 +102,7 @@ public class LoginListener implements Listener {
     public LoginListener(@NotNull SafeNetBungeeCord plugin) {
         // Set
         this.plugin = plugin;
+        this.stackTraceVerifier = new StackTraceVerifier(plugin);
         // Reload
         reload();
 
@@ -146,7 +151,6 @@ public class LoginListener implements Listener {
      * Reloads the internal data.
      */
     public void reload() {
-        // Set
         disconnectMessage = new TextComponent(ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE)));
     }
 
@@ -164,7 +168,7 @@ public class LoginListener implements Listener {
 
         try {
             // Set
-            loginResultField.set(pendingConnection, new SafeNetLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getPassphraseVault()));
+            loginResultField.set(pendingConnection, new SafeNetLoginResult(((InitialHandler) pendingConnection).getLoginProfile(), plugin.getPassphraseVault(), stackTraceVerifier));
         } catch (Exception ex) {
             // Log
             plugin.getLogger().log(Level.SEVERE, "An error occurred whilst setting the custom login result into the connection!", ex);
@@ -176,7 +180,7 @@ public class LoginListener implements Listener {
     }
 
     /**
-     * Cancels a event and sets a disconnect message.
+     * Cancels an event and sets a disconnect message.
      *
      * @param event the event to cancel
      */

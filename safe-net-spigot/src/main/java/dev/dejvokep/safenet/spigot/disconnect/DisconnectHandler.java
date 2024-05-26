@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 https://dejvokep.dev/
+ * Copyright 2024 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
-import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.ChatColor;
@@ -65,13 +64,10 @@ public class DisconnectHandler {
         try {
             // Create the disconnect packet
             PacketContainer disconnectPacket = new PacketContainer(PacketType.Login.Server.DISCONNECT);
-            // Write defaults
+            // Write
             disconnectPacket.getModifier().writeDefaults();
-            BaseComponent[] textComponent = TextComponent.fromLegacyText(message);
-            String serialized = ComponentSerializer.toString(textComponent);
-            WrappedChatComponent wrappedChatComponent = WrappedChatComponent.fromJson(serialized);
-            // Set the message
-            disconnectPacket.getChatComponents().write(0, wrappedChatComponent);
+            String serialized = ComponentSerializer.toString(TextComponent.fromLegacyText(message));
+            disconnectPacket.getChatComponents().write(0, WrappedChatComponent.fromJson(serialized));
             // Send
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, disconnectPacket);
         } catch (Exception ignored) {
@@ -95,7 +91,6 @@ public class DisconnectHandler {
      * Reloads the internal configuration.
      */
     public void reload() {
-        // Message
         message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE));
     }
 

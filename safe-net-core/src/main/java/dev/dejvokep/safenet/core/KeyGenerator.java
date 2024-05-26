@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 https://dejvokep.dev/
+ * Copyright 2024 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ public class KeyGenerator {
     private static final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-=[];,./~!@#$%^&*()_+{}|:<>?";
 
     /**
-     * Generates a random key of the specified length from {@link #CHARS}. If <code>length < 1</code>, returns
-     * <code>null</code>.
+     * Generates a random key of the specified length from {@link #CHARS}. If <code>length < 1</code>, throws an
+     * {@link IllegalArgumentException}.
      *
      * @param length length of the key to generate
      * @return the generated key

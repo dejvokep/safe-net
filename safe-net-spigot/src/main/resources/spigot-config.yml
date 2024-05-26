@@ -13,11 +13,22 @@
 #
 # Config version:
 # - IMPORTANT >> Do NOT change unless you know what you are doing. Changing this might break the plugin.
-config-version: 1
+config-version: 3
 # Passphrase (equal to what you set on the proxy):
 passphrase: ""
+# Property names used by the plugin for passphrase and session validation:
+property-name:
+  # Handshake (equal to the handshake property name on the proxy):
+  handshake: "safe_net_passphrase"
+  # Session (used only internally and on the backend, does not need to be the same everywhere):
+  session: "safe_net_session"
+# If to log connection data:
+# - IMPORTANT >> Data (encoded in base64) is logged into the console when a connection is denied, for easy access and
+#                analysis by server administrators. This data includes IP and other data associated with the player,
+#                which are usually sensitive, but essential to debugging when something happens.
+log-connection-data: false
 # Block server pings for unauthenticated requests:
-# - IMPORTANT >> Might not be available on legacy versions of Paper servers, and it's forks. Check the console on early
+# - IMPORTANT >> Might not be available on legacy versions of Paper servers, and its forks. Check the console on early
 #                startup to see if this feature is supported on your server.
 #                Please note that this may break functionality of plugins that rely on pings to obtain server information.
 block-pings: false

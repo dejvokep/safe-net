@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 https://dejvokep.dev/
+ * Copyright 2024 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,15 +45,6 @@ public class Updater {
      * @param plugin the plugin instance
      */
     public static void watch(@NotNull SafeNetBungeeCord plugin) {
-        // Version
-        String version = plugin.getDescription().getVersion();
-        int dash = version.indexOf('-');
-        if (dash != -1)
-            version = version.substring(0, dash);
-        // ID
-        final int versionId = Integer.parseInt(version.replace(".", ""));
-
-        // Schedule
         ProxyServer.getInstance().getScheduler().schedule(plugin, () -> {
             // The latest version
             String latest;
@@ -65,7 +56,7 @@ public class Updater {
             }
 
             // New version available
-            if (Integer.parseInt(latest.replace(".", "")) > versionId)
+            if (latest.compareTo(plugin.getDescription().getVersion()) > 0)
                 plugin.getLogger().warning("New version " + latest + " is available! Please update as soon as possible to receive the newest features and important security patches. You are using version " + plugin.getDescription().getVersion() + ".");
         }, 0L, RECHECK_DELAY, TimeUnit.MINUTES);
     }

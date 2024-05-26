@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright 2022 https://dejvokep.dev/
+    Copyright 2024 https://dejvokep.dev/
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
     <parent>
         <artifactId>safe-net</artifactId>
         <groupId>dev.dejvokep</groupId>
-        <version>3.8</version>
+        <version>3.9</version>
     </parent>
     <packaging>jar</packaging>
     <description>${project.parent.description}</description>
@@ -121,21 +121,21 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.19-R0.1-SNAPSHOT</version>
+            <version>1.20.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- ProtocolLib -->
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>5.0.0-SNAPSHOT</version>
+            <version>5.2.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- AuthLib -->
         <dependency>
             <groupId>com.mojang</groupId>
             <artifactId>authlib</artifactId>
-            <version>1.5.21</version>
+            <version>6.0.52</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

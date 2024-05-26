@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 https://dejvokep.dev/
+ * Copyright 2024 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import java.util.logging.Logger;
 public class PassphraseVault {
 
     /**
-     * Passphrase property name.
+     * Default passphrase property name.
      */
-    public static final String PASSPHRASE_PROPERTY_NAME = "safe_net_passphrase";
+    public static final String DEFAULT_PASSPHRASE_PROPERTY_NAME = "safe_net_passphrase";
 
     /**
      * Recommended passphrase length.
@@ -42,7 +42,7 @@ public class PassphraseVault {
     public static final int WEAK_PASSPHRASE_LENGTH_THRESHOLD = 50;
 
     // Passphrase
-    private String passphrase;
+    private String passphrase, propertyName;
 
     // Config
     private final YamlDocument config;
@@ -94,11 +94,12 @@ public class PassphraseVault {
     }
 
     /**
-     * Reloads the passphrase.
+     * Reloads the passphrase components.
      */
     public void reload() {
         // Passphrase
         passphrase = config.getString("passphrase", "");
+        propertyName = config.getString("property-name.handshake", DEFAULT_PASSPHRASE_PROPERTY_NAME);
         // Print status
         printStatus();
     }
@@ -123,4 +124,12 @@ public class PassphraseVault {
         return passphrase;
     }
 
+    /**
+     * Returns the property name.
+     *
+     * @return the property name
+     */
+    public String getPropertyName() {
+        return propertyName;
+    }
 }

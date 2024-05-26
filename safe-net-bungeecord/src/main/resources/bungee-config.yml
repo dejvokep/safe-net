@@ -13,10 +13,14 @@
 #
 # Config version:
 # - IMPORTANT >> Do NOT change unless you know what you are doing. Changing this might break the plugin.
-config-version: 2
+config-version: 3
 # Passphrase:
 # - It is recommended to change this once in a while. Generate a new one using "/sn generate".
 passphrase: ""
+# Property names used by the plugin for passphrase and session validation:
+property-name:
+  # Handshake (if changed, must also be updated in other SafeNET configuration files):
+  handshake: "safe_net_passphrase"
 # Disconnect message sent to the player if their connection is unauthorized:
 # - "\n" can be used for a new line.
 disconnect-message: "&7[&6SafeNET&7] &cPlease connect with address: yourserver.com!\n\n&7&oIf you believe this is an error, contact server administrators."

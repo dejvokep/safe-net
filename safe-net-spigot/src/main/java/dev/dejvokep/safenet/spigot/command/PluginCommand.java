@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 https://dejvokep.dev/
+ * Copyright 2024 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,7 @@ public class PluginCommand implements CommandExecutor {
                 plugin.getHandshakeListener().reload();
                 plugin.getPassphraseVault().reload();
                 plugin.getDisconnectHandler().reload();
+                plugin.getAuthenticator().reload();
 
                 // Reloaded
                 sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
