@@ -53,7 +53,7 @@ public class SafeNetLoginResult extends LoginResult {
      * @param passphraseVault    the store providing the secret passphrase and other needed data
      * @param stackTraceVerifier the stack trace verifier
      */
-    SafeNetLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseVault passphraseVault, @NotNull StackTraceVerifier stackTraceVerifier) {
+    public SafeNetLoginResult(@Nullable LoginResult fromLogin, @NotNull PassphraseVault passphraseVault, @NotNull StackTraceVerifier stackTraceVerifier) {
         // Call as in offline mode
         super(null, null, new Property[0]);
         // Set
