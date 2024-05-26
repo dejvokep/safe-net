@@ -95,7 +95,6 @@ public class DisconnectHandler {
      * Reloads the internal configuration.
      */
     public void reload() {
-        // Message
         message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE));
     }
 
