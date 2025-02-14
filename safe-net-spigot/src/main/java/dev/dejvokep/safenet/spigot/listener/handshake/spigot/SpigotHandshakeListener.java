@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 https://dejvokep.dev/
+ * Copyright 2025 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.StructureModifier;
+import com.comphenix.protocol.wrappers.EnumWrappers;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.Authenticator;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
@@ -38,6 +39,8 @@ import java.util.logging.Level;
  */
 public class SpigotHandshakeListener extends AbstractHandshakeListener {
 
+    private final boolean intentsAvailable;
+
     /**
      * Registers the handshake packet listener and handles the incoming connections.
      *
@@ -47,6 +50,7 @@ public class SpigotHandshakeListener extends AbstractHandshakeListener {
         super(plugin, true);
         // Reload
         reload();
+        intentsAvailable = plugin.classExists("com.comphenix.protocol.wrappers.EnumWrappers$ClientIntent");
         // Authenticator
         final Authenticator authenticator = plugin.getAuthenticator();
 
@@ -56,14 +60,16 @@ public class SpigotHandshakeListener extends AbstractHandshakeListener {
             public void onPacketReceiving(PacketEvent event) {
                 try {
                     // If malformed
-                    if (event.getPacket().getProtocols().size() == 0 || event.getPacket().getStrings().size() == 0) {
+                    boolean useIntents = intentsAvailable && event.getPacket().getClientIntents().size() > 0;
+                    boolean hasPingField = useIntents || event.getPacket().getProtocols().size() > 0;
+                    if (!hasPingField || event.getPacket().getStrings().size() == 0) {
                         logAuthResult(new HandshakeAuthenticationResult(AuthenticationResult.HANDSHAKE_MALFORMED_DATA));
                         disconnect(event);
                         return;
                     }
 
                     // If pinging and it is allowed
-                    if (event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS) {
+                    if (useIntents ? event.getPacket().getClientIntents().read(0) == EnumWrappers.ClientIntent.STATUS : event.getPacket().getProtocols().read(0) == PacketType.Protocol.STATUS) {
                         if (isBlockPings())
                             disconnect(event);
                         return;

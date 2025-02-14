@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 https://dejvokep.dev/
+ * Copyright 2025 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,7 +149,7 @@ public class SafeNetSpigot extends JavaPlugin {
      * @return whether ProtocolLib is of an unsupported version
      */
     private boolean isUnsupportedProtocolLib() {
-        return !classExists("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory");
+        return !classExists("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory") || !classExists("com.comphenix.protocol.injector.netty.Injector");
     }
 
     /**

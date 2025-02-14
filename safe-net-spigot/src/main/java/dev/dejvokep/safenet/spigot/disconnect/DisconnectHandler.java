@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 https://dejvokep.dev/
+ * Copyright 2025 https://dejvokep.dev/
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,7 @@ public class DisconnectHandler {
      * @param player the player to disconnect
      */
     public void play(@NotNull Player player) {
+        // Deprecated on Paper servers
         player.kickPlayer(message);
     }
 
@@ -91,6 +92,7 @@ public class DisconnectHandler {
      * Reloads the internal configuration.
      */
     public void reload() {
+        // Deprecated on Paper servers
         message = ChatColor.translateAlternateColorCodes('&', plugin.getConfiguration().getString("disconnect-message", DEFAULT_DISCONNECT_MESSAGE));
     }
 
