@@ -149,7 +149,7 @@ public class SafeNetSpigot extends JavaPlugin {
      * @return whether ProtocolLib is of an unsupported version
      */
     private boolean isUnsupportedProtocolLib() {
-        return !classExists("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory");
+        return !classExists("com.comphenix.protocol.injector.temporary.TemporaryPlayerFactory") || !classExists("com.comphenix.protocol.injector.netty.Injector");
     }
 
     /**
