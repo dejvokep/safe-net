@@ -94,13 +94,18 @@
                         <owner>dejvokep</owner>
                         <email>admin@dejvokep.dev</email>
                     </properties>
-                    <header>${project.parent.basedir}/LICENSE-header.txt</header>
-                    <excludes>
-                        <exclude>**/README</exclude>
-                    </excludes>
-                    <includes>
-                        <include>**/*.xml</include>
-                    </includes>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${maven.multiModuleProjectDirectory}/LICENSE-header.txt</header>
+                            <excludes>
+                                <exclude>**/README</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*.java</include>
+                                <include>**/*.xml</include>
+                            </includes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
                 <executions>
                     <execution>
