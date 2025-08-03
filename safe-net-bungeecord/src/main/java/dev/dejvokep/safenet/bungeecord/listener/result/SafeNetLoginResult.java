@@ -17,7 +17,7 @@ package dev.dejvokep.safenet.bungeecord.listener.result;
 
 import dev.dejvokep.safenet.core.PassphraseVault;
 import net.md_5.bungee.connection.LoginResult;
-import net.md_5.bungee.protocol.Property;
+import net.md_5.bungee.protocol.data.Property;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

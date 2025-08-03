@@ -107,7 +107,7 @@ public class SafeNetBungeeCord extends Plugin {
      */
     private boolean isUnsupportedBungeeCord() {
         try {
-            Class.forName("net.md_5.bungee.protocol.Property");
+            Class.forName("net.md_5.bungee.protocol.data.Property");
             return false;
         } catch (ClassNotFoundException ex) {
             return true;
