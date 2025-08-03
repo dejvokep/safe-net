@@ -44,7 +44,7 @@ public class SafeNetBungeeCord extends Plugin {
     /**
      * Supported version of the BungeeCord server.
      */
-    private static final String BUNGEECORD_VERSION = "build 1984 (1.21-R0.4) or newer";
+    private static final String BUNGEECORD_VERSION = "build #1984 (1.21-R0.4) or newer";
 
     // Message sender
     private final Messenger messenger = new Messenger();
