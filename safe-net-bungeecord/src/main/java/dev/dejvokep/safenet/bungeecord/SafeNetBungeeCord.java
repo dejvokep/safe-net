@@ -44,7 +44,7 @@ public class SafeNetBungeeCord extends Plugin {
     /**
      * Supported version of the BungeeCord server.
      */
-    private static final String BUNGEECORD_VERSION = "build 1637 (1.19 update) or newer";
+    private static final String BUNGEECORD_VERSION = "build #1984 (1.21-R0.4) or newer";
 
     // Message sender
     private final Messenger messenger = new Messenger();
@@ -107,7 +107,7 @@ public class SafeNetBungeeCord extends Plugin {
      */
     private boolean isUnsupportedBungeeCord() {
         try {
-            Class.forName("net.md_5.bungee.protocol.Property");
+            Class.forName("net.md_5.bungee.protocol.data.Property");
             return false;
         } catch (ClassNotFoundException ex) {
             return true;

@@ -25,7 +25,7 @@
     <groupId>dev.dejvokep</groupId>
     <artifactId>safe-net</artifactId>
     <packaging>pom</packaging>
-    <version>4.0</version>
+    <version>4.1</version>
     <modules>
         <module>safe-net-core</module>
         <module>safe-net-bungeecord</module>
@@ -55,14 +55,18 @@
                         <owner>dejvokep</owner>
                         <email>admin@dejvokep.dev</email>
                     </properties>
-                    <header>${project.basedir}/LICENSE-header.txt</header>
-                    <excludes>
-                        <exclude>**/README</exclude>
-                    </excludes>
-                    <includes>
-                        <include>**/*.java</include>
-                        <include>**/*.xml</include>
-                    </includes>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${maven.multiModuleProjectDirectory}/LICENSE-header.txt</header>
+                            <excludes>
+                                <exclude>**/README</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*.java</include>
+                                <include>**/*.xml</include>
+                            </includes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
                 <executions>
                     <execution>

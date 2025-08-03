@@ -25,7 +25,7 @@
     <parent>
         <artifactId>safe-net</artifactId>
         <groupId>dev.dejvokep</groupId>
-        <version>4.0</version>
+        <version>4.1</version>
     </parent>
     <packaging>jar</packaging>
     <description>${project.parent.description}</description>
@@ -90,14 +90,18 @@
                         <owner>dejvokep</owner>
                         <email>admin@dejvokep.dev</email>
                     </properties>
-                    <header>${project.parent.basedir}/LICENSE-header.txt</header>
-                    <excludes>
-                        <exclude>**/README</exclude>
-                    </excludes>
-                    <includes>
-                        <include>**/*.java</include>
-                        <include>**/*.xml</include>
-                    </includes>
+                    <licenseSets>
+                        <licenseSet>
+                            <header>${maven.multiModuleProjectDirectory}/LICENSE-header.txt</header>
+                            <excludes>
+                                <exclude>**/README</exclude>
+                            </excludes>
+                            <includes>
+                                <include>**/*.java</include>
+                                <include>**/*.xml</include>
+                            </includes>
+                        </licenseSet>
+                    </licenseSets>
                 </configuration>
                 <executions>
                     <execution>
@@ -139,7 +143,7 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-api</artifactId>
-            <version>1.21-R0.1-SNAPSHOT</version>
+            <version>1.21-R0.4-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
@@ -147,7 +151,7 @@
         <dependency>
             <groupId>net.md-5</groupId>
             <artifactId>bungeecord-proxy</artifactId>
-            <version>1.21-R0.1-SNAPSHOT</version>
+            <version>1.21-R0.4-SNAPSHOT</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>

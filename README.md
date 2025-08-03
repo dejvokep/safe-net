@@ -39,8 +39,8 @@ The plugin has been downloaded 20K+ times, and is active on 300+ networks managi
 
 Download the latest release from the panel on the right. The plugin supports **all major**:
 
-- proxy servers (BungeeCord, Waterfall, FlameCord...) running **the latest release** (build [1637](https://ci.md-5.net/job/BungeeCord/1637/) or newer),
-- backend servers (Bukkit, Spigot, Paper, Purpur...) running **1.8 - 1.20 releases**.
+- proxy servers (BungeeCord, Waterfall, FlameCord...) running **the latest release** (build [#1984](https://ci.md-5.net/job/BungeeCord/1984/) or newer),
+- backend servers (Bukkit, Spigot, Paper, Purpur...) running **1.8+ releases**.
 
 The plugin must be installed on all servers on your network. Consult the documentation linked below for further
 information and setup instructions.
