@@ -27,9 +27,11 @@ import dev.dejvokep.safenet.spigot.command.PluginCommand;
 import dev.dejvokep.safenet.spigot.disconnect.DisconnectHandler;
 import dev.dejvokep.safenet.spigot.listener.ListenerPusher;
 import dev.dejvokep.safenet.spigot.listener.handshake.AbstractHandshakeListener;
+import dev.dejvokep.safenet.spigot.listener.handshake.folia.FoliaHandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.handshake.paper.PaperHandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.handshake.spigot.SpigotHandshakeListener;
 import dev.dejvokep.safenet.spigot.listener.session.SessionListener;
+import dev.dejvokep.safenet.spigot.utils.FoliaUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -114,12 +116,12 @@ public class SafeNetSpigot extends JavaPlugin {
             getLogger().info("Spigot native server components available; handshakes will be handled via the packet listener and sessions will be validated using the API.");
         } else {
             // All packets are held until all plugins are initialized, so the listener is guaranteed to always be registered
-            getLogger().info("Paper server components available; handshakes will be handled via the API and sessions will not be validated.");
-            handshakeListener = new PaperHandshakeListener(this);
+            getLogger().info((FoliaUtils.isFolia() ? "Folia" : "Paper") + " server components available; handshakes will be handled via the API and sessions will not be validated.");
+            handshakeListener = FoliaUtils.isFolia() ? new FoliaHandshakeListener(this) : new PaperHandshakeListener(this);
         }
 
-        // Postpone messages
-        Bukkit.getScheduler().runTaskLater(this, () -> {
+        // Postpone messages (Folia-safe delayed task)
+        FoliaUtils.runDelayedSafe(this, () -> {
             // Thank you message
             getLogger().info("Thank you for downloading SafeNET!");
             // Print

@@ -1,6 +1,6 @@
 # Plugin info:
 name: ${parent.name}
 version: ${parent.version}
-author: dejvokep
+author: dejvokep, AndyDayy
 main: dev.dejvokep.safenet.bungeecord.SafeNetBungeeCord
 description: ${parent.description}
