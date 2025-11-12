@@ -25,6 +25,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.chat.ComponentSerializer;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -84,8 +85,12 @@ public class DisconnectHandler {
      * @param player the player to disconnect
      */
     public void play(@NotNull Player player) {
-        // Deprecated on Paper servers
-        player.kickPlayer(message);
+        // Use modern kick method for Paper/Folia (Folia-safe)
+        if (plugin.isPaperServer()) {
+            player.kick(net.kyori.adventure.text.Component.text(message));
+        } else {
+            player.kickPlayer(message);
+        }
     }
 
     /**

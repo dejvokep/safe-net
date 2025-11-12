@@ -1,5 +1,5 @@
 # 🔒 SafeNET
-
+[⚠️] Sản phẩm được Build lại vui lòng không sử dụng cho mục đích thương mại!
 [SafeNET](https://www.spigotmc.org/resources/65075/) is a lightweight plugin protecting you from direct backend server
 access and IP-forwarding bypass exploit, mainly for those who cannot access or configure their firewall systems. The
 plugin has been serving protection for everyone since 2019,
@@ -40,7 +40,7 @@ The plugin has been downloaded 20K+ times, and is active on 300+ networks managi
 Download the latest release from the panel on the right. The plugin supports **all major**:
 
 - proxy servers (BungeeCord, Waterfall, FlameCord...) running **the latest release** (build [#1984](https://ci.md-5.net/job/BungeeCord/1984/) or newer),
-- backend servers (Bukkit, Spigot, Paper, Purpur...) running **1.8+ releases**.
+- backend servers (Bukkit, Folia, Spigot, Paper, Purpur...) running **1.8+ releases**.
 
 The plugin must be installed on all servers on your network. Consult the documentation linked below for further
 information and setup instructions.

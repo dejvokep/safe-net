@@ -32,7 +32,7 @@
     <artifactId>safe-net-spigot</artifactId>
     <developers>
         <developer>
-            <name>dejvokep</name>
+            <name>Dávid Kepič</name>
             <email>admin@dejvokep.dev</email>
             <timezone>CET</timezone>
             <url>https://dejvokep.dev</url>
@@ -52,11 +52,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <release>21</release>
                 </configuration>
-                <version>3.8.1</version>
             </plugin>
             <plugin>
                 <groupId>com.mycila</groupId>
@@ -64,7 +63,7 @@
                 <version>4.1</version>
                 <configuration>
                     <properties>
-                        <owner>dejvokep</owner>
+                        <owner>Dávid Kepič</owner>
                         <email>admin@dejvokep.dev</email>
                     </properties>
                     <licenseSets>
@@ -125,7 +124,14 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.21.8-R0.1-SNAPSHOT</version>
+            <version>1.21.3-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Folia API -->
+        <dependency>
+            <groupId>dev.folia</groupId>
+            <artifactId>folia-api</artifactId>
+            <version>1.20.1-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <!-- ProtocolLib -->

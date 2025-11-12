@@ -1,10 +1,11 @@
 # Plugin info:
 name: ${parent.name}
 version: ${parent.version}
-author: dejvokep
+author: dejvokep, AndyDayy
 main: dev.dejvokep.safenet.spigot.SafeNetSpigot
 description: ${parent.description}
 api-version: 1.13
+folia-supported: true
 load: STARTUP
 # Dependencies:
 softdepend:

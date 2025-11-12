@@ -52,7 +52,7 @@
                 <version>4.1</version>
                 <configuration>
                     <properties>
-                        <owner>dejvokep</owner>
+                        <owner>Dávid Kepič</owner>
                         <email>admin@dejvokep.dev</email>
                     </properties>
                     <licenseSets>
