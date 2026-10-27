@@ -25,7 +25,6 @@ import dev.dejvokep.safenet.core.KeyGenerator;
 import dev.dejvokep.safenet.spigot.SafeNetSpigot;
 import dev.dejvokep.safenet.spigot.authentication.result.AuthenticationResult;
 import dev.dejvokep.safenet.spigot.authentication.result.HandshakeAuthenticationResult;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,9 +97,8 @@ public class Authenticator {
     // Session key used to protect against uncaught handshakes and property name
     private final String sessionKey = KeyGenerator.generate(SESSION_KEY_LENGTH);
     private String sessionPropertyName;
-    // Class and method necessary for profile manipulation
-    private Class<?> craftPlayerClass = null;
-    private Method profileMethod = null;
+    // Profile accessor
+    private ProfileAccessor profileAccessor = null;
     // Property accessor
     private final PropertyAccessor propertyAccessor = new PropertyAccessor();
 
@@ -114,9 +112,7 @@ public class Authenticator {
         this.plugin = plugin;
 
         try {
-            craftPlayerClass = Class.forName(Bukkit.getServer().getClass().getPackage().getName() + ".entity.CraftPlayer");
-            profileMethod = craftPlayerClass.getDeclaredMethod("getProfile");
-            profileMethod.setAccessible(true);
+            profileAccessor = new ProfileAccessor();
         } catch (ReflectiveOperationException ex) {
             plugin.getLogger().log(Level.SEVERE, "An error occurred whilst utilizing server classes!", ex);
         }
@@ -266,17 +262,17 @@ public class Authenticator {
      */
     public AuthenticationResult session(@NotNull Player player) {
         // Check fields
-        if (profileMethod == null || craftPlayerClass == null)
+        if (profileAccessor == null)
             return AuthenticationResult.SESSION_REFLECTION_UNAVAILABLE;
 
         try {
             // Profile
-            GameProfile profile = (GameProfile) profileMethod.invoke(craftPlayerClass.cast(player));
+            GameProfile profile = profileAccessor.getProfile(player);
             if (profile == null)
                 return AuthenticationResult.SESSION_NO_GAME_PROFILE;
 
             // Properties
-            PropertyMap propertyMap = profile.getProperties();
+            PropertyMap propertyMap = profileAccessor.getProperties(profile);
             if (propertyMap == null || propertyMap.size() == 0)
                 return AuthenticationResult.SESSION_NO_PROPERTIES;
 
@@ -286,7 +282,7 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Delete possible properties with the passphrase
-            propertyMap.removeAll(plugin.getPassphraseVault().getPropertyName());
+            profile = profileAccessor.stripProfile(player, profile, plugin.getPassphraseVault().getPropertyName());
 
             // If there are more entries
             if (properties.size() != 1)
@@ -304,7 +300,7 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_INVALID;
 
             // Past this point we don't really care about the exposure of the session key
-            propertyMap.removeAll(sessionPropertyName);
+            profileAccessor.stripProfile(player, profile, sessionPropertyName);
 
             // Passed
             return AuthenticationResult.SUCCESS;
