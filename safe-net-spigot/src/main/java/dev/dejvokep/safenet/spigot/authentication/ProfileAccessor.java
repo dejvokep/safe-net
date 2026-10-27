@@ -153,7 +153,7 @@ class ProfileAccessor {
 
         // Replace in Player -> CraftPlayer -> ServerPlayer implements Player
         profileField.set(handleMethod.invoke(craftPlayerClass.cast(player)), updated);
-        return profile;
+        return updated;
     }
 
     /**
