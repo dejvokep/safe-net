@@ -24,16 +24,19 @@
     <!-- Artifact data -->
     <groupId>dev.dejvokep</groupId>
     <artifactId>safe-net</artifactId>
-    <packaging>pom</packaging>
     <version>4.1</version>
+    <name>SafeNET</name>
+    <description>A lightweight protection from IP-forward bypass exploit inspired by BungeeGuard and IP whitelist.</description>
+    <url>https://github.com/dejvokep/safe-net</url>
+    <packaging>pom</packaging>
+
+    <!-- Modules -->
     <modules>
         <module>safe-net-core</module>
         <module>safe-net-bungeecord</module>
         <module>safe-net-spigot</module>
         <module>safe-net-distribution</module>
     </modules>
-    <name>SafeNET</name>
-    <description>A lightweight protection from IP-forward bypass exploit inspired by BungeeGuard and IP whitelist.</description>
 
     <!-- Developers -->
     <developers>
@@ -43,13 +46,63 @@
         </developer>
     </developers>
 
-    <!-- Build configuration -->
+    <!-- SCM -->
+    <scm>
+        <connection>scm:git:git@github.com:dejvokep/safe-net.git</connection>
+        <developerConnection>scm:git:git@github.com:dejvokep/safe-net.git</developerConnection>
+        <url>https://github.com/dejvokep/safe-net</url>
+    </scm>
+
+    <!-- Licenses -->
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <!-- Properties -->
+    <!-- Java 8 bytecode; modules that can also compile against the Java 8 API set maven.compiler.release -->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
+    </properties>
+
+    <!-- Build configuration, shared by all modules -->
     <build>
+        <resources>
+            <resource>
+                <targetPath>.</targetPath>
+                <filtering>true</filtering>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
+
+        <!-- Plugin versions -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.16.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.6.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
+            <!-- License headers: the build only checks them; apply the template with "mvnw license:format" -->
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>4.1</version>
+                <version>4.6</version>
                 <configuration>
                     <properties>
                         <owner>dejvokep</owner>
@@ -58,13 +111,13 @@
                     <licenseSets>
                         <licenseSet>
                             <header>${maven.multiModuleProjectDirectory}/LICENSE-header.txt</header>
-                            <excludes>
-                                <exclude>**/README</exclude>
-                            </excludes>
                             <includes>
                                 <include>**/*.java</include>
                                 <include>**/*.xml</include>
                             </includes>
+                            <excludes>
+                                <exclude>**/README</exclude>
+                            </excludes>
                         </licenseSet>
                     </licenseSets>
                 </configuration>
@@ -73,7 +126,7 @@
                         <id>check-headers</id>
                         <phase>validate</phase>
                         <goals>
-                            <goal>format</goal>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -81,21 +134,35 @@
         </plugins>
     </build>
 
-    <!-- Licenses -->
-    <licenses>
-        <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>manual</distribution>
-        </license>
-    </licenses>
+    <!-- Dependency versions, shared by all modules -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Modules -->
+            <dependency>
+                <groupId>dev.dejvokep</groupId>
+                <artifactId>safe-net-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.dejvokep</groupId>
+                <artifactId>safe-net-bungeecord</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>dev.dejvokep</groupId>
+                <artifactId>safe-net-spigot</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <!-- BoostedYAML -->
+            <dependency>
+                <groupId>dev.dejvokep</groupId>
+                <artifactId>boosted-yaml</artifactId>
+                <version>1.3.8</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
-    <!-- Source encoding -->
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <!-- Dependencies -->
+    <!-- Dependencies, shared by all modules -->
     <dependencies>
         <!-- Annotations -->
         <dependency>
@@ -104,11 +171,10 @@
             <version>23.0.0</version>
             <scope>provided</scope>
         </dependency>
-        <!-- BoostedYAML -->
+        <!-- BoostedYAML (shaded into the plugin jar by safe-net-distribution) -->
         <dependency>
             <groupId>dev.dejvokep</groupId>
             <artifactId>boosted-yaml</artifactId>
-            <version>1.3.7</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
