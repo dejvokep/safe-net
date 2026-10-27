@@ -31,11 +31,15 @@ mvnw verify          # Windows (cmd), or .\mvnw verify in PowerShell
 
 `verify` compiles all modules, checks license headers and builds the plugin jar at `target/SafeNET-<version>.jar` in the repository root. It needs no credentials.
 
+CI runs the same build for every pull request and push to `main`. It also checks that every class in the jar is Java 8 bytecode and that bundled libraries are relocated, and uploads the jar as a build artifact. You can download it from the workflow run to test a PR without building it yourself.
+
 ## Making changes
 
 ### Compatibility
 
 - The code must stay compatible with **Java 8**, because SafeNET supports backend servers from 1.8 onwards. Don't use language features or JDK APIs newer than Java 8.
+    - `safe-net-core` and `safe-net-bungeecord` compile with `--release 8`, so the build fails if you use a newer JDK API there.
+    - `safe-net-spigot` can't, because it calls record accessors on newer AuthLib versions. It compiles against the full JDK 25 API, so the compiler won't stop you from calling, say, `String.isBlank()`, which then fails on Java 8 servers at runtime. Check the Javadoc's `@since` for any JDK method you use there.
 - On the backend, the same jar runs on Spigot and Paper, old and new. Use only API that exists on the oldest supported version, or check for it at runtime and fall back, as the Paper and Spigot (ProtocolLib) handshake listeners do.
 - On the proxy, target the supported BungeeCord build and its forks (Waterfall, FlameCord...).
 - Configuration changes must keep existing config files working. When you add or rename a key, bump `config-version` in the default config, so that BoostedYAML updates users' files automatically.
@@ -66,12 +70,14 @@ Take extra care with the handshake and session listeners, the authenticator and 
 - **License headers:** every `.java` and `.xml` file needs the header from `LICENSE-header.txt`; the build fails if one is missing. Add it to new files with `./mvnw license:format`, but don't commit header changes to files you didn't otherwise touch.
 - Match the surrounding code style: 4-space indentation, Javadoc on classes and public methods, `@NotNull` / `@Nullable` (from `org.jetbrains.annotations`) on parameters and return values, and comments in the same style as the surrounding code.
 - Keep player-facing messages in the config files rather than hard-coded.
+- **Dependencies:** prefer what the server already provides (such as Gson on Spigot) and declare it `provided`. A library that has to be bundled must be shaded and relocated under `dev.dejvokep.safenet`, like BoostedYAML and bStats, so it can't clash with other plugins.
 
 ## Pull requests
 
 - Target the `dev` branch, and keep one topic per PR. `dev` is merged into `main` for each release.
 - Use short, imperative commit messages, e.g. `Fix session check on Paper 1.8`.
 - In the description, explain what changed and why, link the issue (`Fixes #123`), and list what you tested on.
+- CI must pass.
 - If you change behaviour or configuration, say so explicitly, including how existing users are affected.
 - Pull requests waiting on changes from the author for more than 60 days may be closed. You're welcome to reopen them when you continue.
 
