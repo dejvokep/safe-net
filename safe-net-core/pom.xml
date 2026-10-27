@@ -25,7 +25,7 @@
     <parent>
         <groupId>dev.dejvokep</groupId>
         <artifactId>safe-net</artifactId>
-        <version>4.1</version>
+        <version>4.2</version>
     </parent>
     <artifactId>safe-net-core</artifactId>
     <description>${project.parent.description}</description>
