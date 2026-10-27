@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  # Weekly build, so an expired BungeeCord snapshot or a dead repository shows up before the next release
+  schedule:
+    - cron: '17 4 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Cancel superseded runs of the same PR/branch
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # JDK 25 is required to compile against the Paper 26.x API; the plugin itself is Java 8 bytecode
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      # Compiles all modules, checks license headers and builds target/SafeNET-<version>.jar
+      - name: Build
+        run: ./mvnw -B -ntp verify
+
+      - name: Check the plugin jar
+        run: |
+          jar=$(ls target/SafeNET-*.jar)
+          mkdir jar-contents && unzip -q "$jar" -d jar-contents
+          failed=0
+
+          # Every class must be Java 8 bytecode (major version 52), since 1.8 servers run on Java 8
+          wrong=$(find jar-contents -name '*.class' -not -path '*/META-INF/versions/*' -exec sh -c '
+            v=$(od -An -j6 -N2 -tu1 "$1" | awk "{print \$1 * 256 + \$2}")
+            [ "$v" -eq 52 ] || echo "$1: major version $v"
+          ' _ {} \;)
+          if [ -n "$wrong" ]; then echo "::error::Classes not compiled for Java 8:"; echo "$wrong"; failed=1; fi
+
+          # Bundled libraries must be relocated, so they can't clash with other plugins
+          for pkg in dev/dejvokep/boostedyaml org/bstats; do
+            if [ -d "jar-contents/$pkg" ]; then echo "::error::Unrelocated $pkg found in the jar"; failed=1; fi
+          done
+
+          exit $failed
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: SafeNET
+          path: target/SafeNET-*.jar
+          retention-days: 30
