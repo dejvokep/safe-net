@@ -28,17 +28,21 @@ import java.util.Arrays;
  * <p>
  * If the server is in online-mode, values from the previous login result are used. If in offline-mode, the server does
  * not supply the login result. As this custom login result is there every time (not depending on the mode), the
- * returned values are <code>null</code> (replacing the <code>null</code> login profile), except the properties. The
- * returned properties are (if not called by methods mentioned above) always an empty array, as during the testing
- * phase, a lot of problems were found when using some plugins if the value was <code>null</code>.
+ * returned values are <code>null</code> (mirroring the <code>null</code> login profile), except the properties.
+ * <p>
+ * The returned properties are always an empty array (unless supplied as <code>null</code> in online mode), as during
+ * the testing phase, a lot of problems were found when using some plugins if the value was <code>null</code>.
+ * <p>
+ * If the caller of {@link #getProperties()} is the server connector, the method will build a new property array with
+ * the custom property for authentication. This is to pick up properties set by other plugins, like SkinsRestorer, and
+ * is different from legacy versions, where the array was built and cached with each call to
+ * {@link #setProperties(Property[])}.
  * <p>
  * <i>The use of custom login results to forward plugin data to backend servers was inspired by BungeeGuard, although
- * was perfected to properly handle edge cases and wide selection of server software implementations.</i>
+ * was overhauled to handle all needed cases and wide selection of server software implementations.</i>
  */
 public class SafeNetLoginResult extends LoginResult {
 
-    // Property array with passphrase
-    private Property[] withPassphrase;
     // Vault
     private final PassphraseVault passphraseVault;
     // Verifier
@@ -69,32 +73,17 @@ public class SafeNetLoginResult extends LoginResult {
             // Set properties
             setProperties(fromLogin.getProperties());
         }
-
-        // Reset the custom properties
-        resetCustomProperties();
     }
 
     @Override
     public Property[] getProperties() {
-        return stackTraceVerifier.verify(Thread.currentThread().getStackTrace()) ? withPassphrase : super.getProperties();
-    }
+        Property[] base = super.getProperties();
+        if (!stackTraceVerifier.verify(Thread.currentThread().getStackTrace()))
+            return base;
 
-    @Override
-    public void setProperties(Property[] properties) {
-        // Set the properties
-        super.setProperties(properties);
-        // Reset the custom properties
-        resetCustomProperties();
-    }
-
-    /**
-     * Resets the custom property array.
-     */
-    private void resetCustomProperties() {
-        // Make a copy of the original properties, or create a new instance with a space for the passphrase
-        withPassphrase = getProperties() == null ? new Property[1] : Arrays.copyOf(getProperties(), getProperties().length + 1);
-        // Add the passphrase
-        withPassphrase[withPassphrase.length - 1] = new Property(passphraseVault.getPropertyName(), passphraseVault.getPassphrase(), "");
+        Property[] modified = base == null ? new Property[1] : Arrays.copyOf(base, base.length + 1);
+        modified[modified.length - 1] = new Property(passphraseVault.getPropertyName(), passphraseVault.getPassphrase(), "");
+        return modified;
     }
 
 }
