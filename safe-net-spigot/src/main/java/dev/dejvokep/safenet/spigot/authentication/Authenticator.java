@@ -31,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
@@ -218,7 +220,7 @@ public class Authenticator {
                     properties.remove(index);
 
                     // If the values equal
-                    if (property.getValue().equals(passphrase)) {
+                    if (MessageDigest.isEqual(property.getValue().getBytes(), passphrase.getBytes())) {
                         authenticated = true;
                         break;
                     }
@@ -296,7 +298,7 @@ public class Authenticator {
                 return AuthenticationResult.SESSION_PROPERTY_NOT_FOUND;
 
             // Compare keys
-            if (value == null || !value.equals(sessionKey))
+            if (value == null || !MessageDigest.isEqual(value.getBytes(), sessionKey.getBytes()))
                 return AuthenticationResult.SESSION_INVALID;
 
             // Past this point we don't really care about the exposure of the session key
